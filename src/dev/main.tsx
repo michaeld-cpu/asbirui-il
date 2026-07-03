@@ -12,7 +12,7 @@ function App() {
     >
       <div className="mx-auto max-w-xl space-y-8">
         <header className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">GraniteUI</h1>
+          <h1 className="text-2xl font-bold">AsbirUI</h1>
           <Button variant="outline" size="sm" onClick={() => setDark((d) => !d)}>
             Toggle {dark ? "light" : "dark"}
           </Button>

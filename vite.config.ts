@@ -16,8 +16,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
-      name: "GraniteUI",
-      fileName: "granite-ui",
+      name: "AsbirUI",
+      fileName: "asbir-ui",
     },
     rollupOptions: {
       external: ["react", "react-dom", "react/jsx-runtime"],

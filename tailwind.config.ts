@@ -7,29 +7,29 @@ const config: Config = {
     extend: {
       colors: {
         // Semantic tokens driven by CSS variables (see src/styles/tokens.css)
-        background: "hsl(var(--gr-background) / <alpha-value>)",
-        foreground: "hsl(var(--gr-foreground) / <alpha-value>)",
+        background: "hsl(var(--as-background) / <alpha-value>)",
+        foreground: "hsl(var(--as-foreground) / <alpha-value>)",
         primary: {
-          DEFAULT: "hsl(var(--gr-primary) / <alpha-value>)",
-          foreground: "hsl(var(--gr-primary-foreground) / <alpha-value>)",
+          DEFAULT: "hsl(var(--as-primary) / <alpha-value>)",
+          foreground: "hsl(var(--as-primary-foreground) / <alpha-value>)",
         },
         secondary: {
-          DEFAULT: "hsl(var(--gr-secondary) / <alpha-value>)",
-          foreground: "hsl(var(--gr-secondary-foreground) / <alpha-value>)",
+          DEFAULT: "hsl(var(--as-secondary) / <alpha-value>)",
+          foreground: "hsl(var(--as-secondary-foreground) / <alpha-value>)",
         },
         destructive: {
-          DEFAULT: "hsl(var(--gr-destructive) / <alpha-value>)",
-          foreground: "hsl(var(--gr-destructive-foreground) / <alpha-value>)",
+          DEFAULT: "hsl(var(--as-destructive) / <alpha-value>)",
+          foreground: "hsl(var(--as-destructive-foreground) / <alpha-value>)",
         },
         muted: {
-          DEFAULT: "hsl(var(--gr-muted) / <alpha-value>)",
-          foreground: "hsl(var(--gr-muted-foreground) / <alpha-value>)",
+          DEFAULT: "hsl(var(--as-muted) / <alpha-value>)",
+          foreground: "hsl(var(--as-muted-foreground) / <alpha-value>)",
         },
-        border: "hsl(var(--gr-border) / <alpha-value>)",
-        ring: "hsl(var(--gr-ring) / <alpha-value>)",
+        border: "hsl(var(--as-border) / <alpha-value>)",
+        ring: "hsl(var(--as-ring) / <alpha-value>)",
       },
       borderRadius: {
-        granite: "var(--gr-radius)",
+        asbir: "var(--as-radius)",
       },
     },
   },

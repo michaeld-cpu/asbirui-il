@@ -1,4 +1,4 @@
-# BedrockUI — ClickUp Project Setup
+# AsbirUI — ClickUp Project Setup
 
 > Paste this into a ClickUp **Doc**, and use the "Task breakdown" section to create
 > **Lists → Tasks → Subtasks**. Each `- [ ]` line is meant to become a ClickUp task.
@@ -7,8 +7,8 @@
 
 ## 1. Project Overview
 
-**BedrockUI** is a React-first, open-source component library that gives developers a
-solid *foundation* (the bedrock) for building accessible, good-looking user interfaces.
+**AsbirUI** is a React-first component library, owned by **AsbirTech**, that gives
+developers a solid *foundation* for building accessible, good-looking user interfaces.
 It sits in the same space as **Radix UI**, **shadcn/ui**, and **Hero UI** — combining
 accessible headless primitives with a clean, themeable default style you can adopt as-is
 or fully own.
@@ -37,7 +37,7 @@ or fully own.
 
 ## 3. ClickUp Space Setup
 
-**Space name:** `BedrockUI`
+**Space name:** `AsbirUI`
 
 **Folder / List layout**
 - 📁 **Foundations** (repo, tooling, build)
@@ -97,7 +97,8 @@ or fully own.
 - [ ] Deploy docs (Vercel / Netlify)
 
 ### List: Release & Publishing
-- [ ] Reserve npm name / scope (`bedrockui` or `@bedrock-ui/*`)
+- [ ] Reserve npm name / scope (`asbir-ui` now; migrate to `@asbirtech/*` once the org exists)
+- [ ] Create the `asbirtech` npm organization and transfer the package to it
 - [ ] Set up versioning (Changesets)
 - [ ] Publish `v0.1.0` alpha to npm
 - [ ] Write CONTRIBUTING.md and issue templates
@@ -117,8 +118,11 @@ or fully own.
 
 ## 6. Naming & Branding
 
-- **Name:** BedrockUI ✅ (evokes "foundation / solid base" — fits the Radix "root" naming tradition)
-- **npm:** `bedrockui` (single package) or **`@bedrock-ui/*`** (scoped, recommended for multi-package)
-- **GitHub:** `bedrock-ui/bedrock-ui`
-- **Domain ideas:** `bedrockui.dev` / `bedrock-ui.com`
+- **Name:** AsbirUI ✅ (AsbirTech-owned; reflects the owning company)
+- **npm:** `asbir-ui` (single package now) → **`@asbirtech/*`** (scoped, recommended once
+  the `asbirtech` org is created — enables company ownership + multi-package)
+- **Ownership:** Belongs to **AsbirTech**. Currently published under the author's personal
+  npm account as an interim step; transfer to the `asbirtech` org once created.
+- **GitHub:** rename repo to `asbirtech/asbir-ui` (currently `michaeld-cpu/bedrockui`)
+- **Domain ideas:** `asbir-ui.dev` / `asbirui.com`
 - **Tagline:** *"The dependable foundation for React UIs."*

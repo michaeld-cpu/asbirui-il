@@ -4,45 +4,45 @@
 
 @layer base {
   :root {
-    --gr-background: 0 0% 100%;
-    --gr-foreground: 222 47% 11%;
+    --as-background: 0 0% 100%;
+    --as-foreground: 222 47% 11%;
 
-    --gr-primary: 222 89% 55%;
-    --gr-primary-foreground: 0 0% 100%;
+    --as-primary: 222 89% 55%;
+    --as-primary-foreground: 0 0% 100%;
 
-    --gr-secondary: 210 40% 96%;
-    --gr-secondary-foreground: 222 47% 11%;
+    --as-secondary: 210 40% 96%;
+    --as-secondary-foreground: 222 47% 11%;
 
-    --gr-destructive: 0 72% 51%;
-    --gr-destructive-foreground: 0 0% 100%;
+    --as-destructive: 0 72% 51%;
+    --as-destructive-foreground: 0 0% 100%;
 
-    --gr-muted: 210 40% 96%;
-    --gr-muted-foreground: 215 16% 47%;
+    --as-muted: 210 40% 96%;
+    --as-muted-foreground: 215 16% 47%;
 
-    --gr-border: 214 32% 91%;
-    --gr-ring: 222 89% 55%;
+    --as-border: 214 32% 91%;
+    --as-ring: 222 89% 55%;
 
-    --gr-radius: 0.5rem;
+    --as-radius: 0.5rem;
   }
 
   .dark,
   [data-theme="dark"] {
-    --gr-background: 222 47% 8%;
-    --gr-foreground: 210 40% 98%;
+    --as-background: 222 47% 8%;
+    --as-foreground: 210 40% 98%;
 
-    --gr-primary: 217 91% 60%;
-    --gr-primary-foreground: 222 47% 11%;
+    --as-primary: 217 91% 60%;
+    --as-primary-foreground: 222 47% 11%;
 
-    --gr-secondary: 217 33% 17%;
-    --gr-secondary-foreground: 210 40% 98%;
+    --as-secondary: 217 33% 17%;
+    --as-secondary-foreground: 210 40% 98%;
 
-    --gr-destructive: 0 63% 50%;
-    --gr-destructive-foreground: 0 0% 100%;
+    --as-destructive: 0 63% 50%;
+    --as-destructive-foreground: 0 0% 100%;
 
-    --gr-muted: 217 33% 17%;
-    --gr-muted-foreground: 215 20% 65%;
+    --as-muted: 217 33% 17%;
+    --as-muted-foreground: 215 20% 65%;
 
-    --gr-border: 217 33% 20%;
-    --gr-ring: 217 91% 60%;
+    --as-border: 217 33% 20%;
+    --as-ring: 217 91% 60%;
   }
 }

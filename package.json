@@ -1,10 +1,14 @@
 {
-  "name": "granite-ui",
+  "name": "asbir-ui",
   "version": "0.1.0",
   "description": "The dependable foundation for React UIs — accessible, themeable components.",
   "type": "module",
   "license": "MIT",
-  "author": "michaeld-cpu",
+  "author": "Michael John Diopenes <michael.d@lmf.ventures>",
+  "contributors": [
+    "Michael John Diopenes <michael.d@lmf.ventures>"
+  ],
+  "publisher": "AsbirTech",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/michaeld-cpu/bedrockui.git"
@@ -20,19 +24,19 @@
     "tailwind",
     "design-system",
     "accessible",
-    "granite-ui"
+    "asbir-ui"
   ],
   "sideEffects": [
     "**/*.css"
   ],
-  "main": "./dist/granite-ui.umd.cjs",
-  "module": "./dist/granite-ui.js",
+  "main": "./dist/asbir-ui.umd.cjs",
+  "module": "./dist/asbir-ui.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/granite-ui.js",
-      "require": "./dist/granite-ui.umd.cjs"
+      "import": "./dist/asbir-ui.js",
+      "require": "./dist/asbir-ui.umd.cjs"
     },
     "./styles.css": "./dist/style.css"
   },

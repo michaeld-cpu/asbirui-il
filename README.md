@@ -1,8 +1,8 @@
-# GraniteUI
+# AsbirUI
 
 > The dependable foundation for React UIs — accessible, themeable components.
 
-GraniteUI is a React-first component library in the same space as **Radix UI**,
+AsbirUI is a React-first component library in the same space as **Radix UI**,
 **shadcn/ui**, and **Hero UI**. It combines accessible primitives with a clean,
 token-driven design system you can adopt as-is or fully own.
 
@@ -14,7 +14,7 @@ token-driven design system you can adopt as-is or fully own.
 ## Install
 
 ```bash
-npm install granite-ui
+npm install asbir-ui
 ```
 
 Peer dependencies: `react` and `react-dom` (>=18).
@@ -22,8 +22,8 @@ Peer dependencies: `react` and `react-dom` (>=18).
 ## Usage
 
 ```tsx
-import { Button } from "granite-ui";
-import "granite-ui/styles.css";
+import { Button } from "asbir-ui";
+import "asbir-ui/styles.css";
 
 export function Example() {
   return (
@@ -66,4 +66,4 @@ Toast, and more). Current release: **v0.1.0 (alpha)**.
 
 ## License
 
-MIT © michaeld-cpu
+MIT © AsbirTech
