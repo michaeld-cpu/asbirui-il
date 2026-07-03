@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bd-background: 0 0% 100%;
+    --bd-foreground: 222 47% 11%;
+
+    --bd-primary: 222 89% 55%;
+    --bd-primary-foreground: 0 0% 100%;
+
+    --bd-secondary: 210 40% 96%;
+    --bd-secondary-foreground: 222 47% 11%;
+
+    --bd-destructive: 0 72% 51%;
+    --bd-destructive-foreground: 0 0% 100%;
+
+    --bd-muted: 210 40% 96%;
+    --bd-muted-foreground: 215 16% 47%;
+
+    --bd-border: 214 32% 91%;
+    --bd-ring: 222 89% 55%;
+
+    --bd-radius: 0.5rem;
+  }
+
+  .dark,
+  [data-theme="dark"] {
+    --bd-background: 222 47% 8%;
+    --bd-foreground: 210 40% 98%;
+
+    --bd-primary: 217 91% 60%;
+    --bd-primary-foreground: 222 47% 11%;
+
+    --bd-secondary: 217 33% 17%;
+    --bd-secondary-foreground: 210 40% 98%;
+
+    --bd-destructive: 0 63% 50%;
+    --bd-destructive-foreground: 0 0% 100%;
+
+    --bd-muted: 217 33% 17%;
+    --bd-muted-foreground: 215 20% 65%;
+
+    --bd-border: 217 33% 20%;
+    --bd-ring: 217 91% 60%;
+  }
+}

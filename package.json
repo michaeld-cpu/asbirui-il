@@ -1,0 +1,72 @@
+{
+  "name": "bedrockui",
+  "version": "0.1.0",
+  "description": "The dependable foundation for React UIs — accessible, themeable components.",
+  "type": "module",
+  "license": "MIT",
+  "author": "michaeld-cpu",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaeld-cpu/bedrockui.git"
+  },
+  "homepage": "https://github.com/michaeld-cpu/bedrockui#readme",
+  "bugs": {
+    "url": "https://github.com/michaeld-cpu/bedrockui/issues"
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "components",
+    "tailwind",
+    "design-system",
+    "accessible",
+    "bedrockui"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/bedrockui.umd.cjs",
+  "module": "./dist/bedrockui.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/bedrockui.js",
+      "require": "./dist/bedrockui.umd.cjs"
+    },
+    "./styles.css": "./dist/style.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --p tsconfig.build.json && vite build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx",
+    "preview": "vite preview",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.4"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vite-plugin-dts": "^4.3.0"
+  }
+}
