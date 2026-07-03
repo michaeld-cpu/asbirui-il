@@ -1,5 +1,5 @@
 {
-  "name": "bedrockui",
+  "name": "granite-ui",
   "version": "0.1.0",
   "description": "The dependable foundation for React UIs — accessible, themeable components.",
   "type": "module",
@@ -20,19 +20,19 @@
     "tailwind",
     "design-system",
     "accessible",
-    "bedrockui"
+    "granite-ui"
   ],
   "sideEffects": [
     "**/*.css"
   ],
-  "main": "./dist/bedrockui.umd.cjs",
-  "module": "./dist/bedrockui.js",
+  "main": "./dist/granite-ui.umd.cjs",
+  "module": "./dist/granite-ui.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/bedrockui.js",
-      "require": "./dist/bedrockui.umd.cjs"
+      "import": "./dist/granite-ui.js",
+      "require": "./dist/granite-ui.umd.cjs"
     },
     "./styles.css": "./dist/style.css"
   },

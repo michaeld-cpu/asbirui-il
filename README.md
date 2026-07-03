@@ -1,8 +1,8 @@
-# BedrockUI
+# GraniteUI
 
 > The dependable foundation for React UIs — accessible, themeable components.
 
-BedrockUI is a React-first component library in the same space as **Radix UI**,
+GraniteUI is a React-first component library in the same space as **Radix UI**,
 **shadcn/ui**, and **Hero UI**. It combines accessible primitives with a clean,
 token-driven design system you can adopt as-is or fully own.
 
@@ -14,7 +14,7 @@ token-driven design system you can adopt as-is or fully own.
 ## Install
 
 ```bash
-npm install bedrockui
+npm install granite-ui
 ```
 
 Peer dependencies: `react` and `react-dom` (>=18).
@@ -22,13 +22,15 @@ Peer dependencies: `react` and `react-dom` (>=18).
 ## Usage
 
 ```tsx
-import { Button } from "bedrockui";
-import "bedrockui/styles.css";
+import { Button } from "granite-ui";
+import "granite-ui/styles.css";
 
 export function Example() {
   return (
     <div className="flex gap-3">
       <Button>Primary</Button>
+      <Button variant="secondary">Secondary</Button>
+      <Button variant="destructive">Destructive</Button>
       <Button variant="outline">Outline</Button>
       <Button variant="ghost" size="lg">
         Ghost

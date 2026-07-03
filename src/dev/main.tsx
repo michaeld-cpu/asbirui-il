@@ -12,7 +12,7 @@ function App() {
     >
       <div className="mx-auto max-w-xl space-y-8">
         <header className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">BedrockUI</h1>
+          <h1 className="text-2xl font-bold">GraniteUI</h1>
           <Button variant="outline" size="sm" onClick={() => setDark((d) => !d)}>
             Toggle {dark ? "light" : "dark"}
           </Button>
@@ -24,6 +24,8 @@ function App() {
           </h2>
           <div className="flex flex-wrap items-center gap-3">
             <Button>Primary</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="destructive">Destructive</Button>
             <Button variant="outline">Outline</Button>
             <Button variant="ghost">Ghost</Button>
             <Button disabled>Disabled</Button>
