@@ -6,10 +6,10 @@ AsbirUI is a React-first component library in the same space as **Radix UI**,
 **shadcn/ui**, and **Hero UI**. It combines accessible primitives with a clean,
 token-driven design system you can adopt as-is or fully own.
 
-- ⚛️ **React 18+** with full TypeScript types
-- 🎨 **Tailwind CSS** design tokens (light + dark)
-- ♿ **Accessibility** built in
-- 🌲 Tree-shakeable, no runtime lock-in
+- **React 18+** with full TypeScript types
+- **Tailwind CSS** design tokens (light + dark)
+- **Accessibility** built in
+- Tree-shakeable, no runtime lock-in
 
 ## Install
 
