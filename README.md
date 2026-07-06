@@ -14,7 +14,7 @@ token-driven design system you can adopt as-is or fully own.
 ## Install
 
 ```bash
-npm install asbir-ui
+npm install @asbirtech/asbir-ui
 ```
 
 Peer dependencies: `react` and `react-dom` (>=18).
@@ -22,8 +22,8 @@ Peer dependencies: `react` and `react-dom` (>=18).
 ## Usage
 
 ```tsx
-import { Button } from "asbir-ui";
-import "asbir-ui/styles.css";
+import { Button } from "@asbirtech/asbir-ui";
+import "@asbirtech/asbir-ui/styles.css";
 
 export function Example() {
   return (

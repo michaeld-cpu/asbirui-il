@@ -1,0 +1,7 @@
+Task Name,Status,Priority,Tags,Description
+Reserve npm name/scope (asbir-ui now; migrate to @asbirtech/*),In Progress,High,,Package renamed to asbir-ui.
+Create asbirtech npm org and transfer package,Backlog,Normal,,
+Set up versioning (Changesets),Backlog,Normal,,
+Publish v0.1.0 alpha to npm,Backlog,High,,
+Write CONTRIBUTING.md and issue templates,Backlog,Low,docs,
+Set up release CI (automated publish on tag),Backlog,Normal,ci,

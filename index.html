@@ -3,7 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="AsbirUI — the dependable, accessible foundation for React UIs. Own the code, ship faster. Built with React, TypeScript and Tailwind CSS."
+    />
     <title>AsbirUI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      // No-flash theme: set .dark/.light + data-theme before first paint.
+      (function () {
+        try {
+          var t = localStorage.getItem("asbir-theme");
+          if (!t)
+            t = window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+          document.documentElement.classList.remove("light", "dark");
+          document.documentElement.classList.add(t);
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {
+          document.documentElement.classList.add("dark");
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

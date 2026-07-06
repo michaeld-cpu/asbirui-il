@@ -1,5 +1,5 @@
 import "./styles/tokens.css";
 
 export { cn } from "./lib/cn";
-export { Button, buttonVariants } from "./components/button";
-export type { ButtonProps } from "./components/button";
+
+// Components go here as they're built.

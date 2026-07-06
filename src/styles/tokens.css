@@ -2,47 +2,155 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Two token systems live here on purpose:
+
+  1. --as-*  : the LIBRARY's semantic HSL tokens (Button etc. consume these via
+               the Tailwind `primary`/`secondary`/… aliases). Drive light/dark
+               through [data-theme] so shipped components keep working anywhere.
+
+  2. shell    : the Orbit-style APP-SHELL tokens (canvas/panel/card/surface/
+               border/muted/fg/…) as space-separated RGB, flipped by the
+               .light / .dark class on the shell root. Orange is the accent.
+*/
+
 @layer base {
   :root {
-    --as-background: 0 0% 100%;
-    --as-foreground: 222 47% 11%;
-
-    --as-primary: 222 89% 55%;
+    /* ---- library semantic tokens (orange/black) ---- */
+    --as-background: 30 20% 99%;
+    --as-foreground: 20 14% 8%;
+    --as-primary: 24 95% 53%;
     --as-primary-foreground: 0 0% 100%;
-
-    --as-secondary: 210 40% 96%;
-    --as-secondary-foreground: 222 47% 11%;
-
+    --as-secondary: 30 20% 96%;
+    --as-secondary-foreground: 20 14% 12%;
     --as-destructive: 0 72% 51%;
-    --as-destructive-foreground: 0 0% 100%;
-
-    --as-muted: 210 40% 96%;
-    --as-muted-foreground: 215 16% 47%;
-
-    --as-border: 214 32% 91%;
-    --as-ring: 222 89% 55%;
-
-    --as-radius: 0.5rem;
+    --as-destructive-foreground: 0 0% 100%; 
+    --as-muted: 30 12% 94%;
+    --as-muted-foreground: 25 8% 42%;
+    --as-border: 28 18% 88%;
+    --as-ring: 24 95% 53%;
+    --as-radius: 0.65rem;
   }
 
-  .dark,
   [data-theme="dark"] {
-    --as-background: 222 47% 8%;
-    --as-foreground: 210 40% 98%;
-
-    --as-primary: 217 91% 60%;
-    --as-primary-foreground: 222 47% 11%;
-
-    --as-secondary: 217 33% 17%;
-    --as-secondary-foreground: 210 40% 98%;
-
+    --as-background: 0 0% 0%;
+    --as-foreground: 240 5% 93%;
+    --as-primary: 24 95% 55%;
+    --as-primary-foreground: 0 0% 0%;
+    --as-secondary: 240 4% 9%;
+    --as-secondary-foreground: 240 5% 93%;
     --as-destructive: 0 63% 50%;
     --as-destructive-foreground: 0 0% 100%;
-
-    --as-muted: 217 33% 17%;
-    --as-muted-foreground: 215 20% 65%;
-
-    --as-border: 217 33% 20%;
-    --as-ring: 217 91% 60%;
+    --as-muted: 240 4% 12%;
+    --as-muted-foreground: 240 4% 56%;
+    --as-border: 240 5% 12%;
+    --as-ring: 24 95% 55%;
   }
+}
+
+/*
+  ============================================================================
+  PALETTE — the single source of truth for color, going forward.
+  ============================================================================
+
+  Brand ramp (--brand-50 … --brand-950) is theme-independent raw orange.
+  Everything else is SEMANTIC and flips with the theme. Build components against
+  the semantic tokens (accent, accent-soft-*, fg, muted, border, …), NOT raw hex
+  or one-off Tailwind colors. The eyebrow/pill uses `accent-soft-*`.
+*/
+
+:root {
+  /* ---- brand orange ramp (raw, shared by both themes) ----
+     Ramp is centered on the AsbirUI logomark orange (#FF6900). Neighboring
+     steps are derived around that hue so hover/tint states stay coherent. */
+  --brand-50: 255 244 235;
+  --brand-100: 255 229 209;
+  --brand-200: 255 205 166;
+  --brand-300: 255 176 115;
+  --brand-400: 255 138 51;
+  --brand-500: 255 105 0; /* #FF6900 — primary brand orange (matches logomark) */
+  --brand-600: 224 92 0;
+  --brand-700: 184 76 0;
+  --brand-800: 148 61 8;
+  --brand-900: 120 50 12;
+  --brand-950: 64 26 4;
+}
+
+/* ---- Orbit-style app-shell tokens (RGB, flip on .light / .dark) ---- */
+:root,
+.dark {
+  color-scheme: dark;
+
+  /* neutrals / surfaces */
+  --canvas: 0 0 0; /* #000000 */
+  --panel: 10 10 10; /* #0a0a0a */
+  --card: 14 14 14; /* #0e0e0e */
+  --surface: 22 22 22; /* preview / code wells */
+  --border-rgb: 28 28 31; /* #1c1c1f */
+  --muted-rgb: 138 138 146;
+  --fg-rgb: 237 237 239;
+  --fg-invert: 0 0 0;
+  --solid: 255 255 255;
+  --overlay: 255 255 255;
+
+  /* semantic accent — monochrome for now (white in dark theme) */
+  --accent: var(--solid);
+  --accent-fg: var(--fg-invert);
+  --accent-hover: 229 229 229;
+
+  /* soft accent tint — pills, chips, badges, eyebrows */
+  --accent-soft-bg: var(--solid); /* used at low alpha */
+  --accent-soft-border: var(--solid);
+  --accent-soft-fg: var(--fg-rgb); /* eyebrows read as plain foreground */
+}
+
+.light {
+  color-scheme: light;
+
+  --canvas: 255 255 255;
+  --panel: 250 250 250;
+  --card: 255 255 255;
+  --surface: 244 244 245;
+  --border-rgb: 228 228 231;
+  --muted-rgb: 113 113 122;
+  --fg-rgb: 24 24 27;
+  --fg-invert: 255 255 255;
+  --solid: 24 24 27;
+  --overlay: 24 24 27;
+
+  /* monochrome accent flips dark in the light theme */
+  --accent: var(--solid);
+  --accent-fg: var(--fg-invert);
+  --accent-hover: 63 63 70;
+
+  --accent-soft-bg: var(--solid);
+  --accent-soft-border: var(--solid);
+  --accent-soft-fg: var(--fg-rgb);
+}
+
+html,
+body {
+  background: rgb(var(--canvas));
+  color: rgb(var(--fg-rgb));
+}
+
+/* Smooth color crossfade only while the theme is toggling. */
+html.theme-transition body,
+html.theme-transition body * {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--border-rgb));
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }

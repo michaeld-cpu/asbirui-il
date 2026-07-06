@@ -1,43 +1,54 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Button } from "@/index";
+import "@/styles/tokens.css";
+import { ThemeProvider } from "./shell/theme-context";
+import { SidebarProvider } from "./shell/sidebar-context";
+import { Navbar } from "./shell/Navbar";
+import { DocsSidebar } from "./shell/DocsSidebar";
+import { DocsContent } from "./shell/DocsContent";
+import { DocsAside } from "./shell/DocsAside";
+import { Home } from "./shell/Home";
+import { useHashRoute, isDocsRoute } from "./shell/use-hash-route";
 
-function App() {
-  const [dark, setDark] = React.useState(false);
-
+/** Landing view: marketing navbar only, no sidebar. */
+function LandingView() {
   return (
-    <div
-      data-theme={dark ? "dark" : "light"}
-      className="min-h-screen bg-background text-foreground p-10"
-    >
-      <div className="mx-auto max-w-xl space-y-8">
-        <header className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">AsbirUI</h1>
-          <Button variant="outline" size="sm" onClick={() => setDark((d) => !d)}>
-            Toggle {dark ? "light" : "dark"}
-          </Button>
-        </header>
+    <div className="min-h-screen bg-canvas font-sans antialiased">
+      <Navbar active="home" />
+      <main>
+        <Home />
+      </main>
+    </div>
+  );
+}
 
-        <section className="space-y-4">
-          <h2 className="text-sm font-semibold text-muted-foreground">
-            Button variants
-          </h2>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button>Primary</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button variant="destructive">Destructive</Button>
-            <Button variant="outline">Outline</Button>
-            <Button variant="ghost">Ghost</Button>
-            <Button disabled>Disabled</Button>
+/** Docs view: full-width navbar + grouped sidebar, content column, right aside. */
+function DocsView({ route }: { route: string }) {
+  return (
+    <div className="min-h-screen bg-canvas font-sans antialiased">
+      <Navbar active={route} wide />
+      <div className="flex">
+        <DocsSidebar active={route} />
+        <main className="min-w-0 flex-1 px-6 lg:px-12">
+          <div className="mx-auto max-w-3xl">
+            <DocsContent route={route} />
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button size="sm">Small</Button>
-            <Button size="md">Medium</Button>
-            <Button size="lg">Large</Button>
-          </div>
-        </section>
+        </main>
+        <DocsAside />
       </div>
     </div>
+  );
+}
+
+function App() {
+  const route = useHashRoute();
+
+  return (
+    <ThemeProvider>
+      <SidebarProvider>
+        {isDocsRoute(route) ? <DocsView route={route} /> : <LandingView />}
+      </SidebarProvider>
+    </ThemeProvider>
   );
 }
 

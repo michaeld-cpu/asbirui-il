@@ -1,0 +1,13 @@
+Task Name,Status,Priority,Tags,Description
+Button,In Progress,High,component,src/components/button.tsx exists — a11y/tests/docs pending.
+Input / Textarea,Backlog,High,component,
+Select,Backlog,Normal,component,
+Checkbox / Radio / Switch,Backlog,Normal,component,
+Dialog / Modal,Backlog,High,"component,a11y",Focus trap + ARIA.
+Dropdown Menu,Backlog,Normal,"component,a11y",Keyboard nav.
+Tooltip / Popover,Backlog,Normal,"component,a11y",
+Tabs,Backlog,Normal,"component,a11y",
+Toast / Notifications,Backlog,Normal,component,
+Accordion,Backlog,Normal,"component,a11y",
+Card,Backlog,Low,component,
+Table,Backlog,Normal,component,

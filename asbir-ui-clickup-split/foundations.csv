@@ -1,0 +1,8 @@
+Task Name,Status,Priority,Tags,Description
+Create GitHub repository and set license (MIT),Done,Normal,ci,Repo created with MIT LICENSE.
+Initialize project (React + TypeScript + Tailwind),Done,High,,Vite + React 18 + TS + Tailwind scaffolded.
+Configure ESLint + Prettier + commit hooks,Backlog,Normal,ci,Lint/format + husky/lint-staged.
+Set up build pipeline (tsup / Vite library mode),In Progress,High,ci,vite.config.ts library mode + tsconfig.build.json present.
+Configure package exports and package.json metadata,In Progress,High,,Exports/types/files fields for npm consumption.
+Decide monorepo vs single-package structure,Backlog,Normal,,Currently single-package.
+Add base CI (lint typecheck build) — GitHub Actions,Backlog,Normal,ci,CI workflow for PRs.

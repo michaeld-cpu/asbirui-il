@@ -1,0 +1,7 @@
+Task Name,Status,Priority,Tags,Description
+Choose docs framework (Next.js / Astro / Nextra),Backlog,Normal,docs,
+Set up docs site scaffold,Backlog,Normal,docs,
+Component API reference pages,Backlog,Normal,docs,
+Live examples / code previews,Backlog,Normal,docs,
+Installation & theming guides,Backlog,Normal,docs,
+Deploy docs (Vercel / Netlify),Backlog,Low,docs,

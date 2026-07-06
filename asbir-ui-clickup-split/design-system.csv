@@ -1,0 +1,6 @@
+Task Name,Status,Priority,Tags,Description
+Define design tokens (color spacing radius shadow typography),In Progress,High,design,src/styles/tokens.css exists — expand full scale.
+Implement theming (light/dark + data-theme support),Backlog,High,design,Theme switching via data-theme attribute.
+Create Tailwind preset that exposes the tokens,Backlog,Normal,design,Publishable tailwind preset.
+Document color scales and semantic tokens,Backlog,Normal,"design,docs",Semantic token naming + usage.
+Define accessibility baseline (contrast focus rings motion),Backlog,High,"a11y,design",WCAG contrast + focus ring + reduced motion.
