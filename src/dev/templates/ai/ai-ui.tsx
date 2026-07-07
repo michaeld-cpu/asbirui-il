@@ -56,6 +56,10 @@ export const Icons = {
   arrowLeft: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>),
   arrowUp: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg>),
   copy: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>),
+  volume: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5Z" /><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14" /></svg>),
+  thumbUp: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3Zm0 0 4.5-7a2 2 0 0 1 2.6 2.6L13 8h5.5a2 2 0 0 1 2 2.4l-1.4 7A2 2 0 0 1 17 19H7" /></svg>),
+  thumbDown: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 14V3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-3Zm0 0-4.5 7a2 2 0 0 1-2.6-2.6L11 16H5.5a2 2 0 0 1-2-2.4l1.4-7A2 2 0 0 1 7 5h10" /></svg>),
+  regenerate: (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5" /></svg>),
   trash: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></svg>),
   sun: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4" /></svg>),
   moon: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>),
@@ -69,6 +73,10 @@ export const Icons = {
   arrowUpRight: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M8 7h9v9" /></svg>),
   filter: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M7 12h10M11 18h2" /></svg>),
   logo: (<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 14l10 5 10-5-10-5Z" /></svg>),
+  paperclip: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21.4 11.05 12.25 20.2a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.5 3.5 0 1 1 4.95 4.95l-9.2 9.19a1.5 1.5 0 0 1-2.12-2.12l8.49-8.49" /></svg>),
+  book: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z" /></svg>),
+  mic: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 10a7 7 0 0 0 14 0M12 17v4" /></svg>),
+  wand: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m15 4 5 5L9 20l-5-5L15 4ZM18 2l.7 1.8L20.5 4.5 18.7 5.2 18 7l-.7-1.8L15.5 4.5 17.3 3.8 18 2ZM5 13l.6 1.6L7.2 15l-1.6.6L5 17.2 4.4 15.6 2.8 15l1.6-.4L5 13Z" /></svg>),
 };
 
 /* Real provider logos (Simple Icons SVGs vendored into src/assets/providers).
@@ -201,8 +209,10 @@ export const ModelMarks: Record<string, React.ReactNode> = Object.fromEntries(
 );
 
 /* Eased count-up for stat numbers — ramps from 0 to `value` on mount.
-   Respects prefers-reduced-motion (jumps straight to the final value). */
-export function useCountUp(target: number, duration = 900) {
+   Respects prefers-reduced-motion (jumps straight to the final value).
+   Uses ease-out quad (not cubic) at a relaxed default duration so big numbers
+   read as a smooth count rather than a fast flicker through thousands. */
+export function useCountUp(target: number, duration = 1400) {
   const [v, setV] = React.useState(0);
   React.useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -213,7 +223,7 @@ export function useCountUp(target: number, duration = 900) {
     const t0 = performance.now();
     const tick = (now: number) => {
       const p = Math.min(1, (now - t0) / duration);
-      setV(target * (1 - Math.pow(1 - p, 3))); // ease-out cubic
+      setV(target * (1 - Math.pow(1 - p, 2))); // ease-out quad — gentler ramp
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -225,7 +235,7 @@ export function useCountUp(target: number, duration = 900) {
 export function CountUp({
   value,
   format,
-  duration = 900,
+  duration = 1400,
 }: {
   value: number;
   format?: (n: number) => string;
@@ -339,6 +349,18 @@ export function HalftoneChart({
       })}
     </div>
   );
+}
+
+/* Day labels for a daily series (chart x-axis + tooltip), derived from the
+   point count so they stay aligned if the count changes. Static end date so
+   the demo reads consistently; a live app would derive these from real data. */
+const CHART_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export function dayLabels(count: number, end = new Date(2026, 2, 6)): string[] {
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(end);
+    d.setDate(end.getDate() - (count - 1 - i));
+    return `${d.getDate()} ${CHART_MONTHS[d.getMonth()]}`;
+  });
 }
 
 /* Smoothed area chart (analytics style) — Catmull-Rom curve through the series

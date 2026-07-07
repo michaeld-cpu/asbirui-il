@@ -42,14 +42,14 @@ function PromptCard({ prompt, onDelete }: { prompt: Prompt; onDelete: (p: Prompt
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
         <Badge className="ai-bg-accent-soft ai-accent">{prompt.model}</Badge>
         {prompt.tags.map((t) => (
-          <span key={t} className="rounded-md bg-overlay/[0.05] px-2 py-0.5 text-[11px] text-muted">
+          <span key={t} className="rounded-md bg-overlay/[0.05] px-2 py-0.5 text-[11px] text-fg/70 dark:text-fg/55">
             #{t}
           </span>
         ))}
       </div>
 
       <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-        <span className="text-[11px] text-muted">Updated {timeAgo(prompt.updated)}</span>
+        <span className="text-[11px] text-fg/70 dark:text-fg/55">Updated {timeAgo(prompt.updated)}</span>
         <div className="flex items-center gap-1">
           <a
             href={`#ai/prompts/${prompt.id}`}

@@ -51,7 +51,6 @@ export const docsNav: DocsNavGroup[] = [
     items: [
       { label: "Overview", href: "#templates" },
       { label: "AI console", href: "#ai" },
-      { label: "Admin", href: "#admin" },
     ],
   },
   {

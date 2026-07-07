@@ -117,6 +117,70 @@
   }
 }
 
+/* prompt composer focus ring — an animated gradient border in the same teal→
+   lavender→violet family as the credits pill. The ::before paints a rotating
+   conic gradient one step outside the card (via a negative inset + a mask that
+   punches out the interior), so only the 1.5px rim shows. It rotates and the
+   whole card glows while focused. */
+.ai-console .ai-prompt {
+  position: relative;
+  border-radius: 1rem; /* matches rounded-2xl */
+}
+.ai-console .ai-prompt::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  /* same family as the credits pill but richer — more purple stops with bright
+     lilac/orchid highlights so the rotating ring reads vividly, not subtle */
+  background: conic-gradient(
+    from var(--ai-ring-angle, 0deg),
+    rgb(221 214 254),
+    rgb(167 139 250),
+    rgb(147 51 234),
+    rgb(217 70 239),
+    rgb(124 58 237),
+    rgb(196 181 253),
+    rgb(221 214 254)
+  );
+  /* show only the border: fill the ring, then subtract the interior */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+.ai-console .ai-prompt:focus-within::before {
+  opacity: 1;
+  animation: ai-ring-spin 4s linear infinite;
+}
+.ai-console .ai-prompt:focus-within {
+  box-shadow:
+    0 0 0 1px rgb(var(--ai-500) / 0.3),
+    0 0 32px rgb(168 85 247 / 0.55),
+    0 0 12px rgb(217 70 239 / 0.4);
+}
+/* --ai-ring-angle must be a registered custom property to animate; register it
+   so the conic gradient's start angle can tween smoothly */
+@property --ai-ring-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes ai-ring-spin {
+  to { --ai-ring-angle: 360deg; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-console .ai-prompt:focus-within::before { animation: none; }
+}
+
 /* subtle glow used on hero/usage cards — anchored to opposite corners so the
    wash reads as a diagonal, not a blob floating mid-tile */
 .ai-console .ai-glow {

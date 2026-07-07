@@ -1,4 +1,5 @@
 import * as React from "react";
+import { SelectMenu } from "@/components/select-menu";
 import { Button, PageHeader, Field, EmptyState, inputCls, useToast } from "./ai-states";
 import { Icons } from "./ai-ui";
 import { usePrompt, savePrompt, MODELS } from "./store";
@@ -78,13 +79,12 @@ export function PromptFormPage({ id }: { id?: string }) {
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <Field label="Model">
-              <select value={model} onChange={(e) => setModel(e.target.value)} className={inputCls}>
-                {MODELS.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.label}
-                  </option>
-                ))}
-              </select>
+              <SelectMenu
+                aria-label="Model"
+                value={model}
+                onValueChange={setModel}
+                options={MODELS.map((m) => ({ value: m.id, label: m.label }))}
+              />
             </Field>
 
             <Field label="Tags" hint="Comma-separated">

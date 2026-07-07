@@ -1,20 +1,78 @@
-import { PageHeader, Button, Badge, KpiTile, useToast } from "./ai-states";
-import { AreaChart, Icons } from "./ai-ui";
+import * as React from "react";
+import { PageHeader, Button, Badge, useToast } from "./ai-states";
+import { AreaChart, Icons, CountUp, dayLabels } from "./ai-ui";
 import { usage, useInvoices, invoiceTone } from "./store";
+
+const nf = new Intl.NumberFormat("en-US");
+const fmtCost = (n: number) => `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/* KPI cell in the divided top row — mirrors the Overview dashboard exactly:
+   label, big count-up value, optional delta pill. */
+function KpiCell({
+  label,
+  value,
+  delta,
+  up = true,
+}: {
+  label: string;
+  value: React.ReactNode;
+  delta?: string;
+  up?: boolean;
+}) {
+  return (
+    <div className="px-4 py-4 sm:px-6 sm:py-5">
+      <p className="text-xs text-fg/70 dark:text-fg/55 sm:text-sm">{label}</p>
+      <div className="mt-1.5 flex flex-col items-start gap-1 sm:mt-2 sm:flex-row sm:items-center sm:gap-3">
+        <span className="text-2xl font-semibold tabular-nums tracking-tight text-fg sm:text-3xl">{value}</span>
+        {delta && (
+          <span
+            className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+              up ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-fg/10 text-fg/70 dark:text-fg/55"
+            }`}
+          >
+            {delta}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function BillingPage() {
   const invoices = useInvoices();
   const toast = useToast();
 
   const creditsPct = Math.min(100, Math.round((usage.creditsUsed / usage.creditsTotal) * 100));
+  const creditsLeft = Math.max(0, usage.creditsTotal - usage.creditsUsed);
   const maxCost = Math.max(...usage.byModel.map((m) => m.cost), 1);
+  const totalModelCost = usage.byModel.reduce((s, m) => s + m.cost, 0);
+  const seriesSum = usage.spendSeries.reduce((a, b) => a + b, 0) || 1;
 
   return (
     <div>
       <PageHeader title="Usage & Billing" subtitle="Track spend, credits, and invoices for your Lumina AI workspace." />
 
-      {/* Current plan */}
-      <div className="mb-6 rounded-xl border border-border bg-panel p-5">
+      {/* KPI row — divided columns, count-up values, matches Overview */}
+      <div className="mb-6 rounded-xl border border-border bg-panel">
+        <div className="grid grid-cols-2 divide-x divide-y divide-border lg:grid-cols-4 lg:divide-y-0">
+          <KpiCell label="Spend (MTD)" value={<CountUp value={usage.spendMonth} format={fmtCost} />} delta={usage.spendDelta} />
+          <KpiCell
+            label="Requests (7d)"
+            value={<CountUp value={usage.requests7d} format={(n) => nf.format(Math.round(n))} />}
+            delta={usage.requestsDelta}
+          />
+          <KpiCell label="Error rate" value={usage.errorRate} delta="0.42% err" up={false} />
+          <KpiCell
+            label="Credits left"
+            value={<CountUp value={creditsLeft} format={(n) => nf.format(Math.round(n))} />}
+            delta={`${creditsPct}% used`}
+            up={false}
+          />
+        </div>
+      </div>
+
+      {/* Current plan + credits */}
+      <div className="mb-6 ai-glow rounded-xl border border-border bg-panel p-5">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
@@ -33,7 +91,7 @@ export function BillingPage() {
         <div className="mt-5">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="text-fg/70 dark:text-fg/55">Credits used this cycle</span>
-            <span className="font-medium text-fg">
+            <span className="font-medium tabular-nums text-fg">
               {usage.creditsUsed.toLocaleString()}{" "}
               <span className="text-fg/65 dark:text-fg/45">/ {usage.creditsTotal.toLocaleString()}</span>
             </span>
@@ -45,32 +103,25 @@ export function BillingPage() {
         </div>
       </div>
 
-      {/* Spend chart + KPI stack */}
-      <div className="mb-6 grid gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-border bg-panel p-5 lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-fg">Spend, last 14 days</h3>
-            <span className="ai-accent text-sm font-medium">${usage.spendMonth.toFixed(2)} MTD</span>
-          </div>
-          <AreaChart data={usage.spendSeries} className="h-44 w-full" />
+      {/* Spend chart — polished interactive area chart with date axis */}
+      <div className="mb-6 rounded-xl border border-border bg-panel p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-fg">Spend, last 14 days</h3>
+          <span className="ai-accent text-sm font-medium">{fmtCost(usage.spendMonth)} MTD</span>
         </div>
-        <div className="grid gap-4">
-          <KpiTile label="Spend this month" value={`$${usage.spendMonth.toFixed(2)}`} />
-          <KpiTile
-            label="Requests, 7d"
-            value={usage.requests7d.toLocaleString()}
-            delta={usage.requestsDelta}
-            up
-            spark={usage.requestsSeries}
-          />
-          <KpiTile label="Error rate" value={usage.errorRate} />
-        </div>
+        <AreaChart
+          data={usage.spendSeries}
+          labels={dayLabels(usage.spendSeries.length)}
+          format={(v) => fmtCost((v / seriesSum) * usage.spendMonth)}
+          className="h-48 w-full"
+        />
       </div>
 
       {/* Usage by model */}
       <div className="mb-6 rounded-xl border border-border bg-panel">
-        <div className="border-b border-border px-5 py-3">
+        <div className="flex items-center justify-between border-b border-border px-5 py-3">
           <h3 className="text-sm font-semibold text-fg">Usage by model</h3>
+          <span className="text-xs text-fg/70 dark:text-fg/55">{fmtCost(totalModelCost)} total</span>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-[640px] w-full text-sm">
@@ -85,7 +136,7 @@ export function BillingPage() {
             </thead>
             <tbody>
               {usage.byModel.map((m) => (
-                <tr key={m.model} className="border-b border-border/60 last:border-0">
+                <tr key={m.model} className="border-b border-border/60 last:border-0 hover:bg-overlay/[0.03]">
                   <td className="whitespace-nowrap px-5 py-3 font-medium text-fg">{m.model}</td>
                   <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg/70">
                     {m.requests.toLocaleString()}
@@ -93,7 +144,7 @@ export function BillingPage() {
                   <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg/70">{m.tokens}</td>
                   <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg">${m.cost.toFixed(2)}</td>
                   <td className="px-5 py-3">
-                    <div className="ml-auto h-2 w-40 overflow-hidden rounded-full bg-overlay/[0.08]">
+                    <div className="ml-auto h-2 w-40 max-w-full overflow-hidden rounded-full bg-overlay/[0.08]">
                       <div
                         className="ai-bg-accent h-full rounded-full"
                         style={{ width: `${Math.round((m.cost / maxCost) * 100)}%` }}

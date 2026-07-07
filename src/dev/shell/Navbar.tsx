@@ -123,7 +123,7 @@ export function Navbar({ active, wide }: { active: string; wide?: boolean }) {
           <ThemeToggle />
           <a
             href="#components"
-            className="ml-1 hidden items-center gap-1.5 rounded-asbir bg-solid px-3.5 py-2 text-sm font-semibold text-fg-invert transition-colors hover:bg-solid/85 md:inline-flex"
+            className="ml-1 hidden items-center gap-1.5 rounded-asbir bg-solid px-3.5 py-2 text-sm font-semibold text-fg-invert transition-colors hover:bg-solid/85 lg:inline-flex"
           >
             Get started
             <span>{ArrowIcon}</span>

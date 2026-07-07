@@ -1,4 +1,5 @@
 import * as React from "react";
+import { SelectMenu } from "@/components/select-menu";
 import { PageHeader, Tabs, Button, Badge, Field, inputCls, CodeBlock, ConfirmDialog, Modal, useToast } from "./ai-states";
 import { MODELS } from "./store";
 
@@ -62,11 +63,12 @@ function GeneralTab() {
             <input className={inputCls} value={orgName} onChange={(e) => setOrgName(e.target.value)} />
           </Field>
           <Field label="Default model" hint="Used when a request does not specify a model.">
-            <select className={inputCls} value={defaultModel} onChange={(e) => setDefaultModel(e.target.value)}>
-              {MODELS.map((m) => (
-                <option key={m.id} value={m.id}>{m.label}</option>
-              ))}
-            </select>
+            <SelectMenu
+              aria-label="Default model"
+              value={defaultModel}
+              onValueChange={setDefaultModel}
+              options={MODELS.map((m) => ({ value: m.id, label: m.label }))}
+            />
           </Field>
           <div className="flex justify-end">
             <Button onClick={() => toast("Settings saved")}>Save changes</Button>
@@ -115,12 +117,12 @@ function SecurityTab() {
   return (
     <div className="max-w-2xl space-y-6">
       <div className="rounded-xl border border-border bg-panel p-5">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold text-fg">Two-factor authentication</h2>
             <p className="mt-1 text-sm text-fg/70 dark:text-fg/55">Require a second factor for all members when signing in.</p>
           </div>
-          <label className="inline-flex cursor-pointer items-center gap-2">
+          <label className="inline-flex shrink-0 cursor-pointer items-center gap-2">
             <input
               type="checkbox"
               className="h-4 w-4 accent-[rgb(var(--accent))]"
@@ -140,9 +142,9 @@ function SecurityTab() {
         <p className="mt-1 text-sm text-fg/70 dark:text-fg/55">Devices currently signed in to your account.</p>
         <ul className="mt-4 divide-y divide-border">
           {sessions.map((s) => (
-            <li key={s.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-              <div>
-                <p className="flex items-center gap-2 text-sm font-medium text-fg">
+            <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+              <div className="min-w-0">
+                <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-fg">
                   {s.device}
                   {s.current && <Badge className="bg-overlay/[0.08] text-fg/60">This device</Badge>}
                 </p>
@@ -201,7 +203,7 @@ function WebhooksTab() {
 
   return (
     <div className="max-w-3xl space-y-6">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold text-fg">Endpoints</h2>
           <p className="mt-1 text-sm text-fg/70 dark:text-fg/55">Receive real-time event notifications at your URLs.</p>
@@ -252,7 +254,7 @@ function WebhooksTab() {
           </Field>
           <div>
             <span className="mb-1.5 block text-sm font-medium text-fg">Events</span>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {EVENT_TYPES.map((evt) => (
                 <label key={evt} className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs text-fg/70 transition-colors hover:bg-overlay/[0.05]">
                   <input

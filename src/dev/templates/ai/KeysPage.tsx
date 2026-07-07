@@ -21,13 +21,6 @@ const SCOPES: { id: string; label: string; hint: string }[] = [
   { id: "images", label: "images", hint: "Generate and edit images with Aurora Vision" },
 ];
 
-function randToken() {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let out = "";
-  for (let i = 0; i < 40; i++) out += chars[Math.floor(Math.random() * chars.length)];
-  return "sk-live-" + out;
-}
-
 function CopyButton({ value, onCopied }: { value: string; onCopied: () => void }) {
   return (
     <button
@@ -76,7 +69,7 @@ export function KeysPage() {
 
   function closeCreate() {
     setCreateOpen(false);
-    // clear after close animation-safe next tick
+    // clear after close so the reveal state doesn't flash on the next open
     setTimeout(resetCreate, 0);
   }
 
@@ -95,9 +88,10 @@ export function KeysPage() {
       toast("Select at least one scope");
       return;
     }
-    createApiKey(trimmed, scopes);
+    // real mutation — adds a row and returns the one-time full token
+    const { token } = createApiKey(trimmed, scopes);
     toast("API key created");
-    setIssuedKey(randToken());
+    setIssuedKey(token);
   }
 
   return (
@@ -125,78 +119,81 @@ export function KeysPage() {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-panel">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-xs capitalize text-fg">
-                  <th className="px-4 py-3 font-medium">Name</th>
-                  <th className="px-4 py-3 font-medium">Key</th>
-                  <th className="px-4 py-3 font-medium">Scopes</th>
-                  <th className="px-4 py-3 font-medium">Created</th>
-                  <th className="px-4 py-3 font-medium">Last used</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 text-right font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {keys.map((k) => (
-                  <tr key={k.id} className="border-b border-border/60 last:border-0 hover:bg-overlay/[0.03]">
-                    <td className="px-4 py-3">
-                      <span className="font-medium text-fg">{k.name}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5">
-                        <code className="rounded-md bg-overlay/[0.05] px-2 py-1 font-mono text-xs text-fg/80">
-                          {k.prefix}…
-                        </code>
-                        <CopyButton value={k.prefix} onCopied={() => toast("Key prefix copied")} />
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {k.scopes.length === 0 ? (
-                          <span className="text-xs text-fg/70 dark:text-fg/55">none</span>
-                        ) : (
-                          k.scopes.map((s) => (
-                            <Badge key={s} className="ai-bg-accent-soft ai-accent">
-                              {s}
-                            </Badge>
-                          ))
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-fg/70 dark:text-fg/55">{k.created}</td>
-                    <td className="px-4 py-3 text-fg/70 dark:text-fg/55">{k.lastUsed || "Never"}</td>
-                    <td className="px-4 py-3">
-                      <Badge className={keyStatusTone[k.status]}>{k.status}</Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {k.status === "active" && (
-                          <Button variant="secondary" size="sm" onClick={() => setRevokeTarget(k)}>
-                            Revoke
-                          </Button>
-                        )}
-                        <Button variant="danger" size="sm" onClick={() => setDeleteTarget(k)}>
-                          {Icons.trash}
-                          Delete
-                        </Button>
-                      </div>
-                    </td>
+        <>
+          <div className="overflow-hidden rounded-xl border border-border bg-panel">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[860px] text-sm">
+                <thead>
+                  <tr className="border-b border-border text-left text-xs capitalize text-fg">
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Key</th>
+                    <th className="px-4 py-3 font-medium">Scopes</th>
+                    <th className="px-4 py-3 font-medium">Created</th>
+                    <th className="px-4 py-3 font-medium">Last used</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 text-right font-medium">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {keys.map((k) => (
+                    <tr
+                      key={k.id}
+                      className={`border-b border-border/60 last:border-0 transition-colors hover:bg-overlay/[0.03] ${k.status === "revoked" ? "opacity-60" : ""}`}
+                    >
+                      <td className="px-4 py-3">
+                        <span className="font-medium text-fg">{k.name}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          <code className="rounded-md bg-overlay/[0.05] px-2 py-1 font-mono text-xs text-fg/80">
+                            {k.prefix}…
+                          </code>
+                          <CopyButton value={k.prefix} onCopied={() => toast("Key prefix copied")} />
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {k.scopes.length === 0 ? (
+                            <span className="text-xs text-fg/70 dark:text-fg/55">none</span>
+                          ) : (
+                            k.scopes.map((s) => (
+                              <Badge key={s} className="ai-bg-accent-soft ai-accent">
+                                {s}
+                              </Badge>
+                            ))
+                          )}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-fg/70 dark:text-fg/55">{k.created}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-fg/70 dark:text-fg/55">{k.lastUsed}</td>
+                      <td className="px-4 py-3">
+                        <Badge className={keyStatusTone[k.status]}>{k.status}</Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {k.status === "active" && (
+                            <Button variant="secondary" size="sm" onClick={() => setRevokeTarget(k)}>
+                              Revoke
+                            </Button>
+                          )}
+                          <Button variant="danger" size="sm" onClick={() => setDeleteTarget(k)}>
+                            {Icons.trash}
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
 
-      {keys.length > 0 && (
-        <p className="mt-3 text-xs text-fg/70 dark:text-fg/55">
-          Revoking a key immediately rejects any request that presents it — active integrations will start
-          returning 401. Deleting removes the record and its usage audit trail permanently.
-        </p>
+          <p className="mt-3 text-xs text-fg/70 dark:text-fg/55">
+            Revoking a key immediately rejects any request that presents it — active integrations will start
+            returning 401. Deleting removes the record and its usage audit trail permanently.
+          </p>
+        </>
       )}
 
       <Modal open={createOpen} title="Create API key" onClose={closeCreate}>

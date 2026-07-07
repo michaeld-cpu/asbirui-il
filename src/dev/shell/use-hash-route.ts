@@ -34,14 +34,14 @@ export function isDocsRoute(route: string): boolean {
   return DOCS_ROUTES.has(route);
 }
 
-/** The admin template owns everything under "admin" / "admin/…". */
-export function isAdminRoute(route: string): boolean {
-  return route === "admin" || route.startsWith("admin/");
-}
-
-/** Sub-path within the admin template (e.g. "", "projects", "projects/new"). */
-export function adminSubPath(route: string): string {
-  return route === "admin" ? "" : route.replace(/^admin\//, "");
+/**
+ * Bare preview route — renders the AI console with NO shell chrome, sized to
+ * whatever viewport it's loaded in. The homepage device frames point <iframe>s
+ * here (e.g. "#preview/ai") so each frame gets its own viewport width and the
+ * template's real responsive breakpoints fire (desktop rail vs. mobile drawer).
+ */
+export function isPreviewRoute(route: string): boolean {
+  return route === "preview" || route.startsWith("preview/");
 }
 
 /** The AI console template owns everything under "ai" / "ai/…". */

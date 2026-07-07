@@ -1,6 +1,13 @@
 import * as React from "react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+} from "@/components/dropdown-menu";
 import { Button } from "./ai-states";
-import { AreaChart, HalftoneChart, RoundAction, Icons, ProviderMarks, ModelMarks, ProviderBadge, CountUp } from "./ai-ui";
+import { AreaChart, HalftoneChart, RoundAction, Icons, ProviderMarks, ModelMarks, ProviderBadge, CountUp, dayLabels } from "./ai-ui";
 import {
   platform,
   useAgents,
@@ -12,22 +19,17 @@ import {
 
 const nf = new Intl.NumberFormat("en-US");
 
+// selectable dashboard time ranges (header period dropdown)
+const PERIODS = ["Last 24 hours", "Last 7 days", "Last 30 days", "Last 90 days"] as const;
+type Period = (typeof PERIODS)[number];
+// compact form for the KPI label, e.g. "Last 7 days" → "7d"
+const periodShort = (p: Period) =>
+  ({ "Last 24 hours": "24h", "Last 7 days": "7d", "Last 30 days": "30d", "Last 90 days": "90d" })[p];
+
 // distinct hues for the per-agent trend charts — a spectrum, NOT the brand
 // color; each var is a bright pastel in dark mode and a deeper step in light
 // mode so the curve stays visible on both surfaces (see ai-theme.css)
 const CHART_COLORS = ["rgb(var(--ai-chart-1))", "rgb(var(--ai-chart-2))", "rgb(var(--ai-chart-3))"];
-
-// day labels for the daily agent series (x-axis + tooltip), derived from the
-// series length so they stay aligned if the point count changes. Static end
-// date so the demo reads consistently; a live app would derive from real data.
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-function dayLabels(count: number, end = new Date(2026, 2, 6)): string[] {
-  return Array.from({ length: count }, (_, i) => {
-    const d = new Date(end);
-    d.setDate(end.getDate() - (count - 1 - i));
-    return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
-  });
-}
 
 // one violet ramp — accent → lilac → lightest purple — uniform in both themes
 const SEG_COLORS = ["rgb(var(--accent))", "rgb(var(--ai-seg-2))", "rgb(var(--ai-seg-3))"];
@@ -56,11 +58,14 @@ function KpiCell({
   return (
     <div className="px-4 py-4 sm:px-6 sm:py-5">
       <p className="text-xs text-fg/70 dark:text-fg/55 sm:text-sm">{label}</p>
-      <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 sm:mt-2 sm:gap-3">
-        <span className="text-2xl font-semibold tracking-tight text-fg sm:text-3xl">{value}</span>
+      {/* stack value + pill on mobile so the count-up's changing width can't
+          push the pill onto another line (it caused a bounce); inline on sm+.
+          tabular-nums keeps each digit fixed-width so the ramp doesn't jitter. */}
+      <div className="mt-1.5 flex flex-col items-start gap-1 sm:mt-2 sm:flex-row sm:items-center sm:gap-3">
+        <span className="text-2xl font-semibold tabular-nums tracking-tight text-fg sm:text-3xl">{value}</span>
         {delta && (
           <span
-            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+            className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium ${
               up ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-fg/10 text-fg/70 dark:text-fg/55"
             }`}
           >
@@ -76,6 +81,9 @@ export function OverviewPage() {
   const agents = useAgents();
   const allLogs = useLogs();
   const breakdown = useProviderBreakdown();
+
+  // dashboard time range — driven by the header period dropdown
+  const [period, setPeriod] = React.useState<Period>(PERIODS[1]);
 
   // provider filter chips (fintech-style pill row) — filters the requests table
   const [filter, setFilter] = React.useState<ProviderId | "all">("all");
@@ -101,6 +109,24 @@ export function OverviewPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {/* period selector — internal DropdownMenu component */}
+          <DropdownMenu>
+            <DropdownMenuTrigger className="inline-flex items-center gap-2 rounded-asbir border border-border bg-panel px-3 py-1.5 text-xs font-medium text-fg/80 transition-colors hover:bg-overlay/[0.05] hover:text-fg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              {period}
+              <span className="text-fg/50">{Icons.chevronDown}</span>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[11rem]">
+              <DropdownMenuLabel>Time range</DropdownMenuLabel>
+              {PERIODS.map((p) => (
+                <DropdownMenuItem key={p} onSelect={() => setPeriod(p)}>
+                  <span className="flex-1">{p}</span>
+                  {p === period && (
+                    <span className="text-accent-soft-fg">{Icons.check}</span>
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button variant="secondary" size="sm">
             <a href="#ai/logs">View logs</a>
           </Button>
@@ -114,7 +140,7 @@ export function OverviewPage() {
       <div className="ai-glow rounded-xl border border-border bg-panel">
         <div className="grid grid-cols-2 divide-x divide-y divide-border lg:grid-cols-4 lg:divide-y-0">
           <KpiCell
-            label="Requests (7d)"
+            label={`Requests (${periodShort(period)})`}
             value={<CountUp value={platform.totalRequests7d} format={(n) => nf.format(Math.round(n))} />}
             delta={platform.requestsDelta}
           />

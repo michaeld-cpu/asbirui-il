@@ -8,15 +8,13 @@ import { DocsSidebar } from "./shell/DocsSidebar";
 import { DocsContent } from "./shell/DocsContent";
 import { DocsAside } from "./shell/DocsAside";
 import { Home } from "./shell/Home";
-import { AdminTemplate } from "./templates/admin/AdminTemplate";
 import { AiTemplate } from "./templates/ai/AiTemplate";
 import {
   useHashRoute,
   isDocsRoute,
-  isAdminRoute,
-  adminSubPath,
   isAiRoute,
   aiSubPath,
+  isPreviewRoute,
 } from "./shell/use-hash-route";
 
 /** Landing view: marketing navbar only, no sidebar. */
@@ -29,6 +27,15 @@ function LandingView() {
       </main>
     </div>
   );
+}
+
+/**
+ * Bare preview: the AI console with no shell chrome, filling the viewport.
+ * Loaded inside the homepage device-frame <iframe>s so each gets its own
+ * viewport width and the template's real responsive breakpoints fire.
+ */
+function PreviewView() {
+  return <AiTemplate sub="" />;
 }
 
 /** Docs view: full-width navbar + grouped sidebar, content column, right aside. */
@@ -51,23 +58,34 @@ function DocsView({ route }: { route: string }) {
 
 function App() {
   const route = useHashRoute();
+  const preview = isPreviewRoute(route);
 
   let view;
-  if (isAiRoute(route)) {
+  if (preview) {
+    view = <PreviewView />;
+  } else if (isAiRoute(route)) {
     view = <AiTemplate sub={aiSubPath(route)} />;
-  } else if (isAdminRoute(route)) {
-    view = <AdminTemplate sub={adminSubPath(route)} />;
   } else if (isDocsRoute(route)) {
     view = <DocsView route={route} />;
   } else {
     view = <LandingView />;
   }
 
+  // In a preview iframe, the parent shell pins the theme via "?t=light|dark"
+  // so the frame always matches the page it's embedded in.
+  const forcedTheme = preview ? previewThemeParam() : undefined;
+
   return (
-    <ThemeProvider>
+    <ThemeProvider forcedTheme={forcedTheme}>
       <SidebarProvider>{view}</SidebarProvider>
     </ThemeProvider>
   );
+}
+
+/** Reads the "t" query param ("light"|"dark") set on preview iframe URLs. */
+function previewThemeParam(): "light" | "dark" | undefined {
+  const t = new URLSearchParams(window.location.search).get("t");
+  return t === "light" || t === "dark" ? t : undefined;
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

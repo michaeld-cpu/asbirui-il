@@ -49,6 +49,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --p tsconfig.build.json && vite build",
+    "build:app": "vite build --config vite.config.app.ts",
+    "preview:app": "vite preview --outDir dist-app",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "preview": "vite preview",

@@ -16,20 +16,32 @@
     />
     <script>
       // No-flash theme: set .dark/.light + data-theme before first paint.
+      // Also paint the canvas background INLINE here — the token CSS that sets
+      // `body { background: var(--canvas) }` ships inside the JS bundle, so
+      // without this the document paints its default white until the bundle
+      // loads (a white→black flash in dark mode, most visible in the homepage
+      // preview iframes which reload on every refresh). The "?t=" query lets an
+      // embedding frame pin the theme regardless of stored value.
       (function () {
+        var t;
         try {
-          var t = localStorage.getItem("asbir-theme");
-          if (!t)
+          var q = new URLSearchParams(window.location.search).get("t");
+          t = q === "light" || q === "dark" ? q : localStorage.getItem("asbir-theme");
+          if (t !== "light" && t !== "dark")
             t = window.matchMedia("(prefers-color-scheme: light)").matches
               ? "light"
               : "dark";
-          document.documentElement.classList.remove("light", "dark");
-          document.documentElement.classList.add(t);
-          document.documentElement.setAttribute("data-theme", t);
         } catch (e) {
-          document.documentElement.classList.add("dark");
-          document.documentElement.setAttribute("data-theme", "dark");
+          t = "dark";
         }
+        var root = document.documentElement;
+        root.classList.remove("light", "dark");
+        root.classList.add(t);
+        root.setAttribute("data-theme", t);
+        // inline background so the first paint is already the right color
+        var bg = t === "light" ? "#ffffff" : "#000000";
+        root.style.background = bg;
+        root.style.colorScheme = t;
       })();
     </script>
   </head>

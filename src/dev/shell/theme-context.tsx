@@ -6,6 +6,9 @@ type ThemeContextValue = { theme: Theme; toggle: () => void };
 
 const ThemeContext = React.createContext<ThemeContextValue | null>(null);
 const STORAGE_KEY = "asbir-theme";
+// message the homepage preview frames receive to switch theme in place (no
+// reload) — must match PREVIEW_THEME_MSG in TemplatePreview.tsx
+const PREVIEW_THEME_MSG = "asbir-preview-theme";
 let themeTransitionTimer = 0;
 // count of in-flight view transitions — rapid toggles overlap, and the
 // theme-switching class must stay on until the LAST one settles, or element
@@ -19,47 +22,88 @@ function applyTheme(theme: Theme) {
   // keep the library's [data-theme] contract in sync so shipped components
   // (Button etc.) re-theme alongside the shell
   root.setAttribute("data-theme", theme);
+  // Keep the inline canvas background (set by index.html's no-flash script to
+  // avoid a first-paint flash) in sync on in-place theme switches — otherwise
+  // that inline style, which wins over the token stylesheet, would pin the old
+  // color after a toggle.
+  root.style.background = theme === "light" ? "#ffffff" : "#000000";
+  root.style.colorScheme = theme;
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = React.useState<Theme>("dark");
+/** Swap to `next` with the smooth full-page crossfade (view transition) when
+    supported, falling back to a timed color transition otherwise. Shared by the
+    shell toggle and the preview-frame message listener so both fade identically
+    — the frames never reload/flash to black. */
+function transitionTheme(next: Theme) {
+  const root = document.documentElement;
+  if (document.startViewTransition) {
+    // full-page crossfade — old and new themes are composited as snapshots, so
+    // gradients/shadows/images fade too (no flash). Element-level color
+    // transitions are suspended so the new theme is final the instant it's
+    // snapshotted — otherwise buttons etc. keep animating inside the crossfade.
+    root.classList.add("theme-switching");
+    pendingViewTransitions++;
+    const vt = document.startViewTransition(() => applyTheme(next));
+    vt.finished.finally(() => {
+      if (--pendingViewTransitions === 0) root.classList.remove("theme-switching");
+    });
+  } else {
+    window.clearTimeout(themeTransitionTimer);
+    root.classList.add("theme-transition");
+    requestAnimationFrame(() => applyTheme(next));
+    themeTransitionTimer = window.setTimeout(
+      () => root.classList.remove("theme-transition"),
+      300
+    );
+  }
+}
+
+export function ThemeProvider({
+  children,
+  forcedTheme,
+}: {
+  children: React.ReactNode;
+  /** Overrides stored/system theme — used by the homepage preview iframes so
+      the parent shell can pin the frame to its own theme via the URL. */
+  forcedTheme?: Theme;
+}) {
+  const [theme, setTheme] = React.useState<Theme>(forcedTheme ?? "dark");
 
   React.useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
     const initial: Theme =
-      stored ??
+      forcedTheme ??
+      (localStorage.getItem(STORAGE_KEY) as Theme | null) ??
       (window.matchMedia("(prefers-color-scheme: light)").matches
         ? "light"
         : "dark");
     setTheme(initial);
     applyTheme(initial);
-  }, []);
+  }, [forcedTheme]);
+
+  // Preview frames (rendered with a forcedTheme) don't own their theme — the
+  // parent shell drives it via postMessage on every toggle. Apply it with the
+  // same crossfade so the framed dashboard fades in lockstep with the page
+  // instead of reloading to a black flash.
+  React.useEffect(() => {
+    if (!forcedTheme) return;
+    const onMessage = (e: MessageEvent) => {
+      const data = e.data;
+      if (!data || data.type !== PREVIEW_THEME_MSG) return;
+      const next: Theme = data.theme === "light" ? "light" : "dark";
+      setTheme((prev) => {
+        if (prev === next) return prev;
+        transitionTheme(next);
+        return next;
+      });
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [forcedTheme]);
 
   const toggle = React.useCallback(() => {
     setTheme((prev) => {
       const next: Theme = prev === "dark" ? "light" : "dark";
-      const root = document.documentElement;
-      if (document.startViewTransition) {
-        // full-page crossfade — old and new themes are composited as
-        // snapshots, so gradients/shadows/images fade too (no flash).
-        // Element-level color transitions are suspended so the new theme is
-        // final the instant it's snapshotted — otherwise buttons etc. keep
-        // animating inside the crossfade and look clunky.
-        root.classList.add("theme-switching");
-        pendingViewTransitions++;
-        const vt = document.startViewTransition(() => applyTheme(next));
-        vt.finished.finally(() => {
-          if (--pendingViewTransitions === 0) root.classList.remove("theme-switching");
-        });
-      } else {
-        window.clearTimeout(themeTransitionTimer);
-        root.classList.add("theme-transition");
-        requestAnimationFrame(() => applyTheme(next));
-        themeTransitionTimer = window.setTimeout(
-          () => root.classList.remove("theme-transition"),
-          300
-        );
-      }
+      transitionTheme(next);
       localStorage.setItem(STORAGE_KEY, next);
       return next;
     });

@@ -114,6 +114,33 @@ function SectionHeading({
 }
 
 /* ------------------------------------------------------------------ */
+/* Under-construction placeholder (temporary section body)             */
+/* ------------------------------------------------------------------ */
+
+const HammerIcon = (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m14.5 12.5-8 8a2.12 2.12 0 0 1-3-3l8-8" />
+    <path d="M17.64 15 22 10.64" />
+    <path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H9l.92.82A6.18 6.18 0 0 1 12 8.4v1.56l2 2h.86c.85 0 1.65.34 2.25.93l1.25 1.25" />
+  </svg>
+);
+
+/* Under-construction placeholder. No solid fill — the diagonal hatch IS the
+   surface, so the card reads as work-in-progress overlaying the section rather
+   than a finished gray panel. Kept to a modest centered width, not full-bleed. */
+function UnderConstruction() {
+  return (
+    <div className="mt-8 flex flex-col items-center justify-center py-12 text-center">
+      <span className="flex h-12 w-12 items-center justify-center rounded-asbir border border-border bg-canvas text-fg/70">
+        {HammerIcon}
+      </span>
+      <p className="mt-4 text-sm font-semibold text-fg">Under construction</p>
+      <p className="mt-1 text-xs leading-relaxed text-fg/55">DE at work.</p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /* Templates showcase                                                  */
 /* ------------------------------------------------------------------ */
 
@@ -164,15 +191,6 @@ function TemplatesSection() {
 /* What's inside / Technology                                          */
 /* ------------------------------------------------------------------ */
 
-const stack = [
-  { name: "React", detail: "Function components, hooks-first API." },
-  { name: "TypeScript", detail: "Fully typed props and variants." },
-  { name: "Tailwind CSS", detail: "Utility-driven, zero runtime CSS." },
-  { name: "Design tokens", detail: "One palette, themed via CSS vars." },
-  { name: "Radix primitives", detail: "Accessible behaviour underneath." },
-  { name: "Vite", detail: "Instant dev server, fast builds." },
-];
-
 function TechnologySection() {
   return (
     <section id="technology" className="mt-24">
@@ -180,16 +198,7 @@ function TechnologySection() {
         title="Built on tools your team already trusts."
         description="No bespoke framework to learn. AsbirUI is a thin, opinionated layer over the stack you already ship with."
       />
-      <div className="mt-8 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
-        {stack.map((item) => (
-          <div key={item.name} className="bg-panel p-5">
-            <h3 className="text-sm font-semibold text-fg">{item.name}</h3>
-            <p className="mt-1 text-xs leading-relaxed text-fg/55">
-              {item.detail}
-            </p>
-          </div>
-        ))}
-      </div>
+      <UnderConstruction />
     </section>
   );
 }
@@ -198,73 +207,6 @@ function TechnologySection() {
 /* Everything you need (features)                                      */
 /* ------------------------------------------------------------------ */
 
-const PaletteIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="13.5" cy="6.5" r="1.5" /><circle cx="17.5" cy="10.5" r="1.5" />
-    <circle cx="8.5" cy="7.5" r="1.5" /><circle cx="6.5" cy="12.5" r="1.5" />
-    <path d="M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.4-.3-.4-.5-.9-.5-1.4 0-1.1.9-2 2-2h1.5A4.5 4.5 0 0 0 22 10.5C22 5.8 17.5 2 12 2Z" />
-  </svg>
-);
-const AccessibilityIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="4.5" r="1.5" />
-    <path d="M4 8c2.5 1 5 1.5 8 1.5S17.5 9 20 8M12 9.5V15m0 0-3 6m3-6 3 6" />
-  </svg>
-);
-const CopyIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-  </svg>
-);
-const ThemeIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="9" /><path d="M12 3v18" fill="currentColor" fillOpacity="0.15" /><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" fillOpacity="0.12" />
-  </svg>
-);
-const TypeIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M4 7V5h16v2M9 5v14m-2 0h4" /><path d="M14 12h6M17 12v7" />
-  </svg>
-);
-const BoltIcon = (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z" />
-  </svg>
-);
-
-const features = [
-  {
-    icon: PaletteIcon,
-    title: "One palette, everywhere",
-    body: "Every component draws from the same semantic tokens, so a single change re-themes the whole system.",
-  },
-  {
-    icon: ThemeIcon,
-    title: "Light & dark, built in",
-    body: "Themes flip through CSS variables — no duplicated styles, no flash, no per-component overrides.",
-  },
-  {
-    icon: AccessibilityIcon,
-    title: "Accessible by default",
-    body: "Keyboard nav, focus rings, and ARIA come from Radix primitives, not bolted on afterward.",
-  },
-  {
-    icon: CopyIcon,
-    title: "Copy the source",
-    body: "Own the code. Copy a component straight into your repo and tweak it — no black-box dependency.",
-  },
-  {
-    icon: TypeIcon,
-    title: "Fully typed",
-    body: "Props, variants, and slots are typed end-to-end, so your editor catches mistakes before runtime.",
-  },
-  {
-    icon: BoltIcon,
-    title: "Fast to ship",
-    body: "Vite-powered dev, tree-shakeable output, and zero-runtime styling keep bundles lean.",
-  },
-];
-
 function FeaturesSection() {
   return (
     <section id="features" className="mt-24">
@@ -272,22 +214,7 @@ function FeaturesSection() {
         title="The details are the product."
         description="A component library is only as good as the thousand small decisions inside it. Here's what we sweated so you don't have to."
       />
-      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {features.map((f) => (
-          <div
-            key={f.title}
-            className="rounded-2xl border border-border bg-panel p-6"
-          >
-            <div className="flex h-10 w-10 items-center justify-center rounded-asbir bg-accent-soft-bg/10 text-accent-soft-fg">
-              {f.icon}
-            </div>
-            <h3 className="mt-4 text-sm font-semibold text-fg">{f.title}</h3>
-            <p className="mt-2 text-xs leading-relaxed text-fg/55 sm:text-sm">
-              {f.body}
-            </p>
-          </div>
-        ))}
-      </div>
+      <UnderConstruction />
     </section>
   );
 }

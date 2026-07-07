@@ -164,7 +164,7 @@ export const MODELS: Model[] = allModels();
 export type ApiKey = {
   id: string;
   name: string;
-  prefix: string;
+  prefix: string; // shown in the table, e.g. "sk-live-a1b2"
   created: string;
   lastUsed: string;
   scopes: string[];
@@ -276,6 +276,11 @@ const seedPrompts: Prompt[] = [
   { id: "pmt_02", title: "SQL generator", body: "Given a schema, write a safe SQL query…", model: "gpt-4.1", tags: ["data"], updated: "1d ago", favorite: false },
   { id: "pmt_03", title: "PR reviewer", body: "Review this diff for bugs and security…", model: "claude-sonnet-4", tags: ["engineering"], updated: "1w ago", favorite: false },
 ];
+const seedApiKeys: ApiKey[] = [
+  { id: "key_01", name: "production-backend", prefix: "sk-live-7Kq2", created: "Jan 14, 2026", lastUsed: "2h ago", scopes: ["chat", "embeddings"], status: "active" },
+  { id: "key_02", name: "staging-worker", prefix: "sk-live-9fD4", created: "Feb 2, 2026", lastUsed: "1d ago", scopes: ["chat"], status: "active" },
+  { id: "key_03", name: "analytics-readonly", prefix: "sk-live-3pLm", created: "Nov 30, 2025", lastUsed: "Never", scopes: ["embeddings"], status: "revoked" },
+];
 
 type DB = {
   connections: Connection[];
@@ -284,6 +289,7 @@ type DB = {
   invoices: Invoice[];
   members: Member[];
   prompts: Prompt[];
+  apiKeys: ApiKey[];
 };
 const db: DB = {
   connections: seedConnections.map((c) => ({ ...c })),
@@ -292,6 +298,7 @@ const db: DB = {
   invoices: seedInvoices.map((i) => ({ ...i })),
   members: seedMembers.map((m) => ({ ...m })),
   prompts: seedPrompts.map((p) => ({ ...p })),
+  apiKeys: seedApiKeys.map((k) => ({ ...k })),
 };
 
 const subs = new Set<() => void>();
@@ -429,22 +436,49 @@ export function deletePrompt(id: string) {
 }
 
 /* ---- back-compat shims for pages not yet revamped ---- */
-export const useApiKeys = (): ApiKey[] =>
-  useDb((d) =>
-    d.connections.map((c) => ({
-      id: c.id,
-      name: c.label,
-      prefix: c.keyPreview,
-      created: c.connected,
-      lastUsed: "recently",
-      scopes: [getProvider(c.provider).name],
-      status: c.status === "connected" ? "active" : "revoked",
-    }))
-  );
-// signature-compatible with the old KeysPage (superseded by connectProvider)
-export function createApiKey(_name?: string, _scopes?: string[]) {/* no-op shim */}
-export function revokeApiKey(id: string) { setConnectionStatus(id, "disabled"); }
-export function deleteApiKey(id: string) { disconnectProvider(id); }
+/* ---- API keys: a real store slice (create / revoke / delete all mutate) ---- */
+export const useApiKeys = (): ApiKey[] => useDb((d) => d.apiKeys);
+
+const KEY_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+// generate a full token; the caller shows it once and we keep only the prefix
+function generateToken(): string {
+  let body = "";
+  for (let i = 0; i < 40; i++) body += KEY_CHARS[Math.floor(Math.random() * KEY_CHARS.length)];
+  return `sk-live-${body}`;
+}
+
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function today(): string {
+  const d = new Date();
+  return `${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+/* Create a key: adds a real row and returns the full one-time token so the UI
+   can reveal it once. Only the prefix is retained in the store afterwards. */
+export function createApiKey(name: string, scopes: string[]): { id: string; token: string } {
+  const token = generateToken();
+  const id = `key_${String(db.apiKeys.length + 1).padStart(2, "0")}`;
+  const key: ApiKey = {
+    id,
+    name,
+    prefix: token.slice(0, 12), // "sk-live-XXXX"
+    created: today(),
+    lastUsed: "Never",
+    scopes,
+    status: "active",
+  };
+  db.apiKeys = [key, ...db.apiKeys];
+  emit();
+  return { id, token };
+}
+export function revokeApiKey(id: string) {
+  db.apiKeys = db.apiKeys.map((k) => (k.id === id ? { ...k, status: "revoked" } : k));
+  emit();
+}
+export function deleteApiKey(id: string) {
+  db.apiKeys = db.apiKeys.filter((k) => k.id !== id);
+  emit();
+}
 
 export const usage = platform; // old name → platform KPIs
 

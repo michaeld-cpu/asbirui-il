@@ -1,4 +1,5 @@
 import * as React from "react";
+import { SelectMenu } from "@/components/select-menu";
 import { PageHeader, Button, Badge, Field, inputCls, ConfirmDialog, Modal, useToast } from "./ai-states";
 import { useMembers, inviteMember, removeMember, memberTone, type Member } from "./store";
 
@@ -64,7 +65,7 @@ export function TeamPage() {
 
       <div className="overflow-hidden rounded-xl border border-border bg-panel">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs capitalize text-fg">
                 <th className="px-4 py-3 font-medium">Member</th>
@@ -117,7 +118,7 @@ export function TeamPage() {
           {ROLE_INFO.map((r) => (
             <div key={r.role} className="flex gap-3">
               <Badge className="h-fit bg-overlay/[0.08] text-fg/70">{r.role}</Badge>
-              <dd className="text-sm text-fg/60">{r.desc}</dd>
+              <dd className="text-sm text-fg/70 dark:text-fg/55">{r.desc}</dd>
             </div>
           ))}
         </dl>
@@ -132,11 +133,12 @@ export function TeamPage() {
             <input className={inputCls} value={email} placeholder="jane@lumina.ai" type="email" onChange={(e) => setEmail(e.target.value)} />
           </Field>
           <Field label="Role" hint="Owner can only be reassigned from settings.">
-            <select className={inputCls} value={role} onChange={(e) => setRole(e.target.value as Member["role"])}>
-              {ROLES.map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
-            </select>
+            <SelectMenu
+              aria-label="Role"
+              value={role}
+              onValueChange={(v) => setRole(v as Member["role"])}
+              options={ROLES.map((r) => ({ value: r, label: r }))}
+            />
           </Field>
           <div className="flex justify-end gap-2 pt-1">
             <Button variant="secondary" onClick={closeInvite}>Cancel</Button>

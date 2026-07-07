@@ -1,4 +1,12 @@
 import * as React from "react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/dropdown-menu";
 import { Icons, CountUp } from "./ai-ui";
 import { useTheme } from "../../shell/theme-context";
 import { useConnections, useLogs, usePrompts } from "./store";
@@ -108,9 +116,12 @@ function SidebarBody({
   collapsed: boolean;
   onNavigate?: () => void;
 }) {
+  // symmetric horizontal padding when collapsed so every icon centers on the
+  // same vertical axis as the logo; the wider label padding only when expanded
+  const pad = collapsed ? "px-2" : "px-2.5";
   return (
     <>
-      <nav className="flex-1 overflow-y-auto px-2.5 py-3">
+      <nav className={`flex-1 overflow-y-auto py-3 ${pad}`}>
         {!collapsed && (
           <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted">Navigate</p>
         )}
@@ -128,7 +139,7 @@ function SidebarBody({
       </nav>
 
       {/* pinned utility cluster — workspace admin + night mode */}
-      <div className="space-y-0.5 border-t border-border px-2.5 py-3">
+      <div className={`space-y-0.5 border-t border-border py-3 ${pad}`}>
         <div className="space-y-0.5" onClick={onNavigate}>
           {utilityNav.map((item) => (
             <NavRow key={item.href} item={item} sub={sub} collapsed={collapsed} />
@@ -137,23 +148,43 @@ function SidebarBody({
         <NightModeRow collapsed={collapsed} />
       </div>
 
-      {/* user profile — avatar + name/role, collapses to just the avatar */}
-      <button
-        type="button"
-        title={collapsed ? "Mike Sander" : undefined}
-        className={`flex items-center gap-2.5 border-t border-border px-4 py-3 text-left transition-colors hover:bg-overlay/[0.04] ${collapsed ? "justify-center" : ""}`}
-      >
-        <span className="h-8 w-8 shrink-0 rounded-full bg-fg/20" />
-        {!collapsed && (
-          <>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] font-medium leading-tight text-fg">Mike Sander</span>
-              <span className="block truncate text-[11px] leading-tight text-fg/70 dark:text-fg/50">Owner</span>
-            </span>
-            <span className="shrink-0 text-fg/60 dark:text-fg/40">{Icons.chevronDown}</span>
-          </>
-        )}
-      </button>
+      {/* user profile — avatar + name/role, collapses to just the avatar.
+          Opens a user menu upward (it sits at the bottom of the sidebar). */}
+      <div className="border-t border-border">
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            title={collapsed ? "Mike Sander" : undefined}
+            className={`flex w-full items-center gap-2.5 py-3 text-left outline-none transition-colors hover:bg-overlay/[0.04] focus-visible:bg-overlay/[0.04] ${collapsed ? "justify-center px-2" : "px-4"}`}
+          >
+            <span className="h-8 w-8 shrink-0 rounded-full bg-fg/20" />
+            {!collapsed && (
+              <>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-medium leading-tight text-fg">Mike Sander</span>
+                  <span className="block truncate text-[11px] leading-tight text-fg/70 dark:text-fg/50">Owner</span>
+                </span>
+                <span className="shrink-0 text-fg/60 dark:text-fg/40">{Icons.chevronDown}</span>
+              </>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="mb-2 w-[13rem]">
+            <DropdownMenuLabel>Mike Sander · Owner</DropdownMenuLabel>
+            <DropdownMenuItem onSelect={() => (location.hash = "#ai/settings")}>
+              Account settings
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => (location.hash = "#ai/billing")}>
+              Usage &amp; billing
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => (location.hash = "#ai/team")}>
+              Team
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem destructive onSelect={() => (location.hash = "#home")}>
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </>
   );
 }
@@ -188,20 +219,41 @@ export function AiLayout({ sub, children }: { sub: string; children: React.React
         className="sticky top-0 hidden h-screen shrink-0 flex-col border-r border-border bg-panel transition-[width] duration-200 ease-out md:flex"
         style={{ width: collapsed ? 68 : 216 }}
       >
-        <div className="flex h-14 items-center gap-2.5 border-b border-border px-4">
+        <div className={`flex h-14 items-center border-b border-border ${collapsed ? "justify-center px-2" : "gap-2.5 px-4"}`}>
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-white [background-color:rgb(var(--accent))]">
             {Icons.logo}
           </span>
-          {!collapsed && <span className="truncate text-sm font-semibold">Lumina AI</span>}
+          {!collapsed && (
+            <>
+              <span className="truncate text-sm font-semibold">Lumina AI</span>
+              <button
+                type="button"
+                onClick={() => setCollapsed((c) => !c)}
+                aria-label="Collapse sidebar"
+                title="Collapse"
+                className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-fg/60 transition-colors hover:bg-overlay/[0.06] hover:text-fg"
+              >
+                {Icons.chevronLeft}
+              </button>
+            </>
+          )}
         </div>
 
-        <SidebarBody sub={sub} counts={counts} collapsed={collapsed} />
+        {/* when collapsed, the expand toggle gets its own centered row below the
+            logo — keeps the logo square and lines the icon up with the nav */}
+        {collapsed && (
+          <button
+            type="button"
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label="Expand sidebar"
+            title="Expand"
+            className="mx-auto mt-2 flex h-8 w-8 items-center justify-center rounded-lg text-fg/60 transition-colors hover:bg-overlay/[0.06] hover:text-fg"
+          >
+            <span className="rotate-180">{Icons.chevronLeft}</span>
+          </button>
+        )}
 
-        <button type="button" onClick={() => setCollapsed((c) => !c)}
-          className="flex h-11 items-center gap-2 border-t border-border px-4 text-xs text-fg/70 dark:text-fg/55 transition-colors hover:text-fg">
-          <span className={`transition-transform ${collapsed ? "rotate-180" : ""}`}>{Icons.chevronLeft}</span>
-          {!collapsed && "Collapse"}
-        </button>
+        <SidebarBody sub={sub} counts={counts} collapsed={collapsed} />
       </aside>
 
       {/* mobile drawer: backdrop + off-canvas panel, slides in from the left */}
@@ -258,15 +310,8 @@ export function AiLayout({ sub, children }: { sub: string; children: React.React
             <button className="relative flex h-9 w-9 items-center justify-center rounded-md text-fg/70 transition-colors hover:bg-overlay/[0.06]">
               {Icons.bell}<span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full ai-bg-accent" />
             </button>
-            {/* avatar hidden on mobile — the hamburger takes its place there */}
-            <button className="hidden items-center gap-2 rounded-lg py-1 pl-1 pr-2 transition-colors hover:bg-overlay/[0.05] md:flex">
-              <span className="h-7 w-7 rounded-full bg-fg/20" />
-              <span className="hidden text-left sm:block">
-                <span className="block text-xs font-medium leading-tight">Mike Sander</span>
-                <span className="block text-[10px] leading-tight text-fg/70 dark:text-fg/50">Owner</span>
-              </span>
-              <span className="text-fg/60 dark:text-fg/40">{Icons.chevronDown}</span>
-            </button>
+            {/* No user chip here — identity lives in the sidebar profile block
+                (see SidebarBody). Kept out of the topbar to avoid duplication. */}
           </div>
         </header>
 

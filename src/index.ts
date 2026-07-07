@@ -2,4 +2,6 @@ import "./styles/tokens.css";
 
 export { cn } from "./lib/cn";
 
-// Components go here as they're built.
+// ---- components ----
+export * from "./components/dropdown-menu";
+export * from "./components/select-menu";
