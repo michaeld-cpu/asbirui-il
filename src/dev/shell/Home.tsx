@@ -1,6 +1,6 @@
 import asbirLogo from "@/assets/logo/asbirlogo-white.svg";
 import heroBackdrop from "@/assets/backdrops/herobackdrop.jpeg";
-import { DashboardPreview } from "./DashboardPreview";
+import { TemplatePreview } from "./TemplatePreview";
 
 const RocketIcon = (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -59,10 +59,10 @@ function IntroPanel() {
           live, read the docs, and copy the source straight into your next build.
         </p>
 
-        <div className="mt-8 flex items-center justify-center gap-3">
+        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
             href="#components"
-            className="group inline-flex items-center gap-2 rounded-asbir border border-white/25 bg-black/40 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-md transition-colors hover:bg-black/55"
+            className="group inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-asbir border border-white/25 bg-black/40 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-md transition-colors hover:bg-black/55"
           >
             Browse components
             <span className="transition-transform group-hover:translate-x-0.5">
@@ -71,7 +71,7 @@ function IntroPanel() {
           </a>
           <a
             href="#docs"
-            className="inline-flex items-center gap-2 rounded-asbir border border-white/25 bg-black/40 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-md transition-colors hover:bg-black/55"
+            className="inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-asbir border border-white/25 bg-black/40 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-md transition-colors hover:bg-black/55"
           >
             Documentation
           </a>
@@ -125,22 +125,36 @@ function TemplatesSection() {
         description="Production-shaped starter kits built entirely on AsbirUI components and tokens. Clone one, swap the data, ship."
       />
 
-      {/* big framed dashboard preview */}
-      <div className="relative mt-10">
-        {/* ambient glow behind the frame */}
+      {/* big framed dashboard preview — p-4 (not margin, which would collapse)
+          keeps the hatch band visible on all four sides */}
+      <div className="relative mt-10 p-4">
+        {/* feathered echo — thin outline offset from the frame, filled with a
+            subtle diagonal hatch that only shows in the gap band (the opaque
+            frame covers the center). */}
         <div
-          className="pointer-events-none absolute -inset-x-8 -top-6 bottom-0 -z-10"
+          className="pointer-events-none absolute inset-0 rounded-2xl border"
           style={{
-            background:
-              "radial-gradient(60% 60% at 50% 0%, rgb(var(--fg-rgb) / 0.06) 0%, transparent 70%)",
+            borderColor: "rgb(var(--accent) / 0.12)",
+            backgroundImage:
+              "repeating-linear-gradient(-45deg, rgb(var(--accent) / 0.12) 0px, rgb(var(--accent) / 0.12) 1px, transparent 1px, transparent 7px)",
           }}
         />
-        <div className="overflow-hidden rounded-xl border border-border bg-canvas shadow-[0_40px_120px_-30px_rgba(0,0,0,0.6)]">
-          {/* fixed aspect stage the mockup fills */}
-          <div className="aspect-[4/3] w-full sm:aspect-[16/10]">
-            <DashboardPreview />
+        <a
+          href="#ai"
+          className="group relative block overflow-hidden rounded-xl border border-border bg-canvas"
+        >
+          {/* fixed aspect stage — renders the REAL AI console template, scaled
+              to fit and non-interactive, so the preview is the actual page. */}
+          <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-[16/10]">
+            <TemplatePreview />
+            {/* hover affordance — the preview opens the live, routable template */}
+            <div className="pointer-events-none absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <span className="mb-6 inline-flex items-center gap-1.5 rounded-asbir bg-white px-4 py-2 text-sm font-semibold text-black">
+                Open live template →
+              </span>
+            </div>
           </div>
-        </div>
+        </a>
       </div>
     </section>
   );

@@ -1,0 +1,126 @@
+/*
+  Dedicated theme for the AI SaaS starter. Scoped under `.ai-console` so it
+  overrides the shell's monochrome accent with a violet AI-brand palette while
+  still inheriting the canvas/panel/fg surface tokens. Adopters restyle by
+  editing these few variables — nothing else in the template hardcodes color.
+
+  Wrap the template root in <div className="ai-console">. Works in both themes.
+*/
+
+.ai-console {
+  /* violet brand ramp */
+  --ai-50: 245 243 255;
+  --ai-100: 237 233 254;
+  --ai-200: 221 214 254;
+  --ai-300: 196 181 253;
+  --ai-400: 167 139 250;
+  --ai-500: 139 92 246; /* primary */
+  --ai-600: 124 58 237;
+  --ai-700: 109 40 217;
+  --ai-800: 91 33 182;
+  --ai-900: 76 29 149;
+
+  /* semantic accent → violet (overrides shell monochrome within the console) */
+  --accent: var(--ai-500);
+  --accent-fg: 255 255 255;
+  --accent-hover: var(--ai-400);
+  --accent-soft-bg: var(--ai-500);
+  --accent-soft-border: var(--ai-400);
+  --accent-soft-fg: var(--ai-300);
+
+  /* segmented-bar steps — one violet ramp, each step lighter than the last,
+     same in both themes so the bar reads uniformly */
+  --ai-seg-2: var(--ai-300);
+  --ai-seg-3: var(--ai-200);
+
+  /* categorical chart hues — luminous pastels for the dark theme (fintech
+     budget-strip look); the light theme swaps in deeper steps below */
+  --ai-chart-1: 163 230 53; /* lime-400 */
+  --ai-chart-2: 244 114 182; /* pink-400 */
+  --ai-chart-3: 167 139 250; /* violet-400 */
+}
+
+/* deeper violet for legibility on light surfaces */
+.light .ai-console {
+  --accent: var(--ai-600);
+  --accent-hover: var(--ai-700);
+  --accent-soft-fg: var(--ai-700);
+
+  /* same hues, 600-step, so the bars hold on white panels */
+  --ai-chart-1: 101 163 13; /* lime-600 */
+  --ai-chart-2: 219 39 119; /* pink-600 */
+  --ai-chart-3: 124 58 237; /* violet-600 */
+}
+
+/* convenience utility classes the template uses */
+.ai-console .ai-accent { color: rgb(var(--accent)); }
+.ai-console .ai-bg-accent { background-color: rgb(var(--accent)); }
+.ai-console .ai-bg-accent-soft { background-color: rgb(var(--accent) / 0.12); }
+.ai-console .ai-border-accent { border-color: rgb(var(--accent) / 0.4); }
+
+/* active nav row — violet gradient anchored at the left edge, fading out
+   toward the right; icon sits in the brightest zone */
+.ai-console .ai-nav-active {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--accent) / 0.28) 0%,
+    rgb(var(--accent) / 0.1) 40%,
+    transparent 85%
+  );
+}
+
+/* credits pill — brighter than the primary button: vivid violet→fuchsia
+   gradient, inner top highlight, strong halo. The background is static;
+   highlight comes from a sheen that sweeps across then rests, so it reads
+   as a glint — not a looping conveyor. */
+.ai-console .ai-credits {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+  /* aurora: luminous lavender top dissolving into deep violet, with a cool
+     teal glint in the upper-left and a soft gloss on top */
+  background-image:
+    radial-gradient(120% 160% at 18% -30%, rgb(94 234 212 / 0.5) 0%, transparent 45%),
+    radial-gradient(150% 180% at 75% -50%, rgb(255 255 255 / 0.45) 0%, transparent 55%),
+    linear-gradient(180deg, rgb(196 181 253) 0%, rgb(147 51 234) 60%, rgb(109 40 217) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.45),
+    0 0 26px rgb(168 85 247 / 0.55),
+    0 0 8px rgb(var(--ai-500) / 0.5),
+    0 1px 2px rgb(0 0 0 / 0.25);
+}
+/* orbiting highlight — a soft blurred glow blob circling the pill, like a
+   specular light gliding around the surface (no hard streak, no spokes) */
+.ai-console .ai-credits::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.75rem;
+  aspect-ratio: 1;
+  margin: -1.375rem 0 0 -1.375rem;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgb(255 255 255 / 0.55), transparent 72%);
+  filter: blur(4px);
+  transform: rotate(0turn) translateX(2.1rem);
+  animation: ai-credits-orbit 6s linear infinite;
+  pointer-events: none;
+}
+@keyframes ai-credits-orbit {
+  to { transform: rotate(1turn) translateX(2.1rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-console .ai-credits::after {
+    animation: none;
+    display: none;
+  }
+}
+
+/* subtle glow used on hero/usage cards — anchored to opposite corners so the
+   wash reads as a diagonal, not a blob floating mid-tile */
+.ai-console .ai-glow {
+  background:
+    radial-gradient(50% 130% at 0% 0%, rgb(var(--ai-500) / 0.16) 0%, transparent 70%),
+    radial-gradient(50% 130% at 100% 100%, rgb(var(--ai-600) / 0.12) 0%, transparent 70%);
+}

@@ -77,6 +77,66 @@ const pages: Record<string, DocsPage> = {
       },
     ],
   },
+  templates: {
+    eyebrow: "Templates",
+    title: "Overview",
+    lead: [
+      "Templates are production-shaped starter kits built entirely on AsbirUI components and tokens. Each one is a full multi-screen flow — routing glue included — so you can clone it, swap the data, and ship.",
+      "Two live templates ship today: the AI console (violet theme) and the Admin dashboard. Both are router-agnostic — the hash-route switch is the only glue, and it's designed to be swapped for React Router, TanStack, or Next.",
+    ],
+    missionTitle: "How they're built",
+    mission:
+      "Every screen is composed from the same components and semantic tokens the rest of the library uses. Nothing is a one-off mockup — the homepage preview is a live render of the actual template page, scaled to fit.",
+    principlesIntro: "What each template gives you:",
+    principles: [
+      {
+        title: "Real screens",
+        body: "Overview, forms, detail, list, settings, auth, and 404 — the pages every internal app needs, not a single hero shot.",
+      },
+      {
+        title: "Router-agnostic",
+        body: "Pages and layout never import a router. The route switch is a single file you replace with your own.",
+      },
+      {
+        title: "Themed end-to-end",
+        body: "The AI console ships its own violet theme layered over the same token names, proving the system re-themes cleanly.",
+      },
+      {
+        title: "Copy and go",
+        body: "Clone the template directory, point it at your data, and you're a step ahead of a blank file.",
+      },
+    ],
+  },
+  "test-cases": {
+    eyebrow: "Test Cases",
+    title: "Overview",
+    lead: [
+      "This is the QA reference for the library — a catalogue of the states and edge cases every component is expected to handle, so nothing regresses quietly.",
+      "Each component is exercised across its variants and its awkward states: empty, loading, error, overflow, and the boundaries in between. If a case lives here, it's a case the component must survive.",
+    ],
+    missionTitle: "Why a test-case page",
+    mission:
+      "A component library is only trustworthy if its rough edges are known and pinned down. Documenting the cases makes the expected behaviour explicit — for reviewers, for adopters, and for the next person who touches the code.",
+    principlesIntro: "The cases are grouped into:",
+    principles: [
+      {
+        title: "Variants",
+        body: "Every size, tone, and layout a component exposes, rendered side by side so a visual regression is obvious.",
+      },
+      {
+        title: "States",
+        body: "Empty, loading, disabled, error, and success — the states real screens spend most of their time in.",
+      },
+      {
+        title: "Edge cases",
+        body: "Long text, overflow, missing data, and unusual inputs that break naïve implementations.",
+      },
+      {
+        title: "Accessibility",
+        body: "Keyboard traversal, focus order, and ARIA — checked, not assumed, since the behaviour comes from Radix underneath.",
+      },
+    ],
+  },
   tokens: {
     eyebrow: "Foundations",
     title: "Tokens",

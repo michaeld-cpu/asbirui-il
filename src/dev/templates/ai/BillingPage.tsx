@@ -1,0 +1,169 @@
+import { PageHeader, Button, Badge, KpiTile, useToast } from "./ai-states";
+import { AreaChart, Icons } from "./ai-ui";
+import { usage, useInvoices, invoiceTone } from "./store";
+
+export function BillingPage() {
+  const invoices = useInvoices();
+  const toast = useToast();
+
+  const creditsPct = Math.min(100, Math.round((usage.creditsUsed / usage.creditsTotal) * 100));
+  const maxCost = Math.max(...usage.byModel.map((m) => m.cost), 1);
+
+  return (
+    <div>
+      <PageHeader title="Usage & Billing" subtitle="Track spend, credits, and invoices for your Lumina AI workspace." />
+
+      {/* Current plan */}
+      <div className="mb-6 rounded-xl border border-border bg-panel p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-fg">Scale</h2>
+              <Badge className="ai-bg-accent-soft ai-accent">Current plan</Badge>
+            </div>
+            <p className="mt-1 text-sm text-fg/70 dark:text-fg/55">
+              <span className="font-medium text-fg">$299</span>/mo · Aurora model family · priority routing
+            </p>
+          </div>
+          <Button variant="secondary" onClick={() => toast("Opening plan manager…")}>
+            Manage plan
+          </Button>
+        </div>
+
+        <div className="mt-5">
+          <div className="mb-2 flex items-center justify-between text-sm">
+            <span className="text-fg/70 dark:text-fg/55">Credits used this cycle</span>
+            <span className="font-medium text-fg">
+              {usage.creditsUsed.toLocaleString()}{" "}
+              <span className="text-fg/65 dark:text-fg/45">/ {usage.creditsTotal.toLocaleString()}</span>
+            </span>
+          </div>
+          <div className="h-2.5 w-full overflow-hidden rounded-full bg-overlay/[0.08]">
+            <div className="ai-bg-accent h-full rounded-full transition-all" style={{ width: `${creditsPct}%` }} />
+          </div>
+          <p className="mt-1.5 text-xs text-fg/65 dark:text-fg/45">{creditsPct}% of monthly credits consumed · resets in 12 days</p>
+        </div>
+      </div>
+
+      {/* Spend chart + KPI stack */}
+      <div className="mb-6 grid gap-4 lg:grid-cols-3">
+        <div className="rounded-xl border border-border bg-panel p-5 lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-fg">Spend, last 14 days</h3>
+            <span className="ai-accent text-sm font-medium">${usage.spendMonth.toFixed(2)} MTD</span>
+          </div>
+          <AreaChart data={usage.spendSeries} className="h-44 w-full" />
+        </div>
+        <div className="grid gap-4">
+          <KpiTile label="Spend this month" value={`$${usage.spendMonth.toFixed(2)}`} />
+          <KpiTile
+            label="Requests, 7d"
+            value={usage.requests7d.toLocaleString()}
+            delta={usage.requestsDelta}
+            up
+            spark={usage.requestsSeries}
+          />
+          <KpiTile label="Error rate" value={usage.errorRate} />
+        </div>
+      </div>
+
+      {/* Usage by model */}
+      <div className="mb-6 rounded-xl border border-border bg-panel">
+        <div className="border-b border-border px-5 py-3">
+          <h3 className="text-sm font-semibold text-fg">Usage by model</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-[640px] w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs capitalize text-fg">
+                <th className="px-5 py-2.5 font-medium">Model</th>
+                <th className="px-5 py-2.5 text-right font-medium">Requests</th>
+                <th className="px-5 py-2.5 text-right font-medium">Tokens</th>
+                <th className="px-5 py-2.5 text-right font-medium">Cost</th>
+                <th className="px-5 py-2.5 font-medium">Share</th>
+              </tr>
+            </thead>
+            <tbody>
+              {usage.byModel.map((m) => (
+                <tr key={m.model} className="border-b border-border/60 last:border-0">
+                  <td className="whitespace-nowrap px-5 py-3 font-medium text-fg">{m.model}</td>
+                  <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg/70">
+                    {m.requests.toLocaleString()}
+                  </td>
+                  <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg/70">{m.tokens}</td>
+                  <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg">${m.cost.toFixed(2)}</td>
+                  <td className="px-5 py-3">
+                    <div className="ml-auto h-2 w-40 overflow-hidden rounded-full bg-overlay/[0.08]">
+                      <div
+                        className="ai-bg-accent h-full rounded-full"
+                        style={{ width: `${Math.round((m.cost / maxCost) * 100)}%` }}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Payment method */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-panel p-5">
+        <div className="flex items-center gap-3">
+          <span className="flex h-9 w-12 items-center justify-center rounded-md border border-border bg-canvas text-[10px] font-bold tracking-wider text-fg/70">
+            VISA
+          </span>
+          <div>
+            <p className="text-sm font-medium text-fg">•••• •••• •••• 4242</p>
+            <p className="text-xs text-fg/65 dark:text-fg/45">Expires 08 / 2028 · default method</p>
+          </div>
+        </div>
+        <Button variant="secondary" onClick={() => toast("Update payment method")}>
+          Update
+        </Button>
+      </div>
+
+      {/* Invoices */}
+      <div className="rounded-xl border border-border bg-panel">
+        <div className="border-b border-border px-5 py-3">
+          <h3 className="text-sm font-semibold text-fg">Invoices</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-[520px] w-full text-sm">
+            <thead>
+              <tr className="border-b border-border text-left text-xs capitalize text-fg">
+                <th className="px-5 py-2.5 font-medium">Date</th>
+                <th className="px-5 py-2.5 text-right font-medium">Amount</th>
+                <th className="px-5 py-2.5 font-medium">Status</th>
+                <th className="px-5 py-2.5 text-right font-medium">Invoice</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoices.map((inv) => (
+                <tr key={inv.id} className="border-b border-border/60 last:border-0 hover:bg-overlay/[0.03]">
+                  <td className="whitespace-nowrap px-5 py-3 text-fg/80">{inv.date}</td>
+                  <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg">
+                    ${inv.amount.toFixed(2)}
+                  </td>
+                  <td className="px-5 py-3">
+                    <Badge className={invoiceTone[inv.status]}>{inv.status}</Badge>
+                  </td>
+                  <td className="px-5 py-3 text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto"
+                      onClick={() => toast(`Downloading ${inv.id}…`)}
+                    >
+                      {Icons.copy}Download
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -46,4 +46,20 @@ export const docsNav: DocsNavGroup[] = [
       { label: "Tabs", href: "#components", soon: true },
     ],
   },
+  {
+    heading: "Templates",
+    items: [
+      { label: "Overview", href: "#templates" },
+      { label: "AI console", href: "#ai" },
+      { label: "Admin", href: "#admin" },
+    ],
+  },
+  {
+    heading: "Test Cases",
+    items: [
+      { label: "Overview", href: "#test-cases" },
+      { label: "States", href: "#test-cases", soon: true },
+      { label: "Edge cases", href: "#test-cases", soon: true },
+    ],
+  },
 ];

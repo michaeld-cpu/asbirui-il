@@ -8,14 +8,23 @@ import { DocsSidebar } from "./shell/DocsSidebar";
 import { DocsContent } from "./shell/DocsContent";
 import { DocsAside } from "./shell/DocsAside";
 import { Home } from "./shell/Home";
-import { useHashRoute, isDocsRoute } from "./shell/use-hash-route";
+import { AdminTemplate } from "./templates/admin/AdminTemplate";
+import { AiTemplate } from "./templates/ai/AiTemplate";
+import {
+  useHashRoute,
+  isDocsRoute,
+  isAdminRoute,
+  adminSubPath,
+  isAiRoute,
+  aiSubPath,
+} from "./shell/use-hash-route";
 
 /** Landing view: marketing navbar only, no sidebar. */
 function LandingView() {
   return (
     <div className="min-h-screen bg-canvas font-sans antialiased">
       <Navbar active="home" />
-      <main>
+      <main className="pt-16 md:pt-0">
         <Home />
       </main>
     </div>
@@ -27,7 +36,7 @@ function DocsView({ route }: { route: string }) {
   return (
     <div className="min-h-screen bg-canvas font-sans antialiased">
       <Navbar active={route} wide />
-      <div className="flex">
+      <div className="flex pt-16 md:pt-0">
         <DocsSidebar active={route} />
         <main className="min-w-0 flex-1 px-6 lg:px-12">
           <div className="mx-auto max-w-3xl">
@@ -43,11 +52,20 @@ function DocsView({ route }: { route: string }) {
 function App() {
   const route = useHashRoute();
 
+  let view;
+  if (isAiRoute(route)) {
+    view = <AiTemplate sub={aiSubPath(route)} />;
+  } else if (isAdminRoute(route)) {
+    view = <AdminTemplate sub={adminSubPath(route)} />;
+  } else if (isDocsRoute(route)) {
+    view = <DocsView route={route} />;
+  } else {
+    view = <LandingView />;
+  }
+
   return (
     <ThemeProvider>
-      <SidebarProvider>
-        {isDocsRoute(route) ? <DocsView route={route} /> : <LandingView />}
-      </SidebarProvider>
+      <SidebarProvider>{view}</SidebarProvider>
     </ThemeProvider>
   );
 }

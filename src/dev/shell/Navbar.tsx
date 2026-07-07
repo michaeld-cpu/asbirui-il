@@ -1,9 +1,22 @@
+import * as React from "react";
 import asbirLogo from "@/assets/logo/asbirlogo-white.svg";
 import { ThemeToggle } from "./ThemeToggle";
 
 const ArrowIcon = (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M5 12h14M13 6l6 6-6 6" />
+  </svg>
+);
+
+const MenuIcon = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+);
+
+const CloseIcon = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 6l12 12M18 6 6 18" />
   </svg>
 );
 
@@ -15,6 +28,8 @@ const GitHubIcon = (
 
 const navLinks = [
   { label: "Components", href: "#components" },
+  { label: "Templates", href: "#templates" },
+  { label: "Test Cases", href: "#test-cases" },
   { label: "Docs", href: "#docs" },
   { label: "Tokens", href: "#tokens" },
 ];
@@ -23,8 +38,43 @@ const navLinks = [
 const REPO_URL = "https://github.com/asbirtech/asbir-ui";
 
 export function Navbar({ active, wide }: { active: string; wide?: boolean }) {
+  // `open` mounts the panel; `closing` plays the exit animation before unmount.
+  const [open, setOpen] = React.useState(false);
+  const [closing, setClosing] = React.useState(false);
+
+  const closeMenu = () => {
+    setClosing(true);
+    window.setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+    }, 170); // matches menu-out duration
+  };
+
+  // outside-click closes instantly, no exit animation
+  const closeMenuNow = () => {
+    setOpen(false);
+    setClosing(false);
+  };
+
+  const toggleMenu = () => (open ? closeMenu() : setOpen(true));
+
+  // Close instantly when the viewport grows past the mobile breakpoint —
+  // otherwise the desktop nav and the mobile panel both show at once.
+  React.useEffect(() => {
+    if (!open) return;
+    const mq = window.matchMedia("(min-width: 768px)"); // md
+    const onChange = () => {
+      if (mq.matches) closeMenuNow();
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [open]);
+
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-canvas/80 backdrop-blur">
+    <header
+      className="fixed inset-x-0 top-0 z-40 border-b border-border bg-canvas md:sticky md:bg-canvas/80 md:backdrop-blur"
+      style={{ transform: "translate3d(0,0,0)", backfaceVisibility: "hidden" }}
+    >
       <div
         className={`flex h-16 items-center gap-6 px-6 lg:px-8 ${
           wide ? "w-full" : "mx-auto max-w-[88rem] lg:px-10"
@@ -38,7 +88,7 @@ export function Navbar({ active, wide }: { active: string; wide?: boolean }) {
           </span>
         </a>
 
-        {/* Primary nav */}
+        {/* Primary nav (desktop) */}
         <nav className="ml-4 hidden items-center gap-1 md:flex">
           {navLinks.map((link) => {
             const isActive = active === link.href.replace(/^#/, "");
@@ -73,13 +123,70 @@ export function Navbar({ active, wide }: { active: string; wide?: boolean }) {
           <ThemeToggle />
           <a
             href="#components"
-            className="ml-1 inline-flex items-center gap-1.5 rounded-asbir bg-solid px-3.5 py-2 text-sm font-semibold text-fg-invert transition-colors hover:bg-solid/85"
+            className="ml-1 hidden items-center gap-1.5 rounded-asbir bg-solid px-3.5 py-2 text-sm font-semibold text-fg-invert transition-colors hover:bg-solid/85 md:inline-flex"
           >
             Get started
             <span>{ArrowIcon}</span>
           </a>
+
+          {/* Hamburger (mobile only) */}
+          <button
+            type="button"
+            onClick={toggleMenu}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            className="ml-1 flex h-9 w-9 items-center justify-center rounded-md text-fg transition-colors hover:bg-overlay/[0.06] md:hidden"
+          >
+            {open && !closing ? CloseIcon : MenuIcon}
+          </button>
         </div>
       </div>
+
+      {/* Mobile menu — fixed overlay anchored to the viewport (outside the
+          sticky header's stacking context) so the backdrop reliably catches
+          outside clicks and nothing jitters on scroll. */}
+      {open && (
+        <div className="fixed inset-0 top-16 z-50 md:hidden">
+          {/* click-away backdrop — full viewport under the panel */}
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={closeMenuNow}
+            className="absolute inset-0 h-full w-full cursor-default bg-black/20"
+          />
+          <nav
+            className={`absolute inset-x-0 top-0 border-b border-border bg-canvas px-6 py-3 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.6)] ${
+              closing ? "menu-exit" : "menu-enter"
+            }`}
+          >
+            {navLinks.map((link) => {
+              const isActive = active === link.href.replace(/^#/, "");
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeMenu}
+                  className={`block rounded-md px-3 py-2.5 text-sm transition-colors ${
+                    isActive
+                      ? "bg-overlay/[0.06] font-medium text-fg"
+                      : "text-fg/70 hover:bg-overlay/[0.04] hover:text-fg"
+                  }`}
+                >
+                  {link.label}
+                </a>
+              );
+            })}
+            <a
+              href="#components"
+              onClick={closeMenu}
+              className="mt-2 flex items-center justify-center gap-1.5 rounded-asbir bg-solid px-3.5 py-2.5 text-sm font-semibold text-fg-invert transition-colors hover:bg-solid/85"
+            >
+              Get started
+              <span>{ArrowIcon}</span>
+            </a>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
