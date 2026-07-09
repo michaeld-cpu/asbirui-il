@@ -1,6 +1,5 @@
 import * as React from "react";
-import { SelectMenu } from "@/components/select-menu";
-import { PageHeader, Tabs, Button, Badge, Field, inputCls, CodeBlock, ConfirmDialog, Modal, useToast } from "./ai-states";
+import { PageHeader, Tabs, Button, Badge, Field, FormSelect, inputCls, CodeBlock, ConfirmDialog, Modal, useToast } from "./ai-states";
 import { MODELS } from "./store";
 
 type Session = { id: string; device: string; location: string; lastActive: string; current: boolean };
@@ -63,8 +62,8 @@ function GeneralTab() {
             <input className={inputCls} value={orgName} onChange={(e) => setOrgName(e.target.value)} />
           </Field>
           <Field label="Default model" hint="Used when a request does not specify a model.">
-            <SelectMenu
-              aria-label="Default model"
+            <FormSelect
+              ariaLabel="Default model"
               value={defaultModel}
               onValueChange={setDefaultModel}
               options={MODELS.map((m) => ({ value: m.id, label: m.label }))}

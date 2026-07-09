@@ -1,0 +1,7 @@
+Task Name,Status,Priority,Tags,Description
+Set up test runner,Backlog,High,qa,Add Vitest + React Testing Library or equivalent for component-level tests.
+DropdownMenu keyboard/a11y tests,Backlog,High,"qa,a11y,component",Cover open/close, arrow navigation, Escape, controlled/uncontrolled behavior, and selection callbacks.
+FilterChips radiogroup tests,Backlog,Normal,"qa,a11y,component",Cover labelled radiogroup behavior, value changes, keyboard interaction, and disabled/edge states if supported.
+Package export smoke tests,Backlog,High,"qa,ci",Verify imports for @asbirtech/asbir-ui, /motion, /preset, /styles.css, and /motion.css from built dist.
+Docs app smoke test,Backlog,Normal,"qa,docs",Verify the docs app routes render for components, tokens, blocks, brand kits, templates, and AI template preview.
+Visual regression baseline,Backlog,Low,"qa,docs",Add a lightweight screenshot baseline later for core docs previews and blocks once UI stabilizes.

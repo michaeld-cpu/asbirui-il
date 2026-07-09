@@ -29,16 +29,27 @@
   "sideEffects": [
     "**/*.css"
   ],
-  "main": "./dist/asbir-ui.umd.cjs",
+  "main": "./dist/asbir-ui.cjs",
   "module": "./dist/asbir-ui.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/asbir-ui.js",
-      "require": "./dist/asbir-ui.umd.cjs"
+      "require": "./dist/asbir-ui.cjs"
     },
-    "./styles.css": "./dist/style.css"
+    "./motion": {
+      "types": "./dist/motion/index.d.ts",
+      "import": "./dist/motion.js",
+      "require": "./dist/motion.cjs"
+    },
+    "./preset": {
+      "types": "./dist/preset.d.ts",
+      "import": "./dist/preset.js",
+      "require": "./dist/preset.cjs"
+    },
+    "./styles.css": "./dist/style.css",
+    "./motion.css": "./dist/motion.css"
   },
   "files": [
     "dist"
@@ -48,17 +59,24 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --p tsconfig.build.json && vite build",
+    "build": "tsc --p tsconfig.build.json && vite build && node scripts/build-motion-css.mjs",
     "build:app": "vite build --config vite.config.app.ts",
     "preview:app": "vite preview --outDir dist-app",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
     "preview": "vite preview",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run check:boundaries && npm run build"
   },
   "peerDependencies": {
     "react": ">=18",
-    "react-dom": ">=18"
+    "react-dom": ">=18",
+    "framer-motion": ">=11"
+  },
+  "peerDependenciesMeta": {
+    "framer-motion": {
+      "optional": true
+    }
   },
   "dependencies": {
     "class-variance-authority": "^0.7.0",
@@ -70,6 +88,7 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.20",
+    "framer-motion": "^12.42.2",
     "postcss": "^8.4.49",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

@@ -1,15 +1,17 @@
 # AsbirUI
 
-> The dependable foundation for React UIs — accessible, themeable components.
+> AsbirTech's internal design system — a Tailwind preset (tokens), components,
+> a motion layer, and product templates.
 
-AsbirUI is a React-first component library in the same space as **Radix UI**,
-**shadcn/ui**, and **Hero UI**. It combines accessible primitives with a clean,
-token-driven design system you can adopt as-is or fully own.
+AsbirUI is **layered on Tailwind CSS** (and, over time, headless primitives),
+not a from-scratch competitor to them. Its job is to give every AsbirTech app
+the same look by default: one OKLCH palette, one set of semantic tokens, and a
+growing set of components/blocks/templates built on them.
 
-- **React 18+** with full TypeScript types
-- **Tailwind CSS** design tokens (light + dark)
-- **Accessibility** built in
-- Tree-shakeable, no runtime lock-in
+- **Tailwind preset** — the shareable design system (colors, radius, fonts,
+  animations) that every app extends.
+- **React 18+**, full TypeScript types, light + dark.
+- **Motion** — opt-in animations built on `framer-motion` (optional peer).
 
 ## Install
 
@@ -17,27 +19,53 @@ token-driven design system you can adopt as-is or fully own.
 npm install @asbirtech/asbir-ui
 ```
 
-Peer dependencies: `react` and `react-dom` (>=18).
+Peer dependencies: `react`, `react-dom` (>=18). `framer-motion` (>=11) only if
+you use `@asbirtech/asbir-ui/motion`.
 
-## Usage
+## Setup (the design system)
+
+Two things wire AsbirUI into an app — the **preset** (gives you the token class
+names like `bg-panel`, `text-fg`, `rounded-asbir`) and the **stylesheet** (gives
+those classes real values + light/dark switching):
+
+```ts
+// tailwind.config.ts
+import asbirPreset from "@asbirtech/asbir-ui/preset";
+
+export default {
+  presets: [asbirPreset],
+  content: ["./src/**/*.{ts,tsx}"],
+};
+```
+
+```ts
+// app entry (once)
+import "@asbirtech/asbir-ui/styles.css";
+```
+
+Now the whole app can use AsbirUI's tokens directly — `className="bg-panel
+text-fg rounded-asbir"` — and every shipped component matches automatically.
+
+### Re-theming
+
+Every color is a CSS variable. Override them in your own stylesheet and the
+entire system follows — no component changes:
+
+```css
+:root { --accent: 139 92 246; }   /* space-separated RGB */
+```
+
+### Components
 
 ```tsx
-import { Button } from "@asbirtech/asbir-ui";
-import "@asbirtech/asbir-ui/styles.css";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@asbirtech/asbir-ui";
 
-export function Example() {
-  return (
-    <div className="flex gap-3">
-      <Button>Primary</Button>
-      <Button variant="secondary">Secondary</Button>
-      <Button variant="destructive">Destructive</Button>
-      <Button variant="outline">Outline</Button>
-      <Button variant="ghost" size="lg">
-        Ghost
-      </Button>
-    </div>
-  );
-}
+<DropdownMenu>
+  <DropdownMenuTrigger>Menu</DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuItem onSelect={() => {}}>Item</DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>;
 ```
 
 ### Dark mode
@@ -45,10 +73,18 @@ export function Example() {
 Tokens respond to a `dark` class **or** `[data-theme="dark"]` on any ancestor:
 
 ```tsx
-<div data-theme="dark">
-  <Button>Dark themed</Button>
-</div>
+<div data-theme="dark">…</div>
 ```
+
+## Exports
+
+| Entry | What |
+|-------|------|
+| `@asbirtech/asbir-ui` | Components + `cn` (imports the base tokens). |
+| `@asbirtech/asbir-ui/preset` | The shareable Tailwind preset. |
+| `@asbirtech/asbir-ui/styles.css` | Compiled token values + component styles. |
+| `@asbirtech/asbir-ui/motion` | `Reveal`, `Stagger` (needs `framer-motion`). |
+| `@asbirtech/asbir-ui/motion.css` | Zero-runtime CSS microinteractions. |
 
 ## Local development
 
@@ -61,8 +97,11 @@ npm run typecheck  # type-check without emitting
 
 ## Roadmap
 
-See the project board for the component backlog (Input, Select, Dialog, Tabs,
-Toast, and more). Current release: **v0.1.0 (alpha)**.
+Shipped: `DropdownMenu`, `FilterChips`, the motion layer, and the token preset.
+Generic primitives (Button, Input, Dialog, Tabs) are best adopted from a headless
+library and restyled with the preset rather than rebuilt. The library's own focus
+is the preset, blocks, and product templates (e.g. the Lumina AI console).
+Current release: **v0.1.0 (alpha)**.
 
 ## License
 

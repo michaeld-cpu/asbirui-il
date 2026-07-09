@@ -1,0 +1,6 @@
+Task Name,Status,Priority,Tags,Description
+Translate DropdownMenu component,Backlog,High,"figma,component,a11y","Create trigger, content, item, label, separator, destructive item, align/side examples, keyboard/focus notes."
+Translate FilterChips component,Backlog,High,"figma,component,a11y","Create labelled radiogroup, selected/unselected states, focus state, light/dark variants, and option examples."
+Create primitive component placeholders,Backlog,Normal,"figma,component","Create draft slots for Button, Input/Textarea, Dialog, Tabs, Tooltip/Popover, Checkbox/Radio/Switch, Toast, Accordion/Card/Table."
+Document component variant naming,Backlog,Normal,"figma,component,docs","Define variant naming for size, tone, state, theme, density, destructive/disabled/focus states."
+Create component documentation frames,Backlog,Normal,"figma,docs","Include usage notes, source links, states, accessibility notes, and light/dark examples."

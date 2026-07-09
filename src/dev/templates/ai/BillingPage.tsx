@@ -1,6 +1,6 @@
 import * as React from "react";
 import { PageHeader, Button, Badge, useToast } from "./ai-states";
-import { AreaChart, Icons, CountUp, dayLabels } from "./ai-ui";
+import { AreaChart, Donut, Icons, CountUp, dayLabels, chartPalette, ModelMarks } from "./ai-ui";
 import { usage, useInvoices, invoiceTone } from "./store";
 
 const nf = new Intl.NumberFormat("en-US");
@@ -80,7 +80,7 @@ export function BillingPage() {
               <Badge className="ai-bg-accent-soft ai-accent">Current plan</Badge>
             </div>
             <p className="mt-1 text-sm text-fg/70 dark:text-fg/55">
-              <span className="font-medium text-fg">$299</span>/mo · Aurora model family · priority routing
+              <span className="font-medium text-fg">$299</span>/mo · every model, one platform · priority routing
             </p>
           </div>
           <Button variant="secondary" onClick={() => toast("Opening plan manager…")}>
@@ -103,18 +103,47 @@ export function BillingPage() {
         </div>
       </div>
 
-      {/* Spend chart — polished interactive area chart with date axis */}
-      <div className="mb-6 rounded-xl border border-border bg-panel p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-fg">Spend, last 14 days</h3>
-          <span className="ai-accent text-sm font-medium">{fmtCost(usage.spendMonth)} MTD</span>
+      {/* Spend trend + composition — trend area chart paired with a donut breakdown */}
+      <div className="mb-6 grid gap-6 lg:grid-cols-3">
+        <div className="rounded-xl border border-border bg-panel p-5 lg:col-span-2">
+          <div className="mb-4 flex items-start justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-fg">Spend</h3>
+              <p className="mt-0.5 text-xs text-fg/60 dark:text-fg/45">Last 30 days</p>
+            </div>
+            <div className="text-right">
+              <div className="text-lg font-semibold tabular-nums tracking-tight text-fg">{fmtCost(usage.spendMonth)}</div>
+              <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">{usage.spendDelta} MTD</div>
+            </div>
+          </div>
+          <AreaChart
+            data={usage.spendSeries}
+            labels={dayLabels(usage.spendSeries.length)}
+            format={(v) => fmtCost((v / seriesSum) * usage.spendMonth)}
+            className="h-48 w-full"
+          />
         </div>
-        <AreaChart
-          data={usage.spendSeries}
-          labels={dayLabels(usage.spendSeries.length)}
-          format={(v) => fmtCost((v / seriesSum) * usage.spendMonth)}
-          className="h-48 w-full"
-        />
+
+        <div className="rounded-xl border border-border bg-panel p-5">
+          <h3 className="text-sm font-semibold text-fg">Spend by model</h3>
+          <p className="mt-0.5 text-xs text-fg/60 dark:text-fg/45">This billing cycle</p>
+          <div className="mt-4 flex justify-center">
+            <Donut
+              className="h-36 w-36"
+              centerLabel={fmtCost(totalModelCost)}
+              slices={usage.byModel.map((m) => ({ label: m.model, value: m.cost }))}
+            />
+          </div>
+          <ul className="mt-4 space-y-2.5">
+            {usage.byModel.map((m) => (
+              <li key={m.model} className="flex items-center gap-2 text-xs">
+                {ModelMarks[m.provider]}
+                <span className="truncate text-fg/70 dark:text-fg/55">{m.model}</span>
+                <span className="ml-auto font-medium tabular-nums text-fg">{Math.round((m.cost / totalModelCost) * 100)}%</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       {/* Usage by model */}
@@ -135,24 +164,37 @@ export function BillingPage() {
               </tr>
             </thead>
             <tbody>
-              {usage.byModel.map((m) => (
-                <tr key={m.model} className="border-b border-border/60 last:border-0 hover:bg-overlay/[0.03]">
-                  <td className="whitespace-nowrap px-5 py-3 font-medium text-fg">{m.model}</td>
-                  <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg/70">
-                    {m.requests.toLocaleString()}
-                  </td>
-                  <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg/70">{m.tokens}</td>
-                  <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg">${m.cost.toFixed(2)}</td>
-                  <td className="px-5 py-3">
-                    <div className="ml-auto h-2 w-40 max-w-full overflow-hidden rounded-full bg-overlay/[0.08]">
-                      <div
-                        className="ai-bg-accent h-full rounded-full"
-                        style={{ width: `${Math.round((m.cost / maxCost) * 100)}%` }}
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {usage.byModel.map((m, i) => {
+                const color = chartPalette[i % chartPalette.length];
+                return (
+                  <tr key={m.model} className="border-b border-border/60 last:border-0 hover:bg-overlay/[0.03]">
+                    <td className="whitespace-nowrap px-5 py-3">
+                      <span className="flex items-center gap-2.5 font-medium text-fg">
+                        {ModelMarks[m.provider]}
+                        {m.model}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg/70">
+                      {m.requests.toLocaleString()}
+                    </td>
+                    <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg/70">{m.tokens}</td>
+                    <td className="px-5 py-3 text-right font-mono text-xs tabular-nums text-fg">${m.cost.toFixed(2)}</td>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center justify-end gap-2.5">
+                        <div className="h-2 w-32 max-w-full overflow-hidden rounded-full bg-overlay/[0.08]">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{ width: `${Math.round((m.cost / maxCost) * 100)}%`, background: color }}
+                          />
+                        </div>
+                        <span className="w-9 text-right text-xs font-medium tabular-nums text-fg/70">
+                          {Math.round((m.cost / totalModelCost) * 100)}%
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

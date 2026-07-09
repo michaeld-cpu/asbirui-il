@@ -1,8 +1,9 @@
 Task Name,Status,Priority,Tags,Description
 Create GitHub repository and set license (MIT),Done,Normal,ci,Repo created with MIT LICENSE.
 Initialize project (React + TypeScript + Tailwind),Done,High,,Vite + React 18 + TS + Tailwind scaffolded.
-Configure ESLint + Prettier + commit hooks,Backlog,Normal,ci,Lint/format + husky/lint-staged.
-Set up build pipeline (tsup / Vite library mode),In Progress,High,ci,vite.config.ts library mode + tsconfig.build.json present.
-Configure package exports and package.json metadata,In Progress,High,,Exports/types/files fields for npm consumption.
-Decide monorepo vs single-package structure,Backlog,Normal,,Currently single-package.
-Add base CI (lint typecheck build) — GitHub Actions,Backlog,Normal,ci,CI workflow for PRs.
+Set up build pipeline (Vite library mode),Done,High,ci,Multi-entry lib build: core + /motion + /preset, ES+CJS, per-entry CSS, dts emitted.
+Configure package exports and package.json metadata,Done,High,,Exports for . / ./motion / ./preset / ./styles.css / ./motion.css with types; framer-motion optional peer.
+Split app vs library build,Done,Normal,ci,build = library (dist); build:app = docs SPA (dist-app) for deploy.
+Configure ESLint + Prettier + commit hooks,Backlog,Normal,ci,No lint config present yet — add ESLint/Prettier + husky/lint-staged.
+Add base CI (lint typecheck build) — GitHub Actions,Backlog,Normal,ci,No .github/workflows yet — add PR workflow.
+Decide monorepo vs single-package structure,Backlog,Low,,Currently single-package; fine for now.

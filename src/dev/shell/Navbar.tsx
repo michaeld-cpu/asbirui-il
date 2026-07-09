@@ -28,6 +28,8 @@ const GitHubIcon = (
 
 const navLinks = [
   { label: "Components", href: "#components" },
+  { label: "Blocks", href: "#blocks" },
+  { label: "Brand Kits", href: "#brand-kits" },
   { label: "Templates", href: "#templates" },
   { label: "Test Cases", href: "#test-cases" },
   { label: "Docs", href: "#docs" },

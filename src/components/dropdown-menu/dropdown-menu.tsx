@@ -1,6 +1,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../lib/cn";
+import { usePresence } from "../../lib/use-presence";
 
 /*
   DropdownMenu — accessible, token-driven dropdown built without Radix.
@@ -195,7 +196,7 @@ export const DropdownMenuTrigger = React.forwardRef<
 /* ---- content ---------------------------------------------------------- */
 
 const contentVariants = cva(
-  "absolute z-50 min-w-[10rem] overflow-hidden rounded-asbir border border-border bg-panel p-1 text-fg shadow-[0_16px_40px_-16px_rgba(0,0,0,0.45)] focus:outline-none",
+  "absolute z-50 min-w-[10rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-asbir border border-border bg-panel p-1 text-fg shadow-[0_16px_40px_-16px_rgba(0,0,0,0.45)] focus:outline-none motion-safe:data-[state=open]:animate-menu-in motion-safe:data-[state=closed]:animate-menu-out",
   {
     variants: {
       align: {
@@ -227,7 +228,8 @@ export const DropdownMenuContent = React.forwardRef<
 ) {
   const { open, contentRef, menuId, triggerId } =
     useDropdownContext("DropdownMenuContent");
-  const ref = useMergedRef(contentRef, forwardedRef);
+  const { mounted, status, ref: presenceRef } = usePresence(open);
+  const ref = useMergedRef(contentRef, forwardedRef, presenceRef);
 
   // Focus the first item when the menu opens (keyboard entry point).
   React.useEffect(() => {
@@ -235,6 +237,55 @@ export const DropdownMenuContent = React.forwardRef<
     const first = getItems(contentRef.current)[0];
     first?.focus();
   }, [open, contentRef]);
+
+  // Collision avoidance: after opening, if the menu overflows its scroll
+  // container horizontally (e.g. a wide min-width near an edge, common on
+  // mobile or inside a constrained preview panel), nudge it back in with a
+  // translate so it never spills past that boundary. Recomputed on open and
+  // on resize/scroll. Keeps a small margin from the boundary.
+  const [shiftX, setShiftX] = React.useState(0);
+  React.useEffect(() => {
+    if (!open) return;
+    const MARGIN = 8;
+    const adjust = () => {
+      const el = contentRef.current;
+      if (!el) return;
+      // Measure without a prior shift so the correction is absolute, not
+      // cumulative (the shift is applied via the `translate` property).
+      const prev = el.style.translate;
+      el.style.translate = "";
+      const r = el.getBoundingClientRect();
+      // Clamp against the nearest ancestor that actually clips content
+      // (overflow hidden/auto/scroll), falling back to the viewport — a
+      // dropdown inside a bounded card should respect the card's edge, not
+      // just the browser window.
+      const boundary = nearestClipAncestor(el);
+      const boundaryRect = boundary
+        ? boundary.getBoundingClientRect()
+        : { left: 0, right: window.innerWidth };
+      let dx = 0;
+      if (r.right > boundaryRect.right - MARGIN) {
+        dx = boundaryRect.right - MARGIN - r.right;
+      }
+      if (r.left + dx < boundaryRect.left + MARGIN) {
+        dx = boundaryRect.left + MARGIN - r.left;
+      }
+      el.style.translate = prev;
+      setShiftX(dx);
+    };
+    adjust();
+    window.addEventListener("resize", adjust);
+    window.addEventListener("scroll", adjust, true);
+    return () => {
+      window.removeEventListener("resize", adjust);
+      window.removeEventListener("scroll", adjust, true);
+    };
+    // `mounted` matters, not just `open`: usePresence flips `mounted` true a
+    // render *after* `open` does, which is the render that actually attaches
+    // contentRef. Depending on `open` alone re-runs this effect one render
+    // too early, when contentRef.current is still null, and never again —
+    // so the shift silently never applies.
+  }, [open, mounted, contentRef, align, side]);
 
   // Roving focus: ↑/↓/Home/End move between enabled items.
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -265,23 +316,45 @@ export const DropdownMenuContent = React.forwardRef<
     }
   };
 
-  if (!open) return null;
+  if (!mounted) return null;
 
   return (
     <div
       ref={ref}
       id={menuId}
       role="menu"
+      data-state={status === "exiting" ? "closed" : "open"}
       aria-labelledby={triggerId}
       tabIndex={-1}
       onKeyDown={handleKeyDown}
       className={cn(contentVariants({ align, side }), className)}
       {...props}
+      // `translate` is its own CSS property, so the collision shift doesn't
+      // clash with the enter/exit keyframes that animate `transform`. Spread
+      // props.style FIRST — it must not clobber the shift that keeps the menu
+      // inside its boundary.
+      style={{ ...props.style, translate: shiftX ? `${shiftX}px 0` : undefined }}
     >
       {children}
     </div>
   );
 });
+
+/** Walk up from `el` to the nearest ancestor that bounds collision avoidance:
+    either an explicit `data-dropdown-boundary` marker (for a visually bounded
+    panel that doesn't clip overflow, e.g. a component preview stage) or an
+    ancestor that clips overflow (a scroll container / `overflow: hidden`
+    panel). Falls back to the viewport when neither is found. */
+function nearestClipAncestor(el: HTMLElement): HTMLElement | null {
+  let node = el.parentElement;
+  while (node && node !== document.body) {
+    if (node.hasAttribute("data-dropdown-boundary")) return node;
+    const style = getComputedStyle(node);
+    if (/(auto|scroll|hidden|clip)/.test(style.overflowX)) return node;
+    node = node.parentElement;
+  }
+  return null;
+}
 
 /** All enabled, focusable menu items inside the content element. */
 function getItems(content: HTMLDivElement | null): HTMLElement[] {
@@ -369,7 +442,7 @@ export function DropdownMenuLabel({
   return (
     <div
       className={cn(
-        "px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted",
+        "px-2.5 py-1.5 text-xs font-semibold text-muted",
         className
       )}
       {...props}
@@ -392,18 +465,19 @@ export function DropdownMenuSeparator({
 
 /* ---- utils ------------------------------------------------------------ */
 
-/** Merge a local ref object with an optionally-forwarded ref. */
+/** Merge any number of ref objects / callbacks into one STABLE ref callback.
+    The callback identity never changes across renders, so React won't detach
+    and re-attach the node — the latest refs are read from a mutable box. */
 function useMergedRef<T>(
-  local: React.RefObject<T>,
-  forwarded: React.ForwardedRef<T>
+  ...refs: Array<React.Ref<T> | undefined>
 ): React.RefCallback<T> {
-  return React.useCallback(
-    (node: T) => {
-      (local as React.MutableRefObject<T | null>).current = node;
-      if (typeof forwarded === "function") forwarded(node);
-      else if (forwarded)
-        (forwarded as React.MutableRefObject<T | null>).current = node;
-    },
-    [local, forwarded]
-  );
+  const box = React.useRef(refs);
+  box.current = refs;
+  return React.useCallback((node: T) => {
+    for (const r of box.current) {
+      if (!r) continue;
+      if (typeof r === "function") r(node);
+      else (r as React.MutableRefObject<T | null>).current = node;
+    }
+  }, []);
 }

@@ -180,10 +180,7 @@ export function DocsContent({ route }: { route: string }) {
 
   return (
     <article className="animate-fade-up py-10">
-      <p className="text-xs font-semibold uppercase tracking-wider text-accent-soft-fg">
-        {page.eyebrow}
-      </p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-fg">
+      <h1 className="text-3xl font-semibold tracking-tight text-fg">
         {page.title}
       </h1>
 

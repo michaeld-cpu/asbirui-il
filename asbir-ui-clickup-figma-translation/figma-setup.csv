@@ -1,0 +1,5 @@
+Task Name,Status,Priority,Tags,Description
+Create Asbir UI Figma library file,Backlog,High,"figma,setup","Create the main Figma design file. Pages: Cover, Foundations, Components, Blocks, Brand Kits, Templates, Docs Screens, QA."
+Define Figma page architecture and naming rules,Backlog,High,"figma,setup","Document page/frame/section/component/variant naming so the file stays maintainable."
+Link source of truth from repo and docs,Backlog,Normal,"figma,docs","Reference repo, docs routes, token files, component files, BlocksDocs, BrandKitsDocs, and TemplatesPage."
+Create Figma translation checklist,Backlog,Normal,"figma,qa","Checklist: source inspected, variables used, variants named, dark mode checked, responsive state considered, engineering notes attached."

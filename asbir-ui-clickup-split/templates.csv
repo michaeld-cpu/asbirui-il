@@ -1,0 +1,5 @@
+Task Name,Status,Priority,Tags,Description
+Lumina AI console template,Done,High,docs,"src/dev/templates/ai contains the live AI gateway console: overview, playground, keys, logs, team, billing, and settings."
+Template preview system,Done,Normal,docs,TemplatePreview and PreviewCard render live desktop/mobile previews using isolated frames and real responsive breakpoints.
+Add next production template,Backlog,Normal,docs,Add another real template entry to TemplatesPage once a second template exists.
+Extract template install/copy workflow,Backlog,High,docs,Document how teams clone a template, wire routing/data, and re-theme it.

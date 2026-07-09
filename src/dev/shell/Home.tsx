@@ -1,6 +1,8 @@
 import asbirLogo from "@/assets/logo/asbirlogo-white.svg";
 import heroBackdrop from "@/assets/backdrops/herobackdrop.jpeg";
 import { TemplatePreview } from "./TemplatePreview";
+import { MotionPromoFloating } from "./MotionPromoCard";
+import { IntegrationsGrid } from "./IntegrationsGrid";
 
 const RocketIcon = (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -73,7 +75,7 @@ function IntroPanel() {
             href="#docs"
             className="inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-asbir border border-white/25 bg-black/40 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-md transition-colors hover:bg-black/55"
           >
-            Documentation
+            Installation
           </a>
         </div>
       </div>
@@ -191,6 +193,9 @@ function TemplatesSection() {
 /* What's inside / Technology                                          */
 /* ------------------------------------------------------------------ */
 
+/* "Built on tools your team already trusts" — a "Fueled by" hub + connector
+   wires fanning down to a 2×3 grid of brand-colored tech cards (React / TS /
+   Tailwind / Vite / Radix / tokens). See IntegrationsGrid.tsx. */
 function TechnologySection() {
   return (
     <section id="technology" className="mt-24">
@@ -198,7 +203,9 @@ function TechnologySection() {
         title="Built on tools your team already trusts."
         description="No bespoke framework to learn. AsbirUI is a thin, opinionated layer over the stack you already ship with."
       />
-      <UnderConstruction />
+      <div className="mt-10">
+        <IntegrationsGrid />
+      </div>
     </section>
   );
 }
@@ -362,6 +369,9 @@ export function Home() {
       <FeaturesSection />
       <CtaSection />
       <Footer />
+
+      {/* floating Asbir Motion promo, bottom-left; dismiss sticks per session */}
+      <MotionPromoFloating dismissKey="asbir-motion-home" corner="bottom-left" />
     </div>
   );
 }

@@ -1,0 +1,160 @@
+/*
+  Asbir UI — motion (CSS layer)
+  ------------------------------------------------------------------
+  Pure-CSS microinteractions. Zero JavaScript, zero runtime deps.
+  Import once at your app root:
+
+      import "@asbirtech/asbir-ui/motion.css";
+
+  Then apply the utility classes below. Every animation is gated behind
+  `prefers-reduced-motion: no-preference`, so users who ask for reduced
+  motion get the final state instantly with no movement.
+
+  These classes are intentionally framework-agnostic (plain class names, not
+  Tailwind plugins) so the CSS layer works with or without Tailwind.
+*/
+
+@media (prefers-reduced-motion: no-preference) {
+  /* --- entrance animations (run once on mount) --- */
+  .as-animate-fade-in {
+    animation: as-fade-in var(--as-motion-duration, 0.4s) var(--as-motion-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+  }
+  .as-animate-fade-up {
+    animation: as-fade-up var(--as-motion-duration, 0.45s) var(--as-motion-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+  }
+  .as-animate-scale-in {
+    animation: as-scale-in var(--as-motion-duration, 0.35s) var(--as-motion-ease, cubic-bezier(0.22, 1, 0.36, 1)) both;
+  }
+
+  /* --- press feedback: a subtle squash on :active --- */
+  .as-press {
+    transition: transform 0.12s ease;
+  }
+  .as-press:active {
+    transform: scale(0.97);
+  }
+
+  /* --- lift on hover: nudge up + shadow, springy ease --- */
+  .as-lift {
+    transition:
+      transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.2s ease;
+  }
+  .as-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+  }
+
+  /* --- shimmer: a moving highlight sweep, e.g. for skeletons/CTAs --- */
+  .as-shimmer {
+    background-image: linear-gradient(
+      100deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.12) 50%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
+    animation: as-shimmer 1.6s linear infinite;
+  }
+
+  /* --- pulse: gentle opacity breathing for "live"/loading states --- */
+  .as-pulse {
+    animation: as-pulse 1.8s ease-in-out infinite;
+  }
+
+}
+
+/* --- chart draw-in (pure CSS, no JS) ------------------------------------
+   Left→right CLIP WIPE, not a stroke-dashoffset draw. The SVG renders fully
+   from the first frame; a clip-path on the wrapper uncovers it left→right. This
+   is bulletproof against the fast-refresh flicker because the path never
+   changes state and there is NO JS measurement/priming/observer to race — only
+   the clip animates. (Same technique as the Tripket dashboard chart.)
+
+   The wrapper starts fully clipped (`inset(0 100% 0 0)`) declared
+   unconditionally, so the very first painted frame shows nothing; the animation
+   then wipes it open. The end-dot pops in once the wipe reaches it.
+   Stagger a row by setting --asbir-draw-delay on the wrapper. */
+.asbir-chart-wipe {
+  clip-path: inset(0 100% 0 0);
+  animation: asbir-chart-wipe var(--asbir-draw-duration, 1.1s)
+    cubic-bezier(0.22, 1, 0.36, 1) var(--asbir-draw-delay, 0s) forwards;
+  /* scroll-trigger: hold paused (fully clipped) until the chart is in view */
+  animation-play-state: paused;
+}
+.asbir-draw-dot {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: asbir-draw-dot 0.42s cubic-bezier(0.34, 1.56, 0.64, 1)
+    calc(var(--asbir-draw-delay, 0s) + var(--asbir-draw-duration, 1.1s) * 0.9) forwards;
+  animation-play-state: paused;
+}
+/* play once the chart scrolls into view (data-inview flipped by JS) */
+.asbir-chart[data-inview="true"] .asbir-chart-wipe,
+.asbir-chart[data-inview="true"] .asbir-draw-dot {
+  animation-play-state: running;
+}
+
+@keyframes asbir-chart-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes asbir-draw-dot {
+  from { opacity: 0; transform: scale(0.2); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Reduced motion: skip the wipe — show the finished chart instantly. */
+@media (prefers-reduced-motion: reduce) {
+  .asbir-chart-wipe {
+    clip-path: none;
+    animation: none;
+  }
+  .asbir-draw-dot {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+/* Reduced-motion / no-JS fallback: entrance classes still resolve to their
+   final visible state so nothing is left hidden. */
+@media (prefers-reduced-motion: reduce) {
+  .as-animate-fade-in,
+  .as-animate-fade-up,
+  .as-animate-scale-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  /* chart reveal: show the finished chart instantly, no drawing */
+  .asbir-chart-reveal [data-asbir-draw] {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+  .asbir-chart-reveal [data-asbir-fill] {
+    opacity: 1;
+  }
+}
+
+@keyframes as-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes as-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes as-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes as-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@keyframes as-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}

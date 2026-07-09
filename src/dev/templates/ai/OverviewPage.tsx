@@ -176,7 +176,8 @@ export function OverviewPage() {
                 data={a.series}
                 color={CHART_COLORS[i % CHART_COLORS.length]}
                 labels={dayLabels(a.series.length)}
-                className="mt-3 h-20"
+                className="mt-3 block h-20"
+                revealDelay={i * 0.12}
               />
             </div>
           ))}

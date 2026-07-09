@@ -24,22 +24,53 @@ export function useHashRoute(): string {
 /** Routes that render inside the sidebar+topbar app shell. */
 export const DOCS_ROUTES = new Set([
   "components",
+  "blocks",
   "docs",
   "tokens",
   "templates",
   "test-cases",
+  "brand-kits",
+  "motion",
 ]);
 
 export function isDocsRoute(route: string): boolean {
-  return DOCS_ROUTES.has(route);
+  // exact top-level docs routes, plus sub-routes under a docs section
+  // (e.g. "components/dropdown-menu", "blocks/stats", "tokens/colors") —
+  // all render in the shell
+  return (
+    DOCS_ROUTES.has(route) ||
+    route.startsWith("components/") ||
+    route.startsWith("blocks/") ||
+    route.startsWith("tokens/") ||
+    route.startsWith("brand-kits/")
+  );
 }
 
-/**
- * Bare preview route — renders the AI console with NO shell chrome, sized to
- * whatever viewport it's loaded in. The homepage device frames point <iframe>s
- * here (e.g. "#preview/ai") so each frame gets its own viewport width and the
- * template's real responsive breakpoints fire (desktop rail vs. mobile drawer).
- */
+/** The docs section the sidebar/navbar highlights — a sub-route still lives
+    under its parent section ("components/…" → "components", "tokens/…" →
+    "tokens"). */
+export function docsRouteBase(route: string): string {
+  return route.replace(/\/.*$/, "");
+}
+
+export function blocksSubPath(route: string): string {
+  return route.startsWith("blocks/") ? route.replace(/^blocks\//, "") : "";
+}
+
+export function componentsSubPath(route: string): string {
+  return route.startsWith("components/")
+    ? route.replace(/^components\//, "")
+    : "";
+}
+
+export function tokensSubPath(route: string): string {
+  return route.startsWith("tokens/") ? route.replace(/^tokens\//, "") : "";
+}
+
+export function brandKitsSubPath(route: string): string {
+  return route.startsWith("brand-kits/") ? route.replace(/^brand-kits\//, "") : "";
+}
+
 export function isPreviewRoute(route: string): boolean {
   return route === "preview" || route.startsWith("preview/");
 }

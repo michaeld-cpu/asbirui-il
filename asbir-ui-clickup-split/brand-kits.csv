@@ -1,0 +1,8 @@
+Task Name,Status,Priority,Tags,Description
+Brand Kits index + routing,Done,Normal,"design,docs",BrandKitsDocs renders the #brand-kits index and #brand-kits/<slug> pages from PROJECTS data.
+Tripket PH brand kit,In Progress,Normal,"design,docs",Seeded draft project kit in BrandKitsDocs.tsx; replace placeholder values with approved brand specs.
+PlanOut brand kit,In Progress,Normal,"design,docs",Seeded draft project kit in BrandKitsDocs.tsx; replace placeholder values with approved brand specs.
+Asbir Tech Web brand kit,In Progress,Normal,"design,docs",Seeded draft project kit in BrandKitsDocs.tsx; replace placeholder values with approved brand specs.
+ProjectPlaza brand kit,In Progress,Normal,"design,docs",Seeded draft project kit in BrandKitsDocs.tsx; replace placeholder values with approved brand specs.
+BeetzeePlay brand kit,In Progress,Normal,"design,docs",Seeded draft project kit in BrandKitsDocs.tsx; replace placeholder values with approved brand specs.
+Add logo asset references per kit,Backlog,Normal,"design,docs",Connect each brand kit to actual logo assets instead of initials.

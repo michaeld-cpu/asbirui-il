@@ -1,0 +1,6 @@
+Task Name,Status,Priority,Tags,Description
+Translate color tokens to Figma variables,Backlog,High,"figma,tokens,design","Translate tokens.css and palette-data.ts into Figma variables: brand ramp, semantic surfaces/text/border/ring/accent/overlay/states."
+Create light/dark variable modes,Backlog,High,"figma,tokens,design","Set up Figma variable modes matching .dark and [data-theme=dark]."
+Create typography styles and usage samples,Backlog,Normal,"figma,typography,design","Create text styles and samples for display, headings, body, small text, mono/code, labels, helper text."
+Create spacing radius and effect variables,Backlog,Normal,"figma,tokens,design","Map spacing/radius/elevation conventions from preset.ts and tokens.css into Figma variables or documented styles."
+Build foundations reference page,Backlog,Normal,"figma,docs","Show colors, contrast, typography, spacing, radius, focus rings, and light/dark previews."

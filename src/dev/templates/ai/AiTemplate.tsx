@@ -3,8 +3,6 @@ import { AiLayout } from "./AiLayout";
 import { OverviewPage } from "./OverviewPage";
 import { PlaygroundPage } from "./PlaygroundPage";
 import { KeysPage } from "./KeysPage";
-import { PromptsPage } from "./PromptsPage";
-import { PromptFormPage } from "./PromptFormPage";
 import { LogsPage } from "./LogsPage";
 import { BillingPage } from "./BillingPage";
 import { TeamPage } from "./TeamPage";
@@ -19,11 +17,13 @@ import { ToastProvider } from "./ai-states";
 
   Routes:
     ""                 Overview        playground        Playground
-    prompts            Prompt library  prompts/new       New prompt
-    prompts/:id        Edit prompt     keys              API keys
-    logs               Request logs    billing           Usage & Billing
-    team               Team            settings[/:tab]   Settings
-    (else)             404
+    keys               API keys        logs              Request logs
+    billing            Usage & Billing team              Team
+    settings[/:tab]    Settings        (else)            404
+
+  Note: the Playground owns conversation history — the session's Runs are nested
+  under Playground in the sidebar (ChatGPT-style). Any legacy "#ai/prompts…"
+  link redirects to the Playground; there's no prompt-library surface.
 */
 export function AiTemplate({ sub }: { sub: string }) {
   const parts = sub.split("/").filter(Boolean);
@@ -33,10 +33,9 @@ export function AiTemplate({ sub }: { sub: string }) {
   if (sub === "") page = <OverviewPage />;
   else if (sub === "playground") page = <PlaygroundPage />;
   else if (parts[0] === "prompts") {
-    if (parts.length === 1) page = <PromptsPage />;
-    else if (parts[1] === "new") page = <PromptFormPage />;
-    else if (parts.length === 2) page = <PromptFormPage id={parts[1]} />;
-    else notFound = true;
+    // prompts were removed — redirect any lingering link to the Playground
+    if (typeof window !== "undefined") window.location.replace("#ai/playground");
+    page = <PlaygroundPage />;
   } else if (sub === "keys") page = <KeysPage />;
   else if (sub === "logs") page = <LogsPage />;
   else if (sub === "billing") page = <BillingPage />;

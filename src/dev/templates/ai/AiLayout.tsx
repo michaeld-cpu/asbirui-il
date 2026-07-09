@@ -9,7 +9,8 @@ import {
 } from "@/components/dropdown-menu";
 import { Icons, CountUp } from "./ai-ui";
 import { useTheme } from "../../shell/theme-context";
-import { useConnections, useLogs, usePrompts } from "./store";
+import { useConnections, useLogs } from "./store";
+import { useRuns, useActiveRunId, setActiveRunId, removeRun } from "./playground-runs";
 
 /*
   AI console layout: compact collapsible sidebar + topbar (search, credits
@@ -20,7 +21,7 @@ import { useConnections, useLogs, usePrompts } from "./store";
   mode) above the collapse control — no per-group headings.
 */
 
-type Counts = { prompts: number; keys: number; logs: number };
+type Counts = { keys: number; logs: number };
 
 type NavItem = {
   label: string;
@@ -33,15 +34,8 @@ type NavItem = {
 const mainNav: NavItem[] = [
   { label: "Overview", href: "#ai", icon: Icons.overview, match: (s) => s === "" },
   { label: "Playground", href: "#ai/playground", icon: Icons.playground, match: (s) => s.startsWith("playground") },
-  { label: "Prompts", href: "#ai/prompts", icon: Icons.prompts, match: (s) => s.startsWith("prompts"), countKey: "prompts" },
   { label: "API keys", href: "#ai/keys", icon: Icons.keys, match: (s) => s.startsWith("keys"), countKey: "keys" },
   { label: "Logs", href: "#ai/logs", icon: Icons.logs, match: (s) => s.startsWith("logs"), countKey: "logs" },
-];
-
-const utilityNav: NavItem[] = [
-  { label: "Usage & Billing", href: "#ai/billing", icon: Icons.billing, match: (s) => s.startsWith("billing") },
-  { label: "Team", href: "#ai/team", icon: Icons.team, match: (s) => s.startsWith("team") },
-  { label: "Settings", href: "#ai/settings", icon: Icons.settings, match: (s) => s.startsWith("settings") },
 ];
 
 function NavRow({
@@ -73,34 +67,112 @@ function NavRow({
   );
 }
 
-/* night-mode row (fintech-admin style) — label + mini switch; rides on the
-   shell's theme context so the whole app (and its view-transition crossfade)
-   stays in sync. Swap `useTheme` for your own hook when adopting standalone. */
-function NightModeRow({ collapsed }: { collapsed: boolean }) {
-  const { theme, toggle } = useTheme();
-  const dark = theme === "dark";
+/* Playground nav row with the session's Runs nested beneath it (ChatGPT-style
+   history). The chevron toggles the sub-list; selecting a run opens it in the
+   Playground. Collapses to just the icon on the collapsed rail. */
+function PlaygroundNav({
+  item,
+  sub,
+  collapsed,
+  onNavigate,
+}: {
+  item: NavItem;
+  sub: string;
+  collapsed: boolean;
+  onNavigate?: () => void;
+}) {
+  const runs = useRuns();
+  const activeRunId = useActiveRunId();
+  const active = item.match(sub);
+  const [open, setOpen] = React.useState(true);
+  // auto-expand as soon as there's history to show
+  React.useEffect(() => {
+    if (runs.length > 0) setOpen(true);
+  }, [runs.length]);
+
+  if (collapsed) return <NavRow item={item} sub={sub} collapsed />;
+
+  const openRun = (id: string) => {
+    setActiveRunId(id);
+    location.hash = "#ai/playground";
+    onNavigate?.();
+  };
+
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      title={collapsed ? "Night mode" : undefined}
-      aria-pressed={dark}
-      className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[13px] text-fg/65 transition-colors hover:bg-overlay/[0.04] hover:text-fg ${collapsed ? "justify-center" : ""}`}
-    >
-      <span className="text-fg/70 dark:text-fg/55">{dark ? Icons.moon : Icons.sun}</span>
-      {!collapsed && (
-        <>
-          Night mode
-          <span
-            className={`ml-auto flex h-4 w-7 items-center rounded-full p-0.5 transition-colors ${dark ? "ai-bg-accent" : "bg-fg/20"}`}
+    <div>
+      <div
+        className={`ai-nav-item group flex items-center gap-2.5 rounded-lg pr-1 text-[13px] transition-colors ${
+          active ? "ai-nav-active font-medium text-fg" : "text-fg/65 hover:bg-overlay/[0.04] hover:text-fg"
+        }`}
+      >
+        <a
+          href={item.href}
+          onClick={() => setActiveRunId(null)}
+          className="flex min-w-0 flex-1 items-center gap-2.5 py-1.5 pl-2.5"
+        >
+          <span className={active ? "text-fg" : "text-fg/70 dark:text-fg/55"}>{item.icon}</span>
+          {item.label}
+        </a>
+        {runs.length > 0 && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen((o) => !o);
+            }}
+            aria-label={open ? "Collapse runs" : "Expand runs"}
+            aria-expanded={open}
+            className="rounded-md p-1 text-fg/45 transition-colors hover:bg-overlay/[0.06] hover:text-fg/70 [&_svg]:h-3.5 [&_svg]:w-3.5"
           >
-            <span className={`h-3 w-3 rounded-full bg-white transition-transform ${dark ? "translate-x-3" : ""}`} />
-          </span>
-        </>
+            <span className={`block transition-transform duration-200 ${open ? "rotate-180" : ""}`}>
+              {Icons.chevronDown}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {open && runs.length > 0 && (
+        <ul className="mt-0.5 space-y-0.5 border-l border-border pl-2">
+          {runs.map((r) => {
+            const on = r.id === activeRunId;
+            return (
+              <li
+                key={r.id}
+                className={`group/run flex items-center rounded-lg pr-1 transition-colors ${
+                  on ? "bg-overlay/[0.06]" : "hover:bg-overlay/[0.04]"
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => openRun(r.id)}
+                  title={r.title}
+                  className={`flex min-w-0 flex-1 items-center gap-1.5 py-1.5 pl-2.5 text-left text-[12px] transition-colors ${
+                    on ? "font-medium text-fg" : "text-fg/60 dark:text-fg/45 group-hover/run:text-fg"
+                  }`}
+                >
+                  <span className="line-clamp-1">{r.title}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeRun(r.id);
+                  }}
+                  aria-label={`Delete run: ${r.title}`}
+                  title="Delete run"
+                  className="shrink-0 rounded-md p-1 text-fg/40 opacity-0 transition-opacity hover:bg-rose-500/15 hover:text-rose-600 focus-visible:opacity-100 group-hover/run:opacity-100 dark:hover:text-rose-400 [&_svg]:h-3.5 [&_svg]:w-3.5"
+                >
+                  {Icons.trash}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
       )}
-    </button>
+    </div>
   );
 }
+
 
 /* Sidebar body shared between the desktop rail and the mobile drawer. The
    drawer always renders the full-width (non-collapsed) list; only the desktop
@@ -126,58 +198,73 @@ function SidebarBody({
           <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-muted">Navigate</p>
         )}
         <div className="space-y-0.5" onClick={onNavigate}>
-          {mainNav.map((item) => (
-            <NavRow
-              key={item.href}
-              item={item}
-              sub={sub}
-              collapsed={collapsed}
-              count={item.countKey ? counts[item.countKey] : undefined}
-            />
-          ))}
+          {mainNav.map((item) =>
+            item.href === "#ai/playground" ? (
+              <PlaygroundNav
+                key={item.href}
+                item={item}
+                sub={sub}
+                collapsed={collapsed}
+                onNavigate={onNavigate}
+              />
+            ) : (
+              <NavRow
+                key={item.href}
+                item={item}
+                sub={sub}
+                collapsed={collapsed}
+                count={item.countKey ? counts[item.countKey] : undefined}
+              />
+            ),
+          )}
         </div>
       </nav>
 
-      {/* pinned utility cluster — workspace admin + night mode */}
-      <div className={`space-y-0.5 border-t border-border py-3 ${pad}`}>
-        <div className="space-y-0.5" onClick={onNavigate}>
-          {utilityNav.map((item) => (
-            <NavRow key={item.href} item={item} sub={sub} collapsed={collapsed} />
-          ))}
-        </div>
-        <NightModeRow collapsed={collapsed} />
-      </div>
-
       {/* user profile — avatar + name/role, collapses to just the avatar.
-          Opens a user menu upward (it sits at the bottom of the sidebar). */}
-      <div className="border-t border-border">
+          Opens a menu upward that now owns ALL account nav (billing / team /
+          settings), the night-mode toggle, and sign out — the sidebar no
+          longer carries a separate utility cluster. */}
+      {/* the DropdownMenu root is `inline-block` by default (shrinks to its
+          trigger); force its wrapper full-width here so the trigger spans the
+          whole sidebar and the chevron can sit at the right edge */}
+      <div className="border-t border-border [&>div]:block [&>div]:w-full">
         <DropdownMenu>
           <DropdownMenuTrigger
             title={collapsed ? "Mike Sander" : undefined}
-            className={`flex w-full items-center gap-2.5 py-3 text-left outline-none transition-colors hover:bg-overlay/[0.04] focus-visible:bg-overlay/[0.04] ${collapsed ? "justify-center px-2" : "px-4"}`}
+            className={`group flex w-full items-center gap-2.5 py-3 text-left outline-none transition-colors hover:bg-overlay/[0.04] focus-visible:bg-overlay/[0.04] ${collapsed ? "justify-center px-2" : "px-4"}`}
           >
             <span className="h-8 w-8 shrink-0 rounded-full bg-fg/20" />
             {!collapsed && (
               <>
-                <span className="min-w-0 flex-1">
+                <span className="min-w-0">
                   <span className="block truncate text-[13px] font-medium leading-tight text-fg">Mike Sander</span>
                   <span className="block truncate text-[11px] leading-tight text-fg/70 dark:text-fg/50">Owner</span>
                 </span>
-                <span className="shrink-0 text-fg/60 dark:text-fg/40">{Icons.chevronDown}</span>
+                {/* pushed to the right edge with a gap, like the nav pills' count
+                    badge; rotates 180° when the menu is open (keyed off the
+                    trigger's aria-expanded) */}
+                <span className="ml-auto shrink-0 text-fg/60 transition-transform duration-200 group-aria-expanded:rotate-180 dark:text-fg/40">
+                  {Icons.chevronDown}
+                </span>
               </>
             )}
           </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="mb-2 w-[13rem]">
+          <DropdownMenuContent side="top" align="start" className="mb-2 w-[15rem]">
             <DropdownMenuLabel>Mike Sander · Owner</DropdownMenuLabel>
             <DropdownMenuItem onSelect={() => (location.hash = "#ai/settings")}>
+              <span className="text-fg/60 dark:text-fg/45 [&_svg]:h-4 [&_svg]:w-4">{Icons.settings}</span>
               Account settings
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => (location.hash = "#ai/billing")}>
+              <span className="text-fg/60 dark:text-fg/45 [&_svg]:h-4 [&_svg]:w-4">{Icons.billing}</span>
               Usage &amp; billing
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => (location.hash = "#ai/team")}>
+              <span className="text-fg/60 dark:text-fg/45 [&_svg]:h-4 [&_svg]:w-4">{Icons.team}</span>
               Team
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <NightModeItem />
             <DropdownMenuSeparator />
             <DropdownMenuItem destructive onSelect={() => (location.hash = "#home")}>
               Sign out
@@ -189,11 +276,35 @@ function SidebarBody({
   );
 }
 
+/* Night-mode toggle rendered as a dropdown item — flips the theme WITHOUT
+   closing the menu (preventDefault) so the change is visible in place. */
+function NightModeItem() {
+  const { theme, toggle } = useTheme();
+  const dark = theme === "dark";
+  return (
+    <DropdownMenuItem
+      onSelect={(e) => {
+        e.preventDefault();
+        toggle();
+      }}
+    >
+      <span className="text-fg/60 dark:text-fg/45 [&_svg]:h-4 [&_svg]:w-4">
+        {dark ? Icons.moon : Icons.sun}
+      </span>
+      <span className="flex-1">Night mode</span>
+      <span
+        className={`flex h-4 w-7 items-center rounded-full p-0.5 transition-colors ${dark ? "ai-bg-accent" : "bg-fg/20"}`}
+      >
+        <span className={`h-3 w-3 rounded-full bg-white transition-transform ${dark ? "translate-x-3" : ""}`} />
+      </span>
+    </DropdownMenuItem>
+  );
+}
+
 export function AiLayout({ sub, children }: { sub: string; children: React.ReactNode }) {
   const [collapsed, setCollapsed] = React.useState(false);
   const [drawerOpen, setDrawerOpen] = React.useState(false);
   const counts: Counts = {
-    prompts: usePrompts().length,
     keys: useConnections().length,
     logs: useLogs().length,
   };

@@ -1,10 +1,14 @@
 import * as React from "react";
-import { SelectMenu } from "@/components/select-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/dropdown-menu";
 import { Button, useToast } from "./ai-states";
 import { Icons } from "./ai-ui";
-import { MODELS, fakeCompletion, usePrompts, type ChatMessage } from "./store";
-
-type Turn = ChatMessage & { tokens?: number; latencyMs?: number };
+import { MODELS, fakeCompletion } from "./store";
+import { upsertRun, newRunId, useActiveRunId, setActiveRunId, useRun, type Turn } from "./playground-runs";
 
 const chatModels = MODELS.filter((m) => m.kind === "chat");
 const USER_NAME = "Mike"; // matches the signed-in user shown elsewhere in the shell
@@ -19,12 +23,13 @@ const PRESETS: { icon: React.ReactNode; label: string; prompt: string }[] = [
   { icon: Icons.wand, label: "Improve", prompt: "Improve this copy:\n\n" },
 ];
 
-/* one row in the # mention popover */
-type Mention = { kind: "entry" | "tag"; label: string };
-
 export function PlaygroundPage() {
-  const prompts = usePrompts();
   const toast = useToast();
+
+  // The live conversation belongs to a run id. The sidebar drives which run is
+  // open via the shared activeRunId; selecting one there loads it here.
+  const activeRunId = useActiveRunId();
+  const activeRun = useRun(activeRunId);
 
   const [messages, setMessages] = React.useState<Turn[]>([]);
   const [input, setInput] = React.useState("");
@@ -32,76 +37,57 @@ export function PlaygroundPage() {
   const [model, setModel] = React.useState(chatModels[0]?.id ?? "");
   const [brandVoice, setBrandVoice] = React.useState(false);
 
-  // # mention state
-  const [mentionOpen, setMentionOpen] = React.useState(false);
-  const [mentionQuery, setMentionQuery] = React.useState("");
   const taRef = React.useRef<HTMLTextAreaElement>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  // entries = prompt titles (as slugs); tags = unique prompt tags
-  const entries = React.useMemo<Mention[]>(
-    () => prompts.map((p) => ({ kind: "entry" as const, label: p.title.replace(/\s+/g, "") })),
-    [prompts],
-  );
-  const tags = React.useMemo<Mention[]>(() => {
-    const seen = new Set<string>();
-    const out: Mention[] = [];
-    for (const p of prompts) for (const t of p.tags) if (!seen.has(t)) { seen.add(t); out.push({ kind: "tag", label: t }); }
-    return out;
-  }, [prompts]);
-
-  const q = mentionQuery.toLowerCase();
-  const matchEntries = entries.filter((e) => e.label.toLowerCase().includes(q));
-  const matchTags = tags.filter((t) => t.label.toLowerCase().includes(q));
-  const hasMentions = matchEntries.length + matchTags.length > 0;
+  const modelLabel = MODELS.find((m) => m.id === model)?.label ?? model;
 
   React.useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages]);
 
-  const modelLabel = MODELS.find((m) => m.id === model)?.label ?? model;
+  // Load the run the sidebar selected. Guard against clobbering the live thread
+  // with its own snapshot: only swap when the target id actually changes.
+  const loadedId = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (activeRunId === loadedId.current) return;
+    loadedId.current = activeRunId;
+    setMessages(activeRun ? activeRun.turns : []);
+    setInput("");
+  }, [activeRunId, activeRun]);
 
-  // detect an in-progress "#word" at the caret to drive the mention popover
-  const syncMention = (value: string) => {
-    const m = /(?:^|\s)#(\w*)$/.exec(value);
-    if (m) {
-      setMentionOpen(true);
-      setMentionQuery(m[1]);
-    } else {
-      setMentionOpen(false);
-    }
-  };
-
-  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
-    syncMention(e.target.value);
-  };
-
-  const insertMention = (label: string) => {
-    // replace the trailing "#partial" with the chosen "#label "
-    setInput((v) => v.replace(/#(\w*)$/, `#${label} `));
-    setMentionOpen(false);
-    taRef.current?.focus();
-  };
+  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value);
 
   const submit = (text: string) => {
     const t = text.trim();
     if (!t || sending) return;
+    // first message of a fresh thread → mint + activate a run id
+    let runId = activeRunId;
+    if (!runId) {
+      runId = newRunId();
+      loadedId.current = runId;
+      setActiveRunId(runId);
+    }
     setSending(true);
-    setMessages((m) => [...m, { role: "user", content: t }]);
+    const next: Turn[] = [...messages, { role: "user", content: t }];
+    setMessages(next);
     setInput("");
-    setMentionOpen(false);
     const reply = fakeCompletion(t);
     const tokens = Math.floor(reply.length / 3.6) + 40;
     const latencyMs = 480 + Math.floor(Math.random() * 520);
     window.setTimeout(() => {
-      setMessages((m) => [...m, { role: "assistant", content: reply, tokens, latencyMs }]);
+      setMessages((m) => {
+        const withReply: Turn[] = [...m, { role: "assistant", content: reply, tokens, latencyMs }];
+        // persist the run under its stable id so the sidebar reflects it live
+        if (runId) upsertRun(runId, withReply, modelLabel);
+        return withReply;
+      });
       setSending(false);
     }, 260);
   };
 
-  // preset chip: prefill the composer (not send) and drop the caret at the end
+  // preset chip: prefill the composer (not send), caret at end
   const applyPreset = (prompt: string) => {
     setInput(prompt);
     const ta = taRef.current;
@@ -111,12 +97,15 @@ export function PlaygroundPage() {
     }
   };
 
+  // start a blank thread (the current one is already persisted after each reply)
+  const newChat = () => {
+    loadedId.current = null;
+    setActiveRunId(null);
+    setMessages([]);
+    setInput("");
+  };
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (mentionOpen && e.key === "Escape") {
-      e.preventDefault();
-      setMentionOpen(false);
-      return;
-    }
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       submit(input);
@@ -127,76 +116,57 @@ export function PlaygroundPage() {
 
   // the composer card, reused centered (welcome) and pinned at bottom (chat)
   const composer = (
-    <div className="relative">
-      {/* # mention popover */}
-      {mentionOpen && hasMentions && (
-        <div className="absolute bottom-full left-3 mb-2 w-64 overflow-hidden rounded-xl border border-border bg-card shadow-xl">
-          {matchEntries.length > 0 && (
-            <div className="py-1.5">
-              <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Library entries</p>
-              {matchEntries.map((e) => (
-                <button
-                  key={e.label}
-                  type="button"
-                  onClick={() => insertMention(e.label)}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-fg transition-colors hover:bg-overlay/[0.05]"
-                >
-                  <span className="ai-accent font-mono">#</span>
-                  {e.label}
-                </button>
-              ))}
-            </div>
-          )}
-          {matchTags.length > 0 && (
-            <div className="border-t border-border py-1.5">
-              <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted">Tags</p>
-              {matchTags.map((t) => (
-                <button
-                  key={t.label}
-                  type="button"
-                  onClick={() => insertMention(t.label)}
-                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-fg transition-colors hover:bg-overlay/[0.05]"
-                >
-                  <span className="ai-accent font-mono">#</span>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="ai-prompt rounded-2xl border border-border bg-panel p-2 shadow-sm">
-        <textarea
-          ref={taRef}
-          value={input}
-          onChange={onChange}
-          onKeyDown={onKeyDown}
-          rows={2}
-          placeholder="Ask anything, or type # to reference your prompt library…"
-          className="max-h-48 w-full resize-none bg-transparent px-2 py-1.5 text-sm text-fg placeholder:text-fg/40 outline-none"
+    <div className="ai-prompt rounded-2xl border border-border bg-panel p-2 shadow-sm">
+      <textarea
+        ref={taRef}
+        value={input}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        rows={2}
+        placeholder="Ask anything…"
+        className="max-h-48 w-full resize-none bg-transparent px-2 py-1.5 text-sm text-fg placeholder:text-fg/40 outline-none"
+      />
+      <div className="flex items-center gap-1 px-1 pt-1">
+        <ToolbarButton icon={Icons.paperclip} label="Attach" onClick={() => toast("Attach a file")} />
+        <ToolbarButton
+          icon={Icons.mic}
+          label={brandVoice ? "Brand Voice: on" : "No Brand Voice"}
+          active={brandVoice}
+          onClick={() => setBrandVoice((b) => !b)}
         />
-        <div className="flex items-center gap-1 px-1 pt-1">
-          <ToolbarButton icon={Icons.paperclip} label="Attach" onClick={() => toast("Attach a file")} />
-          <ToolbarButton icon={Icons.book} label="Browse Prompts" onClick={() => (location.hash = "#ai/prompts")} />
-          <ToolbarButton
-            icon={Icons.mic}
-            label={brandVoice ? "Brand Voice: on" : "No Brand Voice"}
-            active={brandVoice}
-            onClick={() => setBrandVoice((b) => !b)}
-          />
-          <div className="ml-auto flex items-center gap-1">
-            <ToolbarButton icon={Icons.wand} label="Improve" onClick={() => toast("Improving your prompt…")} />
-            <button
-              type="button"
-              onClick={() => submit(input)}
-              disabled={!input.trim() || sending}
-              aria-label="Send"
-              className="flex h-8 w-8 items-center justify-center rounded-full ai-bg-accent text-white transition-opacity disabled:opacity-40"
-            >
-              {Icons.send}
-            </button>
-          </div>
+        {/* model switcher — pops up the model list (opens upward so it clears
+            the composer). */}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            aria-label="Model"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-fg/70 outline-none transition-colors hover:bg-overlay/[0.05] hover:text-fg focus-visible:bg-overlay/[0.05] focus-visible:text-fg"
+          >
+            <span className="ai-accent [&_svg]:h-4 [&_svg]:w-4">{Icons.sparkle}</span>
+            {modelLabel}
+            <span className="text-fg/50">{Icons.chevronDown}</span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="mb-2 min-w-[12rem]">
+            {chatModels.map((m) => (
+              <DropdownMenuItem key={m.id} onSelect={() => setModel(m.id)}>
+                <span className="flex-1">{m.label}</span>
+                {m.id === model && (
+                  <span className="text-accent-soft-fg [&_svg]:h-3.5 [&_svg]:w-3.5">{Icons.check}</span>
+                )}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <div className="ml-auto flex items-center gap-1">
+          <ToolbarButton icon={Icons.wand} label="Improve" onClick={() => toast("Improving your prompt…")} />
+          <button
+            type="button"
+            onClick={() => submit(input)}
+            disabled={!input.trim() || sending}
+            aria-label="Send"
+            className="flex h-8 w-8 items-center justify-center rounded-full ai-bg-accent text-white transition-opacity disabled:opacity-40"
+          >
+            {Icons.send}
+          </button>
         </div>
       </div>
     </div>
@@ -204,28 +174,20 @@ export function PlaygroundPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-8rem)] flex-col">
-      {/* thin top bar — model picker + new chat, kept out of the way */}
-      <div className="mb-2 flex items-center justify-end gap-2">
-        <SelectMenu
-          aria-label="Model"
-          value={model}
-          onValueChange={setModel}
-          options={chatModels.map((m) => ({ value: m.id, label: m.label }))}
-          align="end"
-          className="w-auto min-w-[10rem] bg-panel font-medium hover:bg-overlay/[0.03]"
-        />
-        {started && (
-          <Button variant="secondary" onClick={() => setMessages([])}>
+      {/* thin top bar — "new chat" only; rendered mid-conversation */}
+      {started && (
+        <div className="mb-2 flex items-center justify-end">
+          <Button variant="secondary" onClick={newChat}>
             {Icons.plus}New chat
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {!started ? (
         /* centered welcome — logo, greeting, composer, then preset chips */
         <div className="flex flex-1 flex-col items-center justify-center py-8">
           <div className="w-full max-w-2xl text-center">
-            <span className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl ai-bg-accent text-white shadow-lg [&_svg]:h-6 [&_svg]:w-6">
+            <span className="ai-iconmark mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl text-white [&_svg]:relative [&_svg]:z-10 [&_svg]:h-6 [&_svg]:w-6">
               {Icons.logo}
             </span>
             <h1 className="text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
@@ -272,7 +234,6 @@ export function PlaygroundPage() {
                       <div className="px-0.5 py-0.5 text-sm text-fg">
                         <p className="whitespace-pre-wrap leading-relaxed">{m.content}</p>
                       </div>
-                      {/* per-response actions */}
                       <ResponseActions
                         onCopy={() => {
                           navigator.clipboard?.writeText(m.content);
@@ -343,9 +304,7 @@ function ToolbarButton({
   );
 }
 
-/* Per-response action row — copy, read aloud, up/down vote, regenerate. Sits
-   under every assistant reply. `up`/`down` are mutually-exclusive local state so
-   the chosen vote stays highlighted; the rest are one-shot toasts. */
+/* Per-response action row — copy, read aloud, up/down vote, regenerate. */
 function ResponseActions({
   onCopy,
   onSpeak,
@@ -385,9 +344,7 @@ function ResponseActions({
         }}
       />
       <ActionButton icon={Icons.regenerate} label="Regenerate" onClick={onRegenerate} />
-      {meta && (
-        <span className="ml-2 truncate text-[11px] text-fg/60 dark:text-fg/40">{meta}</span>
-      )}
+      {meta && <span className="ml-2 truncate text-[11px] text-fg/60 dark:text-fg/40">{meta}</span>}
     </div>
   );
 }

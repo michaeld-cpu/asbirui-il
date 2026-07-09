@@ -1,0 +1,6 @@
+Task Name,Status,Priority,Tags,Description
+Figma/code parity review,Backlog,High,"figma,qa","Compare Figma frames against live docs and source components for token usage, light/dark parity, sizing, spacing, states, naming."
+Accessibility annotation pass,Backlog,High,"figma,qa,a11y","Annotate focus order, keyboard behavior, dialog/menu expectations, contrast notes, reduced-motion expectations, and state requirements."
+Publish Figma library version 0.1,Backlog,Normal,"figma,handoff","Publish or mark the Figma file as v0.1 for internal use once foundations and shipped components are reviewed."
+Create engineering handoff notes,Backlog,Normal,"figma,handoff","Explain source links, token mappings, Figma variable usage, component status, roadmap placeholders, and known mismatches."
+Track Figma gaps back to Asbir UI roadmap,Backlog,Normal,"figma,planning","Link missing primitives, states, docs, or tokens back to the main Asbir UI ClickUp folder."

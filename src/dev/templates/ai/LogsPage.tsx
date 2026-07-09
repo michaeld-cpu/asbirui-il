@@ -1,4 +1,6 @@
 import * as React from "react";
+import { FilterChips } from "@/components/filter-chips";
+import { Icons } from "./ai-ui";
 import { PageHeader, Badge, EmptyState } from "./ai-states";
 import { useLogs, httpTone, type RequestLog } from "./store";
 
@@ -24,26 +26,13 @@ function statusClass(v: StatusFilter): number {
   return v === "2xx" ? 2 : v === "4xx" ? 4 : 5;
 }
 
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-        active
-          ? "ai-bg-accent-soft ai-accent"
-          : "border border-border text-fg/60 hover:bg-overlay/[0.05] hover:text-fg"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
+const PAGE_SIZE = 12; // rows per page — keeps the table from getting congested
 
 export function LogsPage() {
   const logs = useLogs();
   const [endpoint, setEndpoint] = React.useState<EndpointFilter>("all");
   const [status, setStatus] = React.useState<StatusFilter>("all");
+  const [page, setPage] = React.useState(1);
 
   const filtered = React.useMemo(
     () =>
@@ -62,27 +51,32 @@ export function LogsPage() {
     return { total, avgLatency, errors };
   }, [filtered]);
 
+  // pagination — reset to page 1 whenever the filters narrow/widen the set
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  React.useEffect(() => {
+    setPage(1);
+  }, [endpoint, status]);
+  const current = Math.min(page, pageCount);
+  const start = (current - 1) * PAGE_SIZE;
+  const pageRows = filtered.slice(start, start + PAGE_SIZE);
+
   return (
     <div>
       <PageHeader title="Logs" subtitle="Every request routed through the Lumina AI gateway." />
 
       <div className="mb-4 flex flex-wrap items-center gap-4">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-xs font-medium uppercase tracking-wider text-fg/60 dark:text-fg/40">Endpoint</span>
-          {ENDPOINTS.map((e) => (
-            <Chip key={e.value} active={endpoint === e.value} onClick={() => setEndpoint(e.value)}>
-              {e.label}
-            </Chip>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-xs font-medium uppercase tracking-wider text-fg/60 dark:text-fg/40">Status</span>
-          {STATUSES.map((s) => (
-            <Chip key={s.value} active={status === s.value} onClick={() => setStatus(s.value)}>
-              {s.label}
-            </Chip>
-          ))}
-        </div>
+        <FilterChips
+          label="Endpoint"
+          value={endpoint}
+          onValueChange={setEndpoint}
+          options={ENDPOINTS}
+        />
+        <FilterChips
+          label="Status"
+          value={status}
+          onValueChange={setStatus}
+          options={STATUSES}
+        />
       </div>
 
       <div className="mb-3 flex flex-wrap items-center gap-x-6 gap-y-1 rounded-lg border border-border bg-panel px-4 py-2.5 text-sm">
@@ -121,7 +115,7 @@ export function LogsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((l) => (
+              {pageRows.map((l) => (
                 <tr key={l.id} className="border-b border-border/60 last:border-0 hover:bg-overlay/[0.03]">
                   <td className="px-4 py-2.5 font-mono text-xs text-fg/60">{l.id}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-fg/70">{l.time}</td>
@@ -144,6 +138,105 @@ export function LogsPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {filtered.length > 0 && (
+        <Pager
+          page={current}
+          pageCount={pageCount}
+          rangeStart={start + 1}
+          rangeEnd={start + pageRows.length}
+          total={filtered.length}
+          onChange={setPage}
+        />
+      )}
+    </div>
+  );
+}
+
+/* Numbered pager: "showing X–Y of Z" + Prev / page numbers / Next. Windows the
+   page numbers around the current page so a large set stays compact. */
+function pageWindow(page: number, count: number): (number | "…")[] {
+  if (count <= 7) return Array.from({ length: count }, (_, i) => i + 1);
+  const out: (number | "…")[] = [1];
+  const lo = Math.max(2, page - 1);
+  const hi = Math.min(count - 1, page + 1);
+  if (lo > 2) out.push("…");
+  for (let i = lo; i <= hi; i++) out.push(i);
+  if (hi < count - 1) out.push("…");
+  out.push(count);
+  return out;
+}
+
+function Pager({
+  page,
+  pageCount,
+  rangeStart,
+  rangeEnd,
+  total,
+  onChange,
+}: {
+  page: number;
+  pageCount: number;
+  rangeStart: number;
+  rangeEnd: number;
+  total: number;
+  onChange: (p: number) => void;
+}) {
+  const btn =
+    "flex h-8 min-w-8 items-center justify-center rounded-lg border border-border px-2.5 text-xs font-medium transition-colors disabled:opacity-40 disabled:pointer-events-none";
+  return (
+    <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+      <p className="text-xs text-fg/60 dark:text-fg/45">
+        Showing <span className="font-medium text-fg">{rangeStart.toLocaleString()}</span>–
+        <span className="font-medium text-fg">{rangeEnd.toLocaleString()}</span> of{" "}
+        <span className="font-medium text-fg">{total.toLocaleString()}</span>
+      </p>
+
+      {pageCount > 1 && (
+        <nav className="flex items-center gap-1" aria-label="Pagination">
+          <button
+            type="button"
+            className={`${btn} text-fg/70 hover:bg-overlay/[0.05] hover:text-fg`}
+            onClick={() => onChange(page - 1)}
+            disabled={page <= 1}
+            aria-label="Previous page"
+          >
+            <span className="[&_svg]:h-4 [&_svg]:w-4">{Icons.chevronLeft}</span>
+          </button>
+
+          {pageWindow(page, pageCount).map((p, i) =>
+            p === "…" ? (
+              <span key={`gap-${i}`} className="px-1 text-xs text-fg/40">
+                …
+              </span>
+            ) : (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onChange(p)}
+                aria-current={p === page ? "page" : undefined}
+                className={`${btn} tabular-nums ${
+                  p === page
+                    ? "ai-bg-accent-soft ai-accent [border-color:rgb(var(--accent)/0.4)]"
+                    : "text-fg/70 hover:bg-overlay/[0.05] hover:text-fg"
+                }`}
+              >
+                {p}
+              </button>
+            ),
+          )}
+
+          <button
+            type="button"
+            className={`${btn} text-fg/70 hover:bg-overlay/[0.05] hover:text-fg`}
+            onClick={() => onChange(page + 1)}
+            disabled={page >= pageCount}
+            aria-label="Next page"
+          >
+            <span className="rotate-180 [&_svg]:h-4 [&_svg]:w-4">{Icons.chevronLeft}</span>
+          </button>
+        </nav>
       )}
     </div>
   );

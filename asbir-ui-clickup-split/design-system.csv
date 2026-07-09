@@ -1,6 +1,9 @@
 Task Name,Status,Priority,Tags,Description
-Define design tokens (color spacing radius shadow typography),In Progress,High,design,src/styles/tokens.css exists — expand full scale.
-Implement theming (light/dark + data-theme support),Backlog,High,design,Theme switching via data-theme attribute.
-Create Tailwind preset that exposes the tokens,Backlog,Normal,design,Publishable tailwind preset.
-Document color scales and semantic tokens,Backlog,Normal,"design,docs",Semantic token naming + usage.
-Define accessibility baseline (contrast focus rings motion),Backlog,High,"a11y,design",WCAG contrast + focus ring + reduced motion.
+Define design tokens (color spacing radius shadow typography),Done,High,design,src/styles/tokens.css — brand OKLCH ramp + semantic surfaces/text/accent + radius. Curated 22-family palette in palette-data.ts.
+Implement theming (light/dark + data-theme support),Done,High,design,Light/dark via .dark class and [data-theme=dark]; no-flash init + view-transition crossfade.
+Create Tailwind preset that exposes the tokens,Done,High,design,src/preset.ts — shipped as @asbirtech/asbir-ui/preset. Repo's own tailwind.config consumes it so nothing drifts.
+Document color scales and semantic tokens,Done,Normal,"design,docs",Live Colors page (#tokens/colors): 22 families x 11 steps, OKLCH/HSL/RGB, click-to-copy, per-family contrast grid.
+Document typography tokens,Backlog,Normal,"design,docs",Replace the Typography sidebar placeholder with a real docs section for font families, sizes, weights, and usage guidance.
+Document spacing & radius tokens,Backlog,Normal,"design,docs",Replace the Spacing & radius sidebar placeholder with a real docs section for spacing scale, radius token, and layout conventions.
+Define accessibility baseline (contrast focus rings motion),In Progress,High,"a11y,design",Contrast grid tool + focus-visible rings + motion-safe animations in place; formalize a documented baseline.
+Motion layer (CSS microinteractions + framer components),Done,Normal,design,src/motion — Reveal/Stagger (opt-in framer peer) + motion.css zero-runtime layer; exported at /motion.

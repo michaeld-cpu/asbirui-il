@@ -1,7 +1,13 @@
 Task Name,Status,Priority,Tags,Description
-Choose docs framework (Next.js / Astro / Nextra),Backlog,Normal,docs,
-Set up docs site scaffold,Backlog,Normal,docs,
-Component API reference pages,Backlog,Normal,docs,
-Live examples / code previews,Backlog,Normal,docs,
-Installation & theming guides,Backlog,Normal,docs,
-Deploy docs (Vercel / Netlify),Backlog,Low,docs,
+Choose docs framework,Done,Normal,docs,Built as a custom Vite + React hash-routed SPA (src/dev) rather than Next/Astro/Nextra — lets docs render the real library live.
+Set up docs site scaffold,Done,Normal,docs,Shell: Navbar, grouped DocsSidebar, DocsAside, theme toggle. Routes for components/tokens/templates/blocks/brand-kits.
+Component API reference pages,Done,Normal,docs,ComponentDocs — per-component page with props table + usage + install, data-driven off a registry.
+Live examples / code previews,Done,High,docs,ComponentPlayground — interactive controls that drive both a live render and the copyable code snippet.
+Templates docs catalogue page,Done,Normal,docs,TemplatesPage (#templates) — Tailwind-Plus-style rows with live iframe previews (dark desktop + dark mobile). Template content is tracked in templates.csv.
+Blocks + Brand Kits docs routes,Done,Normal,docs,BlocksDocs (composed sections) and BrandKitsDocs (per-project kits) scaffolded. Content ownership is tracked in blocks.csv and brand-kits.csv.
+Installation & theming guides,In Progress,Normal,docs,README covers preset + styles.css setup and re-theming; port into on-site Get-Started/Theming pages (currently placeholder 'soon').
+Installation guide page,Backlog,Normal,docs,Replace the sidebar placeholder with a real #docs installation page covering package install, peers, preset setup, and stylesheet import.
+Theming guide page,Backlog,Normal,"docs,design",Replace the sidebar placeholder with a real theming page covering CSS variables, .dark/[data-theme=dark], and project-level overrides.
+Motion docs route,Backlog,Normal,"docs,motion",Add a real motion docs page/route so MotionPromoCard can point at #motion instead of the current TODO.
+Test Cases docs section,Backlog,Normal,"docs,qa",Replace the Test Cases placeholders with states/edge-case pages tied to shipped components and blocks.
+Deploy docs (Vercel),In Progress,Low,docs,vercel.json + build:app config added (builds src/dev to a real static site); confirm the staging deploy.

@@ -1,13 +1,13 @@
 Task Name,Status,Priority,Tags,Description
-Button,In Progress,High,component,src/components/button.tsx exists — a11y/tests/docs pending.
-Input / Textarea,Backlog,High,component,
-Select,Backlog,Normal,component,
-Checkbox / Radio / Switch,Backlog,Normal,component,
-Dialog / Modal,Backlog,High,"component,a11y",Focus trap + ARIA.
-Dropdown Menu,Backlog,Normal,"component,a11y",Keyboard nav.
-Tooltip / Popover,Backlog,Normal,"component,a11y",
-Tabs,Backlog,Normal,"component,a11y",
-Toast / Notifications,Backlog,Normal,component,
-Accordion,Backlog,Normal,"component,a11y",
-Card,Backlog,Low,component,
-Table,Backlog,Normal,component,
+Dropdown Menu,Done,High,"component,a11y",Shipped — src/components/dropdown-menu. From-scratch: click/keyboard open, arrow-key nav, Esc close, controlled+uncontrolled, align/side variants.
+Filter Chips,Done,Normal,component,Shipped — src/components/filter-chips. Labeled single-select pill row rendered as an accessible radiogroup.
+Adopt generic primitives from headless lib (not from-scratch),Backlog,High,"component,a11y",Decision: Button/Input/Dialog/Tabs/Tooltip should wrap Radix/React-Aria and be restyled with the preset — do NOT rebuild from scratch.
+Button,Backlog,Normal,component,Restyle a headless button with the preset. (Was mislabeled 'in progress'; no button.tsx exists.)
+Input / Textarea,Backlog,Normal,component,Restyle with preset tokens (inputCls pattern already used in templates).
+Select,Backlog,Low,component,Superseded for now by FormSelect (composes DropdownMenu) in the AI template.
+Dialog / Modal,Backlog,High,"component,a11y",Adopt Radix Dialog + preset styling (focus trap + ARIA come for free).
+Tooltip / Popover,Backlog,Normal,"component,a11y",Adopt headless primitive + preset styling.
+Tabs,Backlog,Normal,"component,a11y",Adopt headless primitive + preset styling.
+Toast / Notifications,Backlog,Normal,component,useToast pattern exists in the AI template; promote to library later.
+Checkbox / Radio / Switch,Backlog,Low,"component,a11y",Adopt headless primitives + preset styling.
+Accordion / Card / Table,Backlog,Low,component,Table + cards already used in templates; extract when a second consumer needs them.

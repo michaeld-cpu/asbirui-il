@@ -46,6 +46,12 @@ export const Icons = {
       <circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" />
     </svg>
   ),
+  palette: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="13.5" cy="6.5" r="1.2" fill="currentColor" /><circle cx="17.5" cy="10.5" r="1.2" fill="currentColor" /><circle cx="8.5" cy="7.5" r="1.2" fill="currentColor" /><circle cx="6.5" cy="12.5" r="1.2" fill="currentColor" />
+      <path d="M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.4-.3-.4-.5-.9-.5-1.4 0-1.1.9-2 2-2h1.5A4.5 4.5 0 0 0 22 10.5C22 5.8 17.5 2 12 2Z" />
+    </svg>
+  ),
   search: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3-3" /></svg>),
   bell: (<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>),
   menu: (<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>),
@@ -69,7 +75,7 @@ export const Icons = {
   check: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>),
   inbox: (<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2" /><path d="M5.5 5.5 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.5A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.5Z" /></svg>),
   alert: (<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" /></svg>),
-  send: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z" /></svg>),
+  send: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 15 22l-4-9-9-4 20-7Z" /></svg>),
   arrowUpRight: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M8 7h9v9" /></svg>),
   filter: (<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M7 12h10M11 18h2" /></svg>),
   logo: (<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Zm0 7L2 14l10 5 10-5-10-5Z" /></svg>),
@@ -374,16 +380,41 @@ export function AreaChart({
   labels,
   format = (v) => `${(v * 100).toFixed(1)}%`,
   className,
+  revealDelay = 0,
 }: {
   data: number[];
   color?: string;
   labels?: string[];
   format?: (v: number) => string;
   className?: string;
+  /** stagger the draw-in entrance (seconds) — used to cascade a row of charts */
+  revealDelay?: number;
 }) {
   const uid = React.useId();
   const wrapRef = React.useRef<HTMLDivElement>(null);
   const [hover, setHover] = React.useState<number | null>(null);
+
+  // Scroll-trigger: hold the wipe paused until the chart scrolls into view, then
+  // play once. The clip stays fully closed (hidden) while paused, so charts
+  // below the fold don't silently "use up" their entrance before you see them.
+  const [inView, setInView] = React.useState(false);
+  React.useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setInView(true);
+            io.disconnect();
+          }
+        }
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   // viewBox space — width scales to the point count, fixed height
   const W = 300;
@@ -426,21 +457,41 @@ export function AreaChart({
   return (
     <div
       ref={wrapRef}
-      className={`relative ${className ?? ""}`}
+      data-inview={inView ? "true" : "false"}
+      className={`asbir-chart relative ${className ?? ""}`}
       onPointerMove={onMove}
       onPointerLeave={() => setHover(null)}
       role="img"
       aria-label={`Trend chart, ${n} points, peak ${format(max)}`}
     >
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-full w-full overflow-visible">
-        <defs>
-          <linearGradient id={`area-${uid}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity="0.28" />
-            <stop offset="100%" stopColor={color} stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <path d={areaPath} fill={`url(#area-${uid})`} />
-        <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      {/* base layer — area + line, revealed by a left→right clip wipe. The SVG
+          renders fully from frame one; only the wrapper's clip animates, so
+          there's no dashoffset/JS to race (no fast-refresh flicker). */}
+      <div
+        className="asbir-chart-wipe absolute inset-0"
+        style={{ ["--asbir-draw-delay" as string]: `${revealDelay}s` }}
+      >
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="h-full w-full overflow-visible">
+          <defs>
+            <linearGradient id={`area-${uid}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+              <stop offset="100%" stopColor={color} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d={areaPath} fill={`url(#area-${uid})`} />
+          <path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+        </svg>
+      </div>
+
+      {/* overlay — end-dot + hover crosshair, NOT clipped (dot pops in after the
+          wipe; hover marks must reach the full width). */}
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible">
+        {n > 0 && hv < 0 && (
+          <g className="asbir-draw-dot" style={{ ["--asbir-draw-delay" as string]: `${revealDelay}s` }}>
+            <circle cx={x(n - 1)} cy={y(data[n - 1])} r="6" fill={color} opacity="0.18" vectorEffect="non-scaling-stroke" />
+            <circle cx={x(n - 1)} cy={y(data[n - 1])} r="3" fill={color} stroke="rgb(var(--panel))" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+          </g>
+        )}
         {hv >= 0 && (
           <>
             <line x1={x(hv)} y1="0" x2={x(hv)} y2={H} stroke="rgb(var(--fg-rgb))" strokeOpacity="0.25" strokeWidth="1" vectorEffect="non-scaling-stroke" />
@@ -463,15 +514,6 @@ export function AreaChart({
               <span className={extreme === "max" ? "text-emerald-500" : "text-amber-500"}>{extreme}.</span>
             )}
           </div>
-        </div>
-      )}
-
-      {/* x-axis: first / mid / last labels */}
-      {labels && labels.length >= 2 && (
-        <div className="mt-1 flex justify-between text-[10px] text-fg/50 dark:text-fg/40">
-          <span>{labels[0]}</span>
-          <span>{labels[Math.floor((labels.length - 1) / 2)]}</span>
-          <span>{labels[labels.length - 1]}</span>
         </div>
       )}
     </div>
@@ -509,5 +551,79 @@ export function Sparkline({ data, className }: { data: number[]; className?: str
     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className={className} aria-hidden="true">
       <path d={d} fill="none" stroke="rgb(var(--accent))" strokeOpacity="0.85" strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+/* Categorical spectrum for breakdowns — accent leads, then a spread of
+   distinct-but-harmonious hues. Cycles if there are more slices than colors. */
+export const chartPalette = [
+  "rgb(var(--accent))",
+  "#6366f1", // indigo
+  "#14b8a6", // teal
+  "#f59e0b", // amber
+  "#ec4899", // pink
+  "#8b5cf6", // violet
+];
+
+/* Donut chart with an interactive center readout. Pass slices with a value and
+   label; hovering a segment shows its share in the middle. */
+export function Donut({
+  slices,
+  className,
+  centerLabel,
+}: {
+  slices: { label: string; value: number; color?: string }[];
+  className?: string;
+  centerLabel?: string;
+}) {
+  const [hover, setHover] = React.useState<number | null>(null);
+  const total = slices.reduce((s, x) => s + x.value, 0) || 1;
+  const R = 42;
+  const C = 2 * Math.PI * R;
+  const gap = 2; // px gap between segments in path units
+
+  let offset = 0;
+  const segs = slices.map((s, i) => {
+    const frac = s.value / total;
+    const len = Math.max(0, frac * C - gap);
+    const seg = { i, len, dash: offset, color: s.color ?? chartPalette[i % chartPalette.length], frac };
+    offset += frac * C;
+    return seg;
+  });
+
+  const active = hover != null ? slices[hover] : null;
+
+  return (
+    <div className={`relative ${className ?? ""}`} role="img" aria-label="Spend composition">
+      <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+        <circle cx="50" cy="50" r={R} fill="none" stroke="rgb(var(--fg-rgb))" strokeOpacity="0.06" strokeWidth="12" />
+        {segs.map((s) => (
+          <circle
+            key={s.i}
+            cx="50"
+            cy="50"
+            r={R}
+            fill="none"
+            stroke={s.color}
+            strokeWidth={hover === s.i ? 14 : 12}
+            strokeLinecap="round"
+            strokeDasharray={`${s.len} ${C - s.len}`}
+            strokeDashoffset={-s.dash}
+            className="cursor-pointer transition-[stroke-width] duration-150"
+            style={{ opacity: hover == null || hover === s.i ? 1 : 0.35 }}
+            onPointerEnter={() => setHover(s.i)}
+            onPointerLeave={() => setHover(null)}
+          />
+        ))}
+      </svg>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
+        <span className="text-xl font-semibold tabular-nums tracking-tight text-fg">
+          {active ? `${Math.round((active.value / total) * 100)}%` : centerLabel}
+        </span>
+        <span className="mt-0.5 max-w-[70%] truncate text-[11px] text-fg/60 dark:text-fg/45">
+          {active ? active.label : "of spend"}
+        </span>
+      </div>
+    </div>
   );
 }

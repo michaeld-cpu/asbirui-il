@@ -155,7 +155,6 @@ export type RequestLog = {
 
 export type Invoice = { id: string; date: string; amount: number; status: "Paid" | "Due" | "Failed" };
 export type Member = { id: string; name: string; email: string; role: "Owner" | "Admin" | "Developer" | "Billing"; status: "Active" | "Invited" };
-export type Prompt = { id: string; title: string; body: string; model: string; tags: string[]; updated: string; favorite: boolean };
 export type ChatMessage = { role: "user" | "assistant"; content: string };
 
 /* ---- back-compat: some pages still import Model/MODELS/ApiKey ---- */
@@ -271,11 +270,6 @@ const seedMembers: Member[] = [
   { id: "usr_03", name: "Michael Foster", email: "michael@lumina.ai", role: "Developer", status: "Active" },
   { id: "usr_04", name: "Dana Kim", email: "dana@lumina.ai", role: "Billing", status: "Invited" },
 ];
-const seedPrompts: Prompt[] = [
-  { id: "pmt_01", title: "Support triage", body: "You are a support agent. Classify the ticket by urgency…", model: "gpt-4o", tags: ["support"], updated: "2h ago", favorite: true },
-  { id: "pmt_02", title: "SQL generator", body: "Given a schema, write a safe SQL query…", model: "gpt-4.1", tags: ["data"], updated: "1d ago", favorite: false },
-  { id: "pmt_03", title: "PR reviewer", body: "Review this diff for bugs and security…", model: "claude-sonnet-4", tags: ["engineering"], updated: "1w ago", favorite: false },
-];
 const seedApiKeys: ApiKey[] = [
   { id: "key_01", name: "production-backend", prefix: "sk-live-7Kq2", created: "Jan 14, 2026", lastUsed: "2h ago", scopes: ["chat", "embeddings"], status: "active" },
   { id: "key_02", name: "staging-worker", prefix: "sk-live-9fD4", created: "Feb 2, 2026", lastUsed: "1d ago", scopes: ["chat"], status: "active" },
@@ -288,7 +282,6 @@ type DB = {
   logs: RequestLog[];
   invoices: Invoice[];
   members: Member[];
-  prompts: Prompt[];
   apiKeys: ApiKey[];
 };
 const db: DB = {
@@ -297,7 +290,6 @@ const db: DB = {
   logs: seededLogs(seedAgents),
   invoices: seedInvoices.map((i) => ({ ...i })),
   members: seedMembers.map((m) => ({ ...m })),
-  prompts: seedPrompts.map((p) => ({ ...p })),
   apiKeys: seedApiKeys.map((k) => ({ ...k })),
 };
 
@@ -321,9 +313,11 @@ export const platform = {
   successRate: 0.976,
   activeAgents: 4,
   connectedProviders: 3,
-  // 14-day platform series (0..1)
-  requestsSeries: [0.3, 0.36, 0.32, 0.44, 0.4, 0.52, 0.48, 0.6, 0.55, 0.7, 0.64, 0.78, 0.72, 0.9],
-  spendSeries: [0.2, 0.28, 0.24, 0.34, 0.3, 0.42, 0.38, 0.5, 0.46, 0.58, 0.54, 0.66, 0.62, 0.8],
+  // 14-day platform series (0..1) — weekday peaks, weekend dips, overall upward trend
+  // 30-point dense, textured series (via the shared generator) so the area
+  // charts read as a real month of activity instead of a coarse 14-point wave
+  requestsSeries: s(0.32, "rising"),
+  spendSeries: s(0.26, "rising"),
 
   /* back-compat fields for pages awaiting the UI revamp (old `usage` shape) */
   creditsUsed: 6820,
@@ -332,10 +326,10 @@ export const platform = {
   requests7d: 48210,
   errorRate: "0.42%",
   byModel: [
-    { model: "GPT-4o", requests: 21400, tokens: "38.2M", cost: 214.6 },
-    { model: "Claude Sonnet 4", requests: 12800, tokens: "22.1M", cost: 88.2 },
-    { model: "Gemini 2.5 Flash", requests: 2100, tokens: "3.1M", cost: 9.7 },
-    { model: "GPT-4.1", requests: 3020, tokens: "5.2M", cost: 33.8 },
+    { model: "GPT-4o", provider: "openai" as ProviderId, requests: 21400, tokens: "38.2M", cost: 214.6 },
+    { model: "Claude Sonnet 4", provider: "anthropic" as ProviderId, requests: 12800, tokens: "22.1M", cost: 88.2 },
+    { model: "Gemini 2.5 Flash", provider: "google" as ProviderId, requests: 2100, tokens: "3.1M", cost: 9.7 },
+    { model: "GPT-4.1", provider: "openai" as ProviderId, requests: 3020, tokens: "5.2M", cost: 33.8 },
   ],
 };
 
@@ -360,8 +354,6 @@ export const useAgent = (id: string | null) => useDb((d) => d.agents.find((a) =>
 export const useLogs = () => useDb((d) => d.logs);
 export const useInvoices = () => useDb((d) => d.invoices);
 export const useMembers = () => useDb((d) => d.members);
-export const usePrompts = () => useDb((d) => d.prompts);
-export const usePrompt = (id: string | null) => useDb((d) => d.prompts.find((p) => p.id === id) ?? null);
 
 /* ============================ mutations ============================ */
 export function connectProvider(input: { provider: ProviderId; label: string; key: string }) {
@@ -415,26 +407,6 @@ export function removeMember(id: string) {
   db.members = db.members.filter((m) => m.id !== id);
   emit();
 }
-export function savePrompt(input: Omit<Prompt, "id" | "updated"> & { id?: string }) {
-  if (input.id) {
-    db.prompts = db.prompts.map((p) => (p.id === input.id ? { ...p, ...input, updated: "just now" } : p));
-    emit();
-    return input.id;
-  }
-  const id = `pmt_${String(db.prompts.length + 1).padStart(2, "0")}`;
-  db.prompts = [{ ...input, id, updated: "just now" }, ...db.prompts];
-  emit();
-  return id;
-}
-export function togglePromptFavorite(id: string) {
-  db.prompts = db.prompts.map((p) => (p.id === id ? { ...p, favorite: !p.favorite } : p));
-  emit();
-}
-export function deletePrompt(id: string) {
-  db.prompts = db.prompts.filter((p) => p.id !== id);
-  emit();
-}
-
 /* ---- back-compat shims for pages not yet revamped ---- */
 /* ---- API keys: a real store slice (create / revoke / delete all mutate) ---- */
 export const useApiKeys = (): ApiKey[] => useDb((d) => d.apiKeys);

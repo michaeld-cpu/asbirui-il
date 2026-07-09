@@ -1,16 +1,8 @@
 import * as React from "react";
-import { SelectMenu } from "@/components/select-menu";
-import { PageHeader, Button, Badge, Field, inputCls, ConfirmDialog, Modal, useToast } from "./ai-states";
+import { PageHeader, Button, Badge, Field, FormSelect, inputCls, ConfirmDialog, Modal, useToast } from "./ai-states";
 import { useMembers, inviteMember, removeMember, memberTone, type Member } from "./store";
 
 const ROLES: Member["role"][] = ["Owner", "Admin", "Developer", "Billing"];
-
-const ROLE_INFO: { role: Member["role"]; desc: string }[] = [
-  { role: "Owner", desc: "Full control of the workspace, billing, and members. Cannot be removed." },
-  { role: "Admin", desc: "Manage API keys, prompts, members, and settings — everything except deleting the workspace." },
-  { role: "Developer", desc: "Create and use API keys, prompts, and the playground. No billing or member access." },
-  { role: "Billing", desc: "View usage and manage invoices and payment methods. No engineering access." },
-];
 
 function initials(name: string) {
   return name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
@@ -111,19 +103,6 @@ export function TeamPage() {
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-border bg-panel p-5">
-        <h2 className="text-sm font-semibold text-fg">Roles</h2>
-        <p className="mt-1 text-sm text-fg/70 dark:text-fg/55">What each role can do in this workspace.</p>
-        <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-          {ROLE_INFO.map((r) => (
-            <div key={r.role} className="flex gap-3">
-              <Badge className="h-fit bg-overlay/[0.08] text-fg/70">{r.role}</Badge>
-              <dd className="text-sm text-fg/70 dark:text-fg/55">{r.desc}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-
       <Modal open={inviteOpen} title="Invite member" onClose={closeInvite}>
         <div className="space-y-4">
           <Field label="Name">
@@ -133,8 +112,8 @@ export function TeamPage() {
             <input className={inputCls} value={email} placeholder="jane@lumina.ai" type="email" onChange={(e) => setEmail(e.target.value)} />
           </Field>
           <Field label="Role" hint="Owner can only be reassigned from settings.">
-            <SelectMenu
-              aria-label="Role"
+            <FormSelect
+              ariaLabel="Role"
               value={role}
               onValueChange={(v) => setRole(v as Member["role"])}
               options={ROLES.map((r) => ({ value: r, label: r }))}

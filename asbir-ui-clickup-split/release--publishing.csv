@@ -1,7 +1,9 @@
 Task Name,Status,Priority,Tags,Description
-Reserve npm name/scope (asbir-ui now; migrate to @asbirtech/*),In Progress,High,,Package renamed to asbir-ui.
-Create asbirtech npm org and transfer package,Backlog,Normal,,
-Set up versioning (Changesets),Backlog,Normal,,
-Publish v0.1.0 alpha to npm,Backlog,High,,
+Reserve npm name/scope,Done,High,,Package is @asbirtech/asbir-ui (scoped, publishConfig access public).
+Create asbirtech npm org and transfer package,Done,High,,Package has been transferred to the Asbir npm org; scoped publishing blocker cleared.
+Set up versioning (Changesets),Backlog,Normal,,No .changeset yet — add for versioned releases.
+Fix package metadata for Asbir repo,Backlog,High,,package.json still references the old bedrockui GitHub URLs; update repository/homepage/bugs before publish.
+Package verification / npm pack install test,Backlog,High,ci,Before v0.1.0 alpha verify dist exports for core/motion/preset/styles and install-test the packed package in a clean app.
+Publish v0.1.0 alpha to npm,Backlog,High,,Build is green (core + motion + preset). Next blockers are versioning/Changesets and final package verification.
 Write CONTRIBUTING.md and issue templates,Backlog,Low,docs,
 Set up release CI (automated publish on tag),Backlog,Normal,ci,

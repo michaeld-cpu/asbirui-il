@@ -1,0 +1,7 @@
+Task Name,Status,Priority,Tags,Description
+Stat cards block,Done,Normal,"component,docs",Dashboard KPI tile row exists in BlocksDocs.tsx with preview and copyable code.
+Login form block,Done,Normal,"component,docs",Centered auth form block exists in BlocksDocs.tsx with preview and copyable code.
+Table toolbar block,Done,Normal,"component,docs",Data table toolbar uses search, FilterChips, and DropdownMenu; exists in BlocksDocs.tsx.
+Empty state block,Done,Normal,"component,docs",Centered empty state block exists in BlocksDocs.tsx with icon, copy, and CTA.
+Extract blocks into src/blocks,Backlog,High,component,Blocks currently live inline in BlocksDocs.tsx; extract source files once the block API stabilizes.
+Add block QA states,Backlog,Normal,"a11y,docs",Add responsive/accessibility review cases for each block before treating them as production-ready assets.
