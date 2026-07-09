@@ -255,10 +255,10 @@ function CtaSection() {
           Every screen your team ships starts a step ahead. Browse the
           components, grab a template, and get back to the work that matters.
         </p>
-        <div className="mt-7 flex items-center justify-center gap-3">
+        <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
             href="#components"
-            className="group inline-flex items-center gap-2 rounded-asbir bg-solid px-5 py-2.5 text-sm font-semibold text-fg-invert transition-colors hover:bg-solid/85"
+            className="group inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-asbir bg-solid px-5 py-2.5 text-sm font-semibold text-fg-invert transition-colors hover:bg-solid/85"
           >
             Browse components
             <span className="transition-transform group-hover:translate-x-0.5">
@@ -267,7 +267,7 @@ function CtaSection() {
           </a>
           <a
             href="#docs"
-            className="inline-flex items-center gap-2 rounded-asbir border border-border bg-overlay/[0.03] px-5 py-2.5 text-sm font-medium text-fg transition-colors hover:bg-overlay/[0.07]"
+            className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-asbir border border-border bg-overlay/[0.03] px-5 py-2.5 text-sm font-medium text-fg transition-colors hover:bg-overlay/[0.07]"
           >
             Read the docs
           </a>
