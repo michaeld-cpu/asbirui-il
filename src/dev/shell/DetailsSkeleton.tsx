@@ -17,14 +17,16 @@
 const glyphCls =
   "mx-1 inline-block h-[1.5em] w-[1.5em] -translate-y-[2px] align-middle";
 
-/** Shared white→gray gradient stroke — vertical and subtle (white easing into
-    a soft gray), so the glyphs read smooth, not metallic. */
+/** Shared gradient stroke — vertical and subtle, so the glyphs read smooth,
+    not metallic. The stop colors come from CSS vars that flip per theme
+    (--glyph-grad-a/b): light→gray in dark mode, dark→gray in light mode, so
+    the glyphs stay legible on either background. */
 function GlyphGradient({ id }: { id: string }) {
   return (
     <defs>
       <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#FFFFFF" />
-        <stop offset="100%" stopColor="#A1A1AA" />
+        <stop offset="0%" stopColor="var(--glyph-grad-a, #FFFFFF)" />
+        <stop offset="100%" stopColor="var(--glyph-grad-b, #A1A1AA)" />
       </linearGradient>
     </defs>
   );

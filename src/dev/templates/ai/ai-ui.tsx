@@ -483,23 +483,46 @@ export function AreaChart({
         </svg>
       </div>
 
-      {/* overlay — end-dot + hover crosshair, NOT clipped (dot pops in after the
-          wipe; hover marks must reach the full width). */}
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible">
-        {n > 0 && hv < 0 && (
-          <g className="asbir-draw-dot" style={{ ["--asbir-draw-delay" as string]: `${revealDelay}s` }}>
-            <circle cx={x(n - 1)} cy={y(data[n - 1])} r="6" fill={color} opacity="0.18" vectorEffect="non-scaling-stroke" />
-            <circle cx={x(n - 1)} cy={y(data[n - 1])} r="3" fill={color} stroke="rgb(var(--panel))" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-          </g>
-        )}
+      {/* overlay — hover crosshair line lives in the stretched SVG (a line is
+          fine to stretch); the round markers are HTML spans positioned by %,
+          so they stay perfectly circular instead of being squished into ovals
+          by the SVG's preserveAspectRatio="none". */}
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
         {hv >= 0 && (
-          <>
-            <line x1={x(hv)} y1="0" x2={x(hv)} y2={H} stroke="rgb(var(--fg-rgb))" strokeOpacity="0.25" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-            {/* dot: surface ring keeps it legible over the line */}
-            <circle cx={x(hv)} cy={y(data[hv])} r="4.5" fill={color} stroke="rgb(var(--panel))" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-          </>
+          <line x1={x(hv)} y1="0" x2={x(hv)} y2={H} stroke="rgb(var(--fg-rgb))" strokeOpacity="0.25" strokeWidth="1" vectorEffect="non-scaling-stroke" />
         )}
       </svg>
+
+      {/* end-dot (pops in after the wipe) — HTML span so it's a true circle */}
+      {n > 0 && hv < 0 && (
+        <span
+          className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
+          style={{
+            left: `${(x(n - 1) / W) * 100}%`,
+            top: `${(y(data[n - 1]) / H) * 100}%`,
+          }}
+        >
+          <span
+            className="asbir-draw-dot block"
+            style={{ ["--asbir-draw-delay" as string]: `${revealDelay}s` }}
+          >
+            <span className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: color, opacity: 0.18 }} />
+            <span className="block h-1.5 w-1.5 rounded-full ring-[1.5px] ring-[rgb(var(--panel))]" style={{ background: color }} />
+          </span>
+        </span>
+      )}
+
+      {/* hover dot — true circle, ring keeps it legible over the crosshair */}
+      {hv >= 0 && (
+        <span
+          className="pointer-events-none absolute block h-[9px] w-[9px] -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[rgb(var(--panel))]"
+          style={{
+            left: `${(x(hv) / W) * 100}%`,
+            top: `${(y(data[hv]) / H) * 100}%`,
+            background: color,
+          }}
+        />
+      )}
 
       {/* floating tooltip — mirrors the reference: time row + value with min/max tag */}
       {hv >= 0 && (

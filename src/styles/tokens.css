@@ -102,6 +102,10 @@
   --accent-soft-bg: var(--solid); /* used at low alpha */
   --accent-soft-border: var(--solid);
   --accent-soft-fg: var(--fg-rgb); /* eyebrows read as plain foreground */
+
+  /* inline glyph gradient (DetailsSkeleton) — light→gray on dark bg */
+  --glyph-grad-a: #ffffff;
+  --glyph-grad-b: #a1a1aa;
 }
 
 .light {
@@ -126,6 +130,10 @@
   --accent-soft-bg: var(--solid);
   --accent-soft-border: var(--solid);
   --accent-soft-fg: var(--fg-rgb);
+
+  /* dark→gray so the glyphs stay legible on the white light-mode background */
+  --glyph-grad-a: #27272a;
+  --glyph-grad-b: #71717a;
 }
 
 html,
