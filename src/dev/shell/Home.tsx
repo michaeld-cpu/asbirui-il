@@ -2,6 +2,7 @@ import asbirLogo from "@/assets/logo/asbirlogo-white.svg";
 import heroBackdrop from "@/assets/backdrops/herobackdrop.jpeg";
 import { TemplatePreview } from "./TemplatePreview";
 import { MotionPromoFloating } from "./MotionPromoCard";
+import { DetailsSkeleton } from "./DetailsSkeleton";
 import { IntegrationsGrid } from "./IntegrationsGrid";
 
 const RocketIcon = (
@@ -116,33 +117,6 @@ function SectionHeading({
 }
 
 /* ------------------------------------------------------------------ */
-/* Under-construction placeholder (temporary section body)             */
-/* ------------------------------------------------------------------ */
-
-const HammerIcon = (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m14.5 12.5-8 8a2.12 2.12 0 0 1-3-3l8-8" />
-    <path d="M17.64 15 22 10.64" />
-    <path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H9l.92.82A6.18 6.18 0 0 1 12 8.4v1.56l2 2h.86c.85 0 1.65.34 2.25.93l1.25 1.25" />
-  </svg>
-);
-
-/* Under-construction placeholder. No solid fill — the diagonal hatch IS the
-   surface, so the card reads as work-in-progress overlaying the section rather
-   than a finished gray panel. Kept to a modest centered width, not full-bleed. */
-function UnderConstruction() {
-  return (
-    <div className="mt-8 flex flex-col items-center justify-center py-12 text-center">
-      <span className="flex h-12 w-12 items-center justify-center rounded-asbir border border-border bg-canvas text-fg/70">
-        {HammerIcon}
-      </span>
-      <p className="mt-4 text-sm font-semibold text-fg">Under construction</p>
-      <p className="mt-1 text-xs leading-relaxed text-fg/55">DE at work.</p>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* Templates showcase                                                  */
 /* ------------------------------------------------------------------ */
 
@@ -217,11 +191,8 @@ function TechnologySection() {
 function FeaturesSection() {
   return (
     <section id="features" className="mt-24">
-      <SectionHeading
-        title="The details are the product."
-        description="A component library is only as good as the thousand small decisions inside it. Here's what we sweated so you don't have to."
-      />
-      <UnderConstruction />
+      <SectionHeading title="The details are the product." />
+      <DetailsSkeleton />
     </section>
   );
 }
