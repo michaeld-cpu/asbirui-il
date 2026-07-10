@@ -10,8 +10,9 @@ import asbirMotionBanner from "@/assets/backdrops/asbirmotion.png";
                            button, HeroUI-style). Used as the mobile form of the
                            docs aside AND as a bottom-left promo on the homepage.
 
-  Floating cards are dismissed for the current browser session (sessionStorage),
-  keyed by `dismissKey`, so closing one doesn't nag again until a fresh visit.
+  Dismissing a floating card only hides it for the current page view (in-memory
+  state) — a reload or returning to the page re-shows it. This is intentional:
+  it's a promo, not a one-time notice, so it should greet each fresh visit.
 */
 
 const ArrowIcon = (
@@ -81,7 +82,8 @@ export function MotionPromoStatic() {
 }
 
 export interface MotionPromoFloatingProps {
-  /** sessionStorage key so a dismiss sticks for the session. */
+  /** Identity for this card (kept for API stability / future per-key logic).
+      Dismissal is in-memory only, so the card re-shows on every fresh visit. */
   dismissKey: string;
   /** Which corner to anchor to. */
   corner?: "bottom-left" | "bottom-right";
@@ -105,25 +107,14 @@ export function MotionPromoFloating({
   const [closing, setClosing] = React.useState(false);
 
   React.useEffect(() => {
-    let seen = false;
-    try {
-      seen = sessionStorage.getItem(dismissKey) === "1";
-    } catch {
-      /* ignore */
-    }
-    if (seen) return;
-    // Hold the card out of the DOM for `delayMs` so the page settles first;
-    // mounting then triggers the promo-in entrance.
+    // Dismissal is in-memory only (see note on `dismissKey`), so every fresh
+    // page load / return to the page re-shows the card. Hold it out of the DOM
+    // for `delayMs` so the page settles first; mounting triggers the entrance.
     const t = window.setTimeout(() => setMounted(true), delayMs);
     return () => window.clearTimeout(t);
   }, [dismissKey, delayMs]);
 
   const dismiss = () => {
-    try {
-      sessionStorage.setItem(dismissKey, "1");
-    } catch {
-      /* ignore */
-    }
     setClosing(true);
     // unmount after the outro finishes (matches promo-out duration)
     window.setTimeout(() => setMounted(false), 240);
