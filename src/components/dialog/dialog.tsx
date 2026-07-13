@@ -71,7 +71,12 @@ export function Dialog({
     if (!open) return;
     lastActive.current = document.activeElement;
     const prevOverflow = document.body.style.overflow;
+    const prevPaddingRight = document.body.style.paddingRight;
+    // hiding the scrollbar widens the page and shifts everything sideways —
+    // pad the body by the scrollbar's width so the layout doesn't jitter
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
     // focus the first focusable thing in the panel (or the panel itself)
     const raf = requestAnimationFrame(() => {
       const panel = panelRef.current;
@@ -82,6 +87,7 @@ export function Dialog({
     return () => {
       cancelAnimationFrame(raf);
       document.body.style.overflow = prevOverflow;
+      document.body.style.paddingRight = prevPaddingRight;
       (lastActive.current as HTMLElement | null)?.focus?.();
     };
   }, [open]);
