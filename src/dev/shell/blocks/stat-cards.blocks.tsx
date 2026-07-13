@@ -15,7 +15,7 @@ function TrendDeltas() {
       {STATS.map((s) => (
         <div key={s.label} className="rounded-xl border border-border bg-panel p-4">
           <p className="text-xs font-medium text-fg/60">{s.label}</p>
-          <p className="mt-2 text-2xl font-semibold tracking-tight text-fg">{s.value}</p>
+          <p className="mt-2 whitespace-nowrap text-2xl font-semibold tracking-tight text-fg">{s.value}</p>
           <span
             className={`mt-2 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-medium ${
               s.up ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/15 text-rose-600 dark:text-rose-400"
@@ -53,8 +53,10 @@ function Sparklines() {
       {STATS.map((s, i) => (
         <div key={s.label} className="rounded-xl border border-border bg-panel p-4">
           <p className="text-xs font-medium text-fg/60">{s.label}</p>
-          <div className="mt-2 flex items-end justify-between gap-3">
-            <p className="text-2xl font-semibold tracking-tight text-fg">{s.value}</p>
+          {/* flex-wrap: on tight cards the sparkline drops below the value
+              instead of overflowing; the value itself never breaks */}
+          <div className="mt-2 flex flex-wrap items-end justify-between gap-x-3 gap-y-1.5">
+            <p className="whitespace-nowrap text-2xl font-semibold tracking-tight text-fg">{s.value}</p>
             <svg viewBox="0 0 64 20" className={`h-5 w-16 shrink-0 ${s.up ? "text-emerald-500" : "text-rose-500"}`} aria-hidden="true">
               <polyline
                 fill="none"
@@ -84,7 +86,7 @@ function CompactPanel() {
         >
           <p className="text-xs font-medium text-fg/60">{s.label}</p>
           <p className="mt-1.5 text-xl font-semibold tracking-tight text-fg">
-            {s.value}
+            <span className="whitespace-nowrap">{s.value}</span>
             <span className={`ml-2 text-[11px] font-medium ${s.up ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
               {s.delta}
             </span>
@@ -119,7 +121,7 @@ export const statCardsBlock: BlockEntry = {
   {stats.map((s) => (
     <div key={s.label} className="rounded-xl border border-border bg-panel p-4">
       <p className="text-xs font-medium text-fg/60">{s.label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-fg">{s.value}</p>
+      <p className="mt-2 whitespace-nowrap text-2xl font-semibold tracking-tight text-fg">{s.value}</p>
       <span className={cn("mt-2 inline-flex rounded-full px-1.5 py-0.5 text-[11px] font-medium",
         s.up ? "bg-emerald-500/15 text-emerald-600" : "bg-rose-500/15 text-rose-600")}>
         {s.delta}
@@ -144,8 +146,8 @@ export const statCardsBlock: BlockEntry = {
   {stats.map((s) => (
     <div key={s.label} className="rounded-xl border border-border bg-panel p-4">
       <p className="text-xs font-medium text-fg/60">{s.label}</p>
-      <div className="mt-2 flex items-end justify-between gap-3">
-        <p className="text-2xl font-semibold tracking-tight text-fg">{s.value}</p>
+      <div className="mt-2 flex flex-wrap items-end justify-between gap-x-3 gap-y-1.5">
+        <p className="whitespace-nowrap text-2xl font-semibold tracking-tight text-fg">{s.value}</p>
         <svg viewBox="0 0 64 20" className={cn("h-5 w-16", s.up ? "text-emerald-500" : "text-rose-500")}>
           <polyline fill="none" stroke="currentColor" strokeWidth="1.5"
             strokeLinecap="round" strokeLinejoin="round" points={sparkPoints(s.series)} />
@@ -167,7 +169,7 @@ export const statCardsBlock: BlockEntry = {
       i >= 2 && "border-t border-border/60 lg:border-l lg:border-t-0")}>
       <p className="text-xs font-medium text-fg/60">{s.label}</p>
       <p className="mt-1.5 text-xl font-semibold tracking-tight text-fg">
-        {s.value}
+        <span className="whitespace-nowrap">{s.value}</span>
         <span className={cn("ml-2 text-[11px] font-medium",
           s.up ? "text-emerald-600" : "text-rose-600")}>{s.delta}</span>
       </p>
