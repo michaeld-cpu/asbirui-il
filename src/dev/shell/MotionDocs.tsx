@@ -42,27 +42,48 @@ const ReplayIcon = (
 
 /* ---- demo helpers ------------------------------------------------------ */
 
-/** A tiny standalone area chart with the draw/fill markup ChartReveal expects. */
+/** The Lumina AI overview chart's look — a Catmull-Rom smoothed area with a
+    gradient wash and an end-dot that pops in after the draw — in white (fg),
+    with the draw/fill/dot markup ChartReveal expects. */
 function MiniChart() {
-  const data = [8, 14, 10, 22, 18, 30, 24, 38, 34, 46];
-  const W = 300, H = 90, pad = 8;
+  const data = [12, 18, 14, 26, 22, 34, 28, 44, 38, 52];
+  const W = 300, H = 100, padY = 10;
   const max = Math.max(...data);
-  const pts = data.map((v, i) => [
-    (i / (data.length - 1)) * W,
-    H - pad - (v / max) * (H - pad * 2),
-  ] as const);
-  const line = pts.map((p, i) => `${i ? "L" : "M"} ${p[0]} ${p[1]}`).join(" ");
+  const n = data.length;
+  const x = (i: number) => (i / (n - 1)) * W;
+  const y = (v: number) => H - padY - (v / max) * (H - padY * 2);
+  const pts = data.map((v, i) => [x(i), y(v)] as const);
+
+  // Catmull-Rom → cubic Bézier: a smooth curve through every point (same
+  // math as the Lumina AreaChart)
+  const line = pts.reduce((d, p, i) => {
+    if (i === 0) return `M ${p[0]} ${p[1]}`;
+    const p0 = pts[i - 1];
+    const p2 = pts[i + 1] ?? p;
+    const cp1x = p0[0] + (p[0] - (pts[i - 2] ?? p0)[0]) / 6;
+    const cp1y = p0[1] + (p[1] - (pts[i - 2] ?? p0)[1]) / 6;
+    const cp2x = p[0] - (p2[0] - p0[0]) / 6;
+    const cp2y = p[1] - (p2[1] - p0[1]) / 6;
+    return `${d} C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${p[0]} ${p[1]}`;
+  }, "");
   const area = `${line} L ${W} ${H} L 0 ${H} Z`;
+  const [ex, ey] = pts[n - 1];
+
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-20 w-full max-w-[16rem] overflow-visible" preserveAspectRatio="none">
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-24 w-full max-w-[17rem] overflow-visible">
       <defs>
         <linearGradient id="motion-demo-area" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgb(var(--accent))" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="rgb(var(--accent))" stopOpacity="0" />
+          <stop offset="0%" stopColor="rgb(var(--fg-rgb))" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="rgb(var(--fg-rgb))" stopOpacity="0" />
         </linearGradient>
       </defs>
       <path d={area} fill="url(#motion-demo-area)" />
-      <path d={line} fill="none" stroke="rgb(var(--accent))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      <path d={line} fill="none" stroke="rgb(var(--fg-rgb))" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      {/* end dot — halo + core, pops once the line reaches it */}
+      <g data-asbir-dot>
+        <circle cx={ex} cy={ey} r="7" fill="rgb(var(--fg-rgb))" opacity="0.18" />
+        <circle cx={ex} cy={ey} r="3.5" fill="rgb(var(--fg-rgb))" stroke="rgb(var(--panel))" strokeWidth="1.5" />
+      </g>
     </svg>
   );
 }

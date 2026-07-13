@@ -2,6 +2,9 @@ import * as React from "react";
 import { cn } from "../lib/cn";
 import { useInView, usePrefersReducedMotion } from "./internal";
 
+/* eased height transition shared by the bar fills */
+const BAR_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+
 /*
   Chart motion (framer-free; pairs with ChartReveal for line charts):
 
@@ -17,35 +20,58 @@ import { useInView, usePrefersReducedMotion } from "./internal";
 export interface BarsRevealProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Bar heights, 0–1. */
   values: number[];
-  /** Seconds between adjacent bars. Default 0.07. */
+  /** Seconds between adjacent bars. Default 0.05. */
   stagger?: number;
+  /** Seconds each bar's grow takes. Default 0.7. */
+  duration?: number;
+  /** Show the dim full-height track behind each bar. Default true. */
+  tracks?: boolean;
   /** Reveal once (default) or on every viewport entry. */
   once?: boolean;
 }
 
 /**
- * BarsReveal — bars grow up out of the baseline one after another when the
- * chart scrolls into view.
+ * BarsReveal — rounded pill bars grow up inside dim full-height tracks
+ * (health-app style), one after another, when the chart scrolls into view.
  */
-export function BarsReveal({ values, stagger = 0.07, once = true, className, ...rest }: BarsRevealProps) {
+export function BarsReveal({
+  values,
+  stagger = 0.05,
+  duration = 0.7,
+  tracks = true,
+  once = true,
+  className,
+  ...rest
+}: BarsRevealProps) {
+  const reduced = usePrefersReducedMotion();
   const [ref, inView] = useInView<HTMLDivElement>(once);
+  const active = inView || reduced;
   return (
-    <div
-      ref={ref}
-      data-inview={inView || undefined}
-      className={cn("flex h-24 items-end gap-1.5", className)}
-      {...rest}
-    >
-      {values.map((v, i) => (
-        <span
-          key={i}
-          className="as-bar w-4 rounded-t-[3px] bg-gradient-to-t from-[rgb(var(--accent)/0.35)] to-[rgb(var(--accent))]"
-          style={{
-            height: `${Math.max(0, Math.min(1, v)) * 100}%`,
-            ["--as-bar-delay" as string]: `${(i * stagger).toFixed(3)}s`,
-          }}
-        />
-      ))}
+    <div ref={ref} className={cn("flex h-28 items-end gap-2", className)} {...rest}>
+      {values.map((v, i) => {
+        const clamped = Math.max(0, Math.min(1, v));
+        const delay = `${(i * stagger).toFixed(3)}s`;
+        return (
+          <span
+            key={i}
+            className={cn(
+              "relative h-full w-2.5 rounded-full",
+              tracks && "bg-overlay/[0.08]"
+            )}
+          >
+            <span
+              className="absolute inset-x-0 bottom-0 min-h-2.5 rounded-full bg-[rgb(var(--accent))]"
+              style={{
+                height: active ? `${clamped * 100}%` : "0%",
+                opacity: active ? 1 : 0,
+                transition: reduced
+                  ? undefined
+                  : `height ${duration}s ${BAR_EASE} ${delay}, opacity 0.25s ease ${delay}`,
+              }}
+            />
+          </span>
+        );
+      })}
     </div>
   );
 }
