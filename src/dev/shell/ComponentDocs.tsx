@@ -10,9 +10,24 @@ import {
 } from "@/index";
 import {
   ComponentPlayground,
-  type Control,
   type ControlValues,
 } from "./component-playground";
+import type { ComponentEntry, PropRow } from "./docs/entry";
+import { avatarEntry } from "./docs/avatar.docs";
+import { badgeEntry } from "./docs/badge.docs";
+import { buttonEntry } from "./docs/button.docs";
+import { cardEntry } from "./docs/card.docs";
+import { commandMenuEntry } from "./docs/command-menu.docs";
+import { copyButtonEntry } from "./docs/copy-button.docs";
+import { dataTableEntry } from "./docs/data-table.docs";
+import { dialogEntry } from "./docs/dialog.docs";
+import { emptyStateEntry } from "./docs/empty-state.docs";
+import { inputEntry } from "./docs/input.docs";
+import { skeletonEntry } from "./docs/skeleton.docs";
+import { tabsEntry } from "./docs/tabs.docs";
+import { themeToggleEntry } from "./docs/theme-toggle.docs";
+import { toastEntry } from "./docs/toast.docs";
+import { tooltipEntry } from "./docs/tooltip.docs";
 
 /*
   Live component documentation for the #components/<slug> routes.
@@ -82,21 +97,8 @@ function PropsTable({ rows }: { rows: PropRow[] }) {
   );
 }
 
-type PropRow = { name: string; type: string; description: string };
-
-type ComponentEntry = {
-  slug: string;
-  name: string;
-  tagline: string;
-  /** Customize-panel controls; their values drive `render` and `code`. */
-  controls: Control[];
-  /** Live demo for the given control values. */
-  render: (v: ControlValues) => React.ReactNode;
-  /** Copyable code reflecting the current control values. */
-  code: (v: ControlValues) => string;
-  props: PropRow[];
-  importPath: string;
-};
+/* ComponentEntry / PropRow live in ./docs/entry — one entry file per
+   component under ./docs/, composed into COMPONENTS below. */
 
 /* ---- live demos ------------------------------------------------------- */
 
@@ -216,6 +218,21 @@ function hexToRgbTriplet(hex: string): string {
 /* ---- registry --------------------------------------------------------- */
 
 const COMPONENTS: ComponentEntry[] = [
+  buttonEntry,
+  inputEntry,
+  dialogEntry,
+  tooltipEntry,
+  tabsEntry,
+  toastEntry,
+  commandMenuEntry,
+  dataTableEntry,
+  cardEntry,
+  badgeEntry,
+  avatarEntry,
+  skeletonEntry,
+  emptyStateEntry,
+  copyButtonEntry,
+  themeToggleEntry,
   {
     slug: "dropdown-menu",
     name: "Dropdown Menu",

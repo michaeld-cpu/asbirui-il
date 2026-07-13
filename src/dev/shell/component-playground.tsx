@@ -670,14 +670,16 @@ export function ComponentPlayground({
         </pre>
       )}
 
-      <CustomizePanel
-        controls={controls}
-        values={values}
-        onChange={set}
-        onReset={reset}
-        sliderMaxOverrides={sliderMaxOverrides}
-        onSliderBlockedAtCap={notifyBlockedAtCap}
-      />
+      {controls.length > 0 && (
+        <CustomizePanel
+          controls={controls}
+          values={values}
+          onChange={set}
+          onReset={reset}
+          sliderMaxOverrides={sliderMaxOverrides}
+          onSliderBlockedAtCap={notifyBlockedAtCap}
+        />
+      )}
 
       <CapToast show={showCapToast} />
     </div>
