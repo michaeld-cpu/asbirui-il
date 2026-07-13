@@ -1,30 +1,18 @@
 import * as React from "react";
 import {
-  Aurora,
   BarsReveal,
   BorderBeam,
-  CardStack,
   ChartReveal,
   Confetti,
   CountUp,
-  Dock,
-  DockItem,
-  Equalizer,
   FlipWords,
-  GradientBlob,
-  GradientText,
-  HoverFlip,
   Magnetic,
   Marquee,
-  Meteors,
   NumberTicker,
-  Orbit,
-  Particles,
   PulseBeacon,
   RadialProgress,
   Reveal,
   Ripple,
-  ScrambleText,
   ShinyText,
   Stagger,
   StaggerItem,
@@ -33,7 +21,6 @@ import {
   WaveText,
 } from "@/motion";
 import { Button, FilterChips } from "@/index";
-import asbirLogo from "@/assets/logo/asbirlogo-white.svg";
 
 /*
   Motion docs. #motion is a filterable GALLERY of live motion pieces; each
@@ -90,30 +77,11 @@ function TickerDemo() {
   return <NumberTicker value={VALUES[i]} className="text-3xl font-semibold tracking-tight text-fg" />;
 }
 
-const DOCK_ICONS: { label: string; path: string }[] = [
-  { label: "Home", path: "M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5" },
-  { label: "Search", path: "M11 4a7 7 0 1 1 0 14 7 7 0 0 1 0-14Zm10 17-4.3-4.3" },
-  { label: "Charts", path: "M4 20V10m6 10V4m6 16v-7m4 7H2" },
-  { label: "Mail", path: "M4 5h16v14H4V5Zm0 2 8 6 8-6" },
-  { label: "Settings", path: "M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm8.5 4a8.4 8.4 0 0 0-.1-1.2l2-1.5-2-3.5-2.4 1a8.6 8.6 0 0 0-2-1.2L15.5 3h-4l-.5 2.6a8.6 8.6 0 0 0-2 1.2l-2.4-1-2 3.5 2 1.5a8.4 8.4 0 0 0 0 2.4l-2 1.5 2 3.5 2.4-1a8.6 8.6 0 0 0 2 1.2l.5 2.6h4l.5-2.6a8.6 8.6 0 0 0 2-1.2l2.4 1 2-3.5-2-1.5c.06-.4.1-.8.1-1.2Z" },
-];
-
 const MARQUEE_BRANDS = ["AsbirUI", "Lumina", "Tripket PH", "PlanOut", "BeetzeePlay", "ProjectPlaza"];
-
-const STACK_CARDS = [
-  { title: "Deploy complete", body: "lumina-web is live on production" },
-  { title: "Build queued", body: "asbir-docs is 2nd in line" },
-  { title: "2FA enabled", body: "All members now require a second factor" },
-].map((c) => (
-  <div key={c.title} className="flex h-full flex-col justify-center rounded-xl border border-border bg-panel px-4 shadow-lg">
-    <p className="text-sm font-medium text-fg">{c.title}</p>
-    <p className="mt-0.5 text-xs text-fg/55">{c.body}</p>
-  </div>
-));
 
 /* ---- registry ---------------------------------------------------------- */
 
-type Category = "Entrance" | "Pointer" | "Text" | "Charts" | "Background" | "Looping";
+type Category = "Entrance" | "Pointer" | "Text" | "Charts" | "Looping";
 
 type MotionDemo = {
   id: string;
@@ -141,58 +109,6 @@ const DEMOS: MotionDemo[] = [
     code: `<Magnetic strength={14}>
   <Button>Hover me</Button>
 </Magnetic>`,
-  },
-  {
-    id: "dock",
-    name: "Dock",
-    category: "Pointer",
-    description: "The macOS dock — tiles magnify as the pointer nears and relax as it leaves, on springs.",
-    render: () => (
-      <Dock>
-        {DOCK_ICONS.map((icon) => (
-          <DockItem key={icon.label} aria-label={icon.label}>
-            <svg width="55%" height="55%" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d={icon.path} />
-            </svg>
-          </DockItem>
-        ))}
-      </Dock>
-    ),
-    code: `<Dock>
-  {apps.map((app) => (
-    <DockItem key={app.id} aria-label={app.label}>
-      {app.icon}
-    </DockItem>
-  ))}
-</Dock>`,
-  },
-  {
-    id: "hover-flip",
-    name: "Hover Flip",
-    category: "Pointer",
-    description: "A card that flips in 3D on hover to reveal its back face.",
-    render: () => (
-      <HoverFlip
-        className="h-32 w-52"
-        front={
-          <div className="flex h-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-panel">
-            <img src={asbirLogo} alt="" width={22} height={20} className="[html.light_&]:invert" />
-            <p className="text-xs text-fg/55">Hover to flip</p>
-          </div>
-        }
-        back={
-          <div className="flex h-full flex-col items-center justify-center rounded-xl border border-accent/30 bg-accent/10">
-            <p className="text-sm font-semibold text-fg">AsbirUI</p>
-            <p className="mt-0.5 text-xs text-fg/55">16 components · 4 blocks</p>
-          </div>
-        }
-      />
-    ),
-    code: `<HoverFlip
-  className="h-32 w-52"
-  front={<CardFront />}
-  back={<CardBack />}
-/>`,
   },
   {
     id: "ripple",
@@ -273,20 +189,6 @@ const DEMOS: MotionDemo[] = [
     code: `<FlipWords words={["designers", "engineers", "founders"]} interval={2200} />`,
   },
   {
-    id: "scramble-text",
-    name: "Scramble Text",
-    category: "Text",
-    description: "Decodes from random glyphs into the target text, left to right.",
-    replayOnHover: true,
-    render: () => (
-      <ScrambleText
-        text="ACCESS GRANTED"
-        className="font-mono text-lg font-semibold tracking-widest text-fg"
-      />
-    ),
-    code: `<ScrambleText text="ACCESS GRANTED" duration={1.1} />`,
-  },
-  {
     id: "wave-text",
     name: "Wave Text",
     category: "Text",
@@ -295,20 +197,6 @@ const DEMOS: MotionDemo[] = [
       <WaveText text="AsbirMotion" className="text-xl font-semibold tracking-tight text-fg" />
     ),
     code: `<WaveText text="AsbirMotion" stagger={0.06} />`,
-  },
-  {
-    id: "gradient-text",
-    name: "Gradient Text",
-    category: "Text",
-    description: "A color gradient flows continuously through the glyphs.",
-    render: () => (
-      <GradientText className="text-2xl font-semibold tracking-tight">
-        Design with motion
-      </GradientText>
-    ),
-    code: `<GradientText colors={["#8b5cf6", "#06b6d4", "#8b5cf6"]} speed={4}>
-  Design with motion
-</GradientText>`,
   },
   {
     id: "shiny-text",
@@ -396,70 +284,6 @@ const DEMOS: MotionDemo[] = [
     code: `<RadialProgress value={72} size={96} strokeWidth={8} />`,
   },
 
-  /* ---- Background ---- */
-  {
-    id: "aurora",
-    name: "Aurora",
-    category: "Background",
-    description: "Two blurred color fields drift against each other — an ambient backdrop.",
-    render: () => (
-      <div className="relative h-32 w-64 overflow-hidden rounded-xl border border-border">
-        <Aurora className="absolute inset-0" />
-        <p className="relative flex h-full items-center justify-center text-sm font-medium text-fg">
-          Aurora backdrop
-        </p>
-      </div>
-    ),
-    code: `<div className="relative overflow-hidden rounded-xl">
-  <Aurora className="absolute inset-0" />
-  <HeroContent />
-</div>`,
-  },
-  {
-    id: "gradient-blob",
-    name: "Gradient Blob",
-    category: "Background",
-    description: "An organic gradient blob that slowly morphs its silhouette.",
-    render: () => <GradientBlob className="h-24 w-24" />,
-    code: `<GradientBlob className="h-40 w-40" />`,
-  },
-  {
-    id: "particles",
-    name: "Particles",
-    category: "Background",
-    description: "A canvas field of softly drifting dots that fills its parent.",
-    render: () => (
-      <div className="relative h-32 w-64 overflow-hidden rounded-xl border border-border bg-panel">
-        <Particles className="absolute inset-0" />
-        <p className="relative flex h-full items-center justify-center text-sm font-medium text-fg">
-          48 drifting dots
-        </p>
-      </div>
-    ),
-    code: `<div className="relative">
-  <Particles count={48} className="absolute inset-0" />
-  <HeroContent />
-</div>`,
-  },
-  {
-    id: "meteors",
-    name: "Meteors",
-    category: "Background",
-    description: "Falling light streaks raining through the parent, clipped to its radius.",
-    render: () => (
-      <div className="relative h-32 w-64 overflow-hidden rounded-xl border border-border bg-panel">
-        <Meteors count={10} />
-        <p className="relative flex h-full items-center justify-center text-sm font-medium text-fg">
-          Meteor shower
-        </p>
-      </div>
-    ),
-    code: `<div className="relative overflow-hidden rounded-xl">
-  <Meteors count={10} />
-  <CardContent />
-</div>`,
-  },
-
   /* ---- Looping ---- */
   {
     id: "border-beam",
@@ -495,33 +319,6 @@ const DEMOS: MotionDemo[] = [
     code: `<Marquee duration={28} gap={40}>
   {logos.map((l) => <Logo key={l.id} {...l} />)}
 </Marquee>`,
-  },
-  {
-    id: "card-stack",
-    name: "Card Stack",
-    category: "Looping",
-    description: "Stacked cards cycle — the top springs to the back on an interval.",
-    render: () => <CardStack items={STACK_CARDS} className="h-24 w-64" />,
-    code: `<CardStack
-  items={[<CardA />, <CardB />, <CardC />]}
-  interval={2600}
-/>`,
-  },
-  {
-    id: "orbit",
-    name: "Orbit",
-    category: "Looping",
-    description: "Satellites orbit a core on counter-rotating rings.",
-    render: () => <Orbit />,
-    code: `<Orbit duration={8} />`,
-  },
-  {
-    id: "equalizer",
-    name: "Equalizer",
-    category: "Looping",
-    description: "Audio-style bars bouncing out of phase.",
-    render: () => <Equalizer />,
-    code: `<Equalizer bars={5} />`,
   },
   {
     id: "pulse-beacon",
@@ -576,7 +373,7 @@ const DEMOS: MotionDemo[] = [
   },
 ];
 
-const CATEGORIES = ["All", "Entrance", "Pointer", "Text", "Charts", "Background", "Looping"] as const;
+const CATEGORIES = ["All", "Entrance", "Pointer", "Text", "Charts", "Looping"] as const;
 
 export const MOTION_SLUGS = DEMOS.map((d) => d.id);
 
@@ -718,11 +515,11 @@ export function MotionDocs({ slug = "" }: { slug?: string }) {
           <h1 className="text-3xl font-semibold tracking-tight text-fg">Asbir Motion</h1>
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-fg/70">
             Microinteractions &amp; animations built to pair with AsbirUI — pointer physics, text
-            effects, charts, ambient backdrops, and loops. Everything honors{" "}
+            effects, charts, and loops. Everything honors{" "}
             <span className="text-fg">prefers-reduced-motion</span>.
           </p>
           <div className="mt-4 flex flex-wrap gap-2 text-xs">
-            <code className="rounded-md border border-border bg-panel px-2 py-1 text-fg/70">import &#123; Dock, ScrambleText, BorderBeam, BarsReveal &#125; from "@asbirtech/asbir-ui/motion"</code>
+            <code className="rounded-md border border-border bg-panel px-2 py-1 text-fg/70">import &#123; Magnetic, Typewriter, BorderBeam, BarsReveal &#125; from "@asbirtech/asbir-ui/motion"</code>
             <code className="rounded-md border border-border bg-panel px-2 py-1 text-fg/70">import "@asbirtech/asbir-ui/motion.css"</code>
           </div>
 
