@@ -97,9 +97,10 @@ export const docsNav: DocsNavGroup[] = [
   {
     heading: "Blocks",
     /* Composed UI sections (shadcn-style). The bare "#blocks" route shows all
-       blocks; each also has its own "#blocks/<slug>" page. Add blocks to BLOCKS
-       in BlocksDocs.tsx. */
+       block families; each family page stacks its numbered variants. Add
+       variants in src/dev/shell/blocks/<slug>.blocks.tsx. */
     items: [
+      { label: "All blocks", href: "#blocks" },
       { label: "Stat cards", href: "#blocks/stat-cards" },
       { label: "Login form", href: "#blocks/login" },
       { label: "Table toolbar", href: "#blocks/table-toolbar" },
