@@ -125,6 +125,29 @@ function SplitPanel() {
   );
 }
 
+/* ---- 04 · magic link ------------------------------------------------------- */
+
+function MagicLink() {
+  return (
+    <div className="mx-auto w-full max-w-xs text-center">
+      <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-panel text-lg text-fg">
+        ⟐
+      </span>
+      <h2 className="mt-4 text-lg font-semibold tracking-tight text-fg">Sign in to AsbirTech</h2>
+      <p className="mt-1 text-sm text-fg/60">We'll email you a magic link — no password needed</p>
+      <form className="mt-5 space-y-2" onSubmit={(e) => e.preventDefault()}>
+        <Input type="email" placeholder="you@company.com" />
+        <Button type="submit" className="w-full">
+          Send magic link
+        </Button>
+      </form>
+      <p className="mt-4 text-xs text-fg/55">
+        Prefer passwords? <a href="#" className="text-accent-soft-fg hover:underline">Sign in with one</a>
+      </p>
+    </div>
+  );
+}
+
 /* ---- registry ------------------------------------------------------------- */
 
 export const loginBlock: BlockEntry = {
@@ -221,6 +244,28 @@ export const loginBlock: BlockEntry = {
       <Button type="submit" className="w-full">Sign in</Button>
     </form>
   </div>
+</div>`,
+    },
+    {
+      id: "login-04",
+      title: "Magic link",
+      description: "Cardless and centered — logo mark, one email field, passwordless by default.",
+      render: () => <MagicLink />,
+      code: `import { Button, Input } from "@asbirtech/asbir-ui";
+
+<div className="mx-auto w-full max-w-xs text-center">
+  <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-panel text-lg text-fg">
+    ⟐
+  </span>
+  <h2 className="mt-4 text-lg font-semibold tracking-tight text-fg">Sign in to AsbirTech</h2>
+  <p className="mt-1 text-sm text-fg/60">We'll email you a magic link — no password needed</p>
+  <form className="mt-5 space-y-2">
+    <Input type="email" placeholder="you@company.com" />
+    <Button type="submit" className="w-full">Send magic link</Button>
+  </form>
+  <p className="mt-4 text-xs text-fg/55">
+    Prefer passwords? <a href="#" className="text-accent-soft-fg">Sign in with one</a>
+  </p>
 </div>`,
     },
   ],

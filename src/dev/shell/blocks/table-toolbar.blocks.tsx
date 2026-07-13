@@ -10,6 +10,9 @@ import {
   DropdownMenuTrigger,
   FilterChips,
   Input,
+  Tabs,
+  TabsList,
+  TabsTrigger,
 } from "@/index";
 import type { BlockEntry } from "./entry";
 
@@ -134,6 +137,55 @@ function BulkActions() {
   );
 }
 
+/* ---- 03 · view tabs ------------------------------------------------------------ */
+
+const VIEWS = [
+  { value: "all", label: "All", count: 24 },
+  { value: "active", label: "Active", count: 18 },
+  { value: "archived", label: "Archived", count: 6 },
+];
+
+function ViewTabs() {
+  const [view, setView] = React.useState("all");
+  return (
+    <div className="w-full">
+      <Tabs value={view} onValueChange={setView}>
+        {/* one shared hairline under the whole row; the TabsList's own border
+            is dropped so tabs and controls sit on the same baseline */}
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border">
+          <TabsList className="border-b-0">
+            {VIEWS.map((v) => (
+              <TabsTrigger key={v.value} value={v.value}>
+                {v.label}
+                <span className="ml-1.5 rounded-full bg-overlay/[0.08] px-1.5 py-0.5 text-[10px] font-medium text-fg/55">
+                  {v.count}
+                </span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <div className="flex items-center gap-2 pb-2">
+            <Input size="sm" placeholder="Filter…" prefix={SearchIcon} wrapperClassName="w-44" />
+            <Button variant="outline" size="sm">
+              Columns
+            </Button>
+          </div>
+        </div>
+      </Tabs>
+      <div className="mt-3 overflow-hidden rounded-xl border border-border">
+        {ROWS.map((r) => (
+          <div key={r.name} className="flex items-center gap-4 border-b border-border/60 px-4 py-2.5 text-sm last:border-0">
+            <span className="flex-1 text-fg/80">{r.name}</span>
+            <Badge variant={r.status === "Active" ? "success" : "warning"} dot>
+              {r.status}
+            </Badge>
+            <span className="w-20 text-right text-fg/50">{r.updated}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ---- registry ---------------------------------------------------------------- */
 
 export const tableToolbarBlock: BlockEntry = {
@@ -207,6 +259,40 @@ export const tableToolbarBlock: BlockEntry = {
     <span className="flex-1">{r.name}</span>
     <Badge variant={r.status === "Active" ? "success" : "warning"} dot>{r.status}</Badge>
   </label>
+))}`,
+    },
+    {
+      id: "table-toolbar-03",
+      title: "View tabs",
+      description: "Saved views as underline Tabs with count pills, filter and column controls on the same hairline.",
+      render: () => <ViewTabs />,
+      code: `import { Badge, Button, Input, Tabs, TabsList, TabsTrigger } from "@asbirtech/asbir-ui";
+
+<Tabs value={view} onValueChange={setView}>
+  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border">
+    <TabsList className="border-b-0">
+      {views.map((v) => (
+        <TabsTrigger key={v.value} value={v.value}>
+          {v.label}
+          <span className="ml-1.5 rounded-full bg-overlay/[0.08] px-1.5 py-0.5 text-[10px] font-medium text-fg/55">
+            {v.count}
+          </span>
+        </TabsTrigger>
+      ))}
+    </TabsList>
+    <div className="flex items-center gap-2 pb-2">
+      <Input size="sm" placeholder="Filter…" prefix={<SearchIcon />} wrapperClassName="w-44" />
+      <Button variant="outline" size="sm">Columns</Button>
+    </div>
+  </div>
+</Tabs>
+
+{rows.map((r) => (
+  <div key={r.name} className="flex items-center gap-4 border-b border-border/60 px-4 py-2.5 text-sm last:border-0">
+    <span className="flex-1 text-fg/80">{r.name}</span>
+    <Badge variant={r.status === "Active" ? "success" : "warning"} dot>{r.status}</Badge>
+    <span className="w-20 text-right text-fg/50">{r.updated}</span>
+  </div>
 ))}`,
     },
   ],

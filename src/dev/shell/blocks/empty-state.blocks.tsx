@@ -70,6 +70,59 @@ function OnboardingSteps() {
   );
 }
 
+/* ---- 03 · error retry -------------------------------------------------------------- */
+
+const AlertIcon = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01" />
+  </svg>
+);
+
+function ErrorRetry() {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-col items-center rounded-xl border border-border bg-panel px-6 py-12 text-center">
+      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-red-500/15 text-red-500 [&_svg]:h-5 [&_svg]:w-5">
+        {AlertIcon}
+      </span>
+      <h2 className="mt-4 text-sm font-semibold text-fg">Couldn't load deployments</h2>
+      <p className="mt-1 max-w-xs text-xs leading-relaxed text-fg/55">
+        The request timed out — your data is safe, this one's on us
+      </p>
+      <div className="mt-4 flex gap-2">
+        <Button size="sm" variant="secondary">
+          Contact support
+        </Button>
+        <Button size="sm">Retry</Button>
+      </div>
+    </div>
+  );
+}
+
+/* ---- 04 · no search results ---------------------------------------------------------- */
+
+const SearchIcon = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3-3" />
+  </svg>
+);
+
+function NoResults() {
+  return (
+    <EmptyState
+      className="mx-auto w-full max-w-md"
+      icon={SearchIcon}
+      title={<>No results for &ldquo;webhok&rdquo;</>}
+      description="Check the spelling or try a broader term — search covers names, tags, and ids"
+      action={
+        <Button size="sm" variant="ghost">
+          Clear search
+        </Button>
+      }
+    />
+  );
+}
+
 /* ---- registry ------------------------------------------------------------------ */
 
 export const emptyStateBlock: BlockEntry = {
@@ -125,6 +178,41 @@ const steps = [
   </ol>
   <Button size="sm" variant="secondary" className="mt-5">Continue setup</Button>
 </div>`,
+    },
+    {
+      id: "empty-state-03",
+      title: "Error with retry",
+      description: "For failed loads — a danger-tinted icon, a blameless message, and a way back.",
+      render: () => <ErrorRetry />,
+      code: `import { Button } from "@asbirtech/asbir-ui";
+
+<div className="mx-auto flex w-full max-w-md flex-col items-center rounded-xl border border-border bg-panel px-6 py-12 text-center">
+  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-red-500/15 text-red-500">
+    <AlertIcon />
+  </span>
+  <h2 className="mt-4 text-sm font-semibold text-fg">Couldn't load deployments</h2>
+  <p className="mt-1 max-w-xs text-xs leading-relaxed text-fg/55">
+    The request timed out — your data is safe, this one's on us
+  </p>
+  <div className="mt-4 flex gap-2">
+    <Button size="sm" variant="secondary">Contact support</Button>
+    <Button size="sm">Retry</Button>
+  </div>
+</div>`,
+    },
+    {
+      id: "empty-state-04",
+      title: "No search results",
+      description: "The zero-hits state — echo the query, suggest a fix, offer to clear.",
+      render: () => <NoResults />,
+      code: `import { Button, EmptyState } from "@asbirtech/asbir-ui";
+
+<EmptyState
+  icon={<SearchIcon />}
+  title={<>No results for "{query}"</>}
+  description="Check the spelling or try a broader term — search covers names, tags, and ids"
+  action={<Button size="sm" variant="ghost" onClick={clearSearch}>Clear search</Button>}
+/>`,
     },
   ],
 };
