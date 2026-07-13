@@ -25,6 +25,7 @@ import {
   docsRouteBase,
   componentsSubPath,
   blocksSubPath,
+  motionSubPath,
   tokensSubPath,
 } from "./shell/use-hash-route";
 
@@ -59,13 +60,14 @@ function DocsView({ route }: { route: string }) {
   const tokensSub = tokensSubPath(route);
   const isTemplates = route === "templates";
   const isBlocks = base === "blocks";
+  const isMotion = base === "motion";
 
   let body: React.ReactNode;
   if (componentSlug) body = <ComponentDocs slug={componentSlug} />;
   else if (isBlocks) body = <BlocksDocs slug={blocksSubPath(route)} />;
   else if (tokensSub === "colors") body = <ColorsDocs />;
   else if (isTemplates) body = <TemplatesPage />;
-  else if (route === "motion") body = <MotionDocs />;
+  else if (isMotion) body = <MotionDocs slug={motionSubPath(route)} />;
   else body = <DocsContent route={route} />;
 
   return (
@@ -74,13 +76,13 @@ function DocsView({ route }: { route: string }) {
       <div className="flex pt-16 md:pt-0">
         <DocsSidebar active={route} />
         <main className="min-w-0 flex-1 px-6 lg:px-12">
-          {/* templates + blocks use wide, full-width previews → a wider column */}
-          <div className={`mx-auto ${isTemplates || isBlocks ? "max-w-5xl" : "max-w-3xl"}`}>
+          {/* templates + blocks + motion use wide, full-width previews → a wider column */}
+          <div className={`mx-auto ${isTemplates || isBlocks || isMotion ? "max-w-5xl" : "max-w-3xl"}`}>
             {body}
           </div>
         </main>
-        {/* templates + blocks previews are full-width; no right promo aside */}
-        {!isTemplates && !isBlocks && <DocsAside />}
+        {/* templates + blocks + motion previews are full-width; no right promo aside */}
+        {!isTemplates && !isBlocks && !isMotion && <DocsAside />}
       </div>
     </div>
   );

@@ -42,7 +42,8 @@ export function isDocsRoute(route: string): boolean {
     route.startsWith("components/") ||
     route.startsWith("blocks/") ||
     route.startsWith("tokens/") ||
-    route.startsWith("brand-kits/")
+    route.startsWith("brand-kits/") ||
+    route.startsWith("motion/")
   );
 }
 
@@ -55,6 +56,10 @@ export function docsRouteBase(route: string): string {
 
 export function blocksSubPath(route: string): string {
   return route.startsWith("blocks/") ? route.replace(/^blocks\//, "") : "";
+}
+
+export function motionSubPath(route: string): string {
+  return route.startsWith("motion/") ? route.replace(/^motion\//, "") : "";
 }
 
 export function componentsSubPath(route: string): string {

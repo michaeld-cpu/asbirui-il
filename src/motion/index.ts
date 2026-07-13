@@ -28,13 +28,63 @@ export type {
 export { ChartReveal } from "./chart-reveal";
 export type { ChartRevealProps } from "./chart-reveal";
 
-// Pointer-driven motion — springs toward/around the cursor (framer).
-export { Magnetic, TiltCard, SpotlightCard } from "./interactive";
-export type { MagneticProps, TiltCardProps, SpotlightCardProps } from "./interactive";
+// Interaction motion — pointer springs (framer) + click feedback.
+export { Magnetic, Dock, DockItem, CardStack, Ripple } from "./interactive";
+export type { MagneticProps, DockProps, DockItemProps, CardStackProps, RippleProps } from "./interactive";
 
 // Text motion — framer-free; pair with "@asbirtech/asbir-ui/motion.css".
-export { Typewriter, CountUp, TextReveal, ShinyText } from "./text";
-export type { TypewriterProps, CountUpProps, TextRevealProps, ShinyTextProps } from "./text";
+export {
+  Typewriter,
+  CountUp,
+  TextReveal,
+  ShinyText,
+  GradientText,
+  ScrambleText,
+  WaveText,
+  FlipWords,
+  NumberTicker,
+} from "./text";
+export type {
+  TypewriterProps,
+  CountUpProps,
+  TextRevealProps,
+  ShinyTextProps,
+  GradientTextProps,
+  ScrambleTextProps,
+  WaveTextProps,
+  FlipWordsProps,
+  NumberTickerProps,
+} from "./text";
+
+// Chart motion — framer-free in-view reveals for data viz.
+export { BarsReveal, RadialProgress } from "./charts";
+export type { BarsRevealProps, RadialProgressProps } from "./charts";
+
+// Ambient / decorative motion — framer-free.
+export {
+  BorderBeam,
+  Meteors,
+  Aurora,
+  GradientBlob,
+  PulseBeacon,
+  Orbit,
+  Equalizer,
+  HoverFlip,
+} from "./decor";
+export type {
+  BorderBeamProps,
+  MeteorsProps,
+  AuroraProps,
+  GradientBlobProps,
+  PulseBeaconProps,
+  OrbitProps,
+  EqualizerProps,
+  HoverFlipProps,
+} from "./decor";
+
+// Canvas motion — drifting particle fields + click confetti.
+export { Particles, Confetti } from "./particles";
+export type { ParticlesProps, ConfettiProps } from "./particles";
 
 // Looping strips — framer-free; pair with "@asbirtech/asbir-ui/motion.css".
 export { Marquee } from "./marquee";

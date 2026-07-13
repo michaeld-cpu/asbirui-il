@@ -13,40 +13,7 @@ import { cn } from "../lib/cn";
   prefers-reduced-motion.
 */
 
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = React.useState(false);
-  React.useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return reduced;
-}
-
-function useInView<T extends Element>(once: boolean): [React.RefObject<T>, boolean] {
-  const ref = React.useRef<T>(null);
-  const [inView, setInView] = React.useState(false);
-  React.useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          if (once) io.disconnect();
-        } else if (!once) {
-          setInView(false);
-        }
-      },
-      { threshold: 0.3 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [once]);
-  return [ref, inView];
-}
+import { useInView, usePrefersReducedMotion } from "./internal";
 
 /* ---- Typewriter ---------------------------------------------------------- */
 
@@ -229,6 +196,201 @@ export function ShinyText({ speed = 2.6, className, style, children, ...rest }: 
       {...rest}
     >
       {children}
+    </span>
+  );
+}
+
+/* ---- GradientText ------------------------------------------------------------ */
+
+export interface GradientTextProps extends React.HTMLAttributes<HTMLSpanElement> {
+  /** Gradient stops, left to right. Repeat the first at the end for a
+      seamless loop. Default violet → cyan → violet. */
+  colors?: string[];
+  /** Seconds per full flow. Default 4. */
+  speed?: number;
+}
+
+/**
+ * GradientText — a color gradient flows continuously through the glyphs
+ * (background-clip: text). Reduced motion shows the static gradient.
+ */
+export function GradientText({
+  colors = ["#8b5cf6", "#06b6d4", "#8b5cf6"],
+  speed = 4,
+  className,
+  style,
+  children,
+  ...rest
+}: GradientTextProps) {
+  return (
+    <span
+      className={cn("as-gradient-text", className)}
+      style={{
+        backgroundImage: `linear-gradient(90deg, ${colors.join(", ")})`,
+        ["--as-gradient-duration" as string]: `${speed}s`,
+        ...style,
+      }}
+      {...rest}
+    >
+      {children}
+    </span>
+  );
+}
+
+/* ---- ScrambleText -------------------------------------------------------------- */
+
+const SCRAMBLE_CHARS = "!<>-_\\/[]{}—=+*^?#@$%";
+
+export interface ScrambleTextProps extends React.HTMLAttributes<HTMLSpanElement> {
+  text: string;
+  /** Seconds the decode takes. Default 1.1. */
+  duration?: number;
+  /** Decode once (default) or every time it re-enters the viewport. */
+  once?: boolean;
+}
+
+/**
+ * ScrambleText — decodes from random glyphs into the target text,
+ * left to right, when scrolled into view. Reduced motion renders plainly.
+ */
+export function ScrambleText({ text, duration = 1.1, once = true, className, ...rest }: ScrambleTextProps) {
+  const reduced = usePrefersReducedMotion();
+  const [ref, inView] = useInView<HTMLSpanElement>(once);
+  const [display, setDisplay] = React.useState(text);
+
+  React.useEffect(() => {
+    if (!inView || reduced) {
+      setDisplay(text);
+      return;
+    }
+    let raf = 0;
+    let frame = 0;
+    const t0 = performance.now();
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - t0) / (duration * 1000));
+      const settled = Math.floor(p * text.length);
+      frame++;
+      setDisplay(
+        text
+          .split("")
+          .map((ch, i) => {
+            if (i < settled || ch === " ") return ch;
+            // hold each random glyph a couple frames so it reads as decoding
+            return SCRAMBLE_CHARS[(i * 7 + (frame >> 1) * 13) % SCRAMBLE_CHARS.length];
+          })
+          .join("")
+      );
+      if (p < 1) raf = requestAnimationFrame(tick);
+      else setDisplay(text);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, reduced, text, duration]);
+
+  return (
+    <span ref={ref} aria-label={text} className={className} {...rest}>
+      <span aria-hidden="true">{display}</span>
+    </span>
+  );
+}
+
+/* ---- WaveText -------------------------------------------------------------------- */
+
+export interface WaveTextProps extends React.HTMLAttributes<HTMLSpanElement> {
+  text: string;
+  /** Seconds between adjacent letters' bob. Default 0.06. */
+  stagger?: number;
+}
+
+/**
+ * WaveText — the letters bob in a continuous wave. Reduced motion renders
+ * static text.
+ */
+export function WaveText({ text, stagger = 0.06, className, ...rest }: WaveTextProps) {
+  return (
+    <span aria-label={text} className={className} {...rest}>
+      {text.split("").map((ch, i) => (
+        <span
+          key={i}
+          aria-hidden="true"
+          className="as-wave-letter"
+          style={{ animationDelay: `${(i * stagger).toFixed(2)}s` }}
+        >
+          {ch === " " ? " " : ch}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/* ---- FlipWords -------------------------------------------------------------------- */
+
+export interface FlipWordsProps extends React.HTMLAttributes<HTMLSpanElement> {
+  words: string[];
+  /** ms each word stays before flipping. Default 2200. */
+  interval?: number;
+}
+
+/**
+ * FlipWords — rotates through words with a 3D flip-up entrance.
+ * Reduced motion shows the first word statically.
+ */
+export function FlipWords({ words, interval = 2200, className, ...rest }: FlipWordsProps) {
+  const reduced = usePrefersReducedMotion();
+  const [idx, setIdx] = React.useState(0);
+
+  React.useEffect(() => {
+    if (reduced || words.length < 2) return;
+    const t = window.setInterval(() => setIdx((i) => (i + 1) % words.length), interval);
+    return () => window.clearInterval(t);
+  }, [reduced, words.length, interval]);
+
+  return (
+    <span className={cn("inline-block [perspective:600px]", className)} aria-label={words.join(", ")} {...rest}>
+      <span key={idx} aria-hidden="true" className="as-flip-word">
+        {reduced ? words[0] : words[idx]}
+      </span>
+    </span>
+  );
+}
+
+/* ---- NumberTicker ------------------------------------------------------------------ */
+
+export interface NumberTickerProps extends React.HTMLAttributes<HTMLSpanElement> {
+  value: number;
+  /** Locale used for grouping separators. Default browser locale. */
+  locale?: string;
+}
+
+/**
+ * NumberTicker — an odometer: each digit rolls vertically to its new
+ * position whenever `value` changes. Reduced motion snaps instantly
+ * (the roll transition lives behind the media gate in motion.css).
+ */
+export function NumberTicker({ value, locale, className, ...rest }: NumberTickerProps) {
+  const chars = Math.round(value).toLocaleString(locale).split("");
+  return (
+    <span className={cn("inline-flex tabular-nums", className)} aria-label={String(value)} {...rest}>
+      {chars.map((ch, i) =>
+        /\d/.test(ch) ? (
+          <span key={i} aria-hidden="true" className="as-ticker-digit">
+            <span
+              className="as-ticker-strip"
+              style={{ transform: `translateY(${-Number(ch)}em)` }}
+            >
+              {Array.from({ length: 10 }, (_, d) => (
+                <span key={d} className="block h-[1em] leading-none">
+                  {d}
+                </span>
+              ))}
+            </span>
+          </span>
+        ) : (
+          <span key={i} aria-hidden="true" className="leading-none">
+            {ch}
+          </span>
+        )
+      )}
     </span>
   );
 }

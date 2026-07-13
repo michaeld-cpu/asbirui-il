@@ -1,21 +1,25 @@
 import * as React from "react";
 import {
   motion,
-  useMotionTemplate,
   useMotionValue,
   useReducedMotion,
   useSpring,
+  useTransform,
+  type MotionValue,
 } from "framer-motion";
 import { cn } from "../lib/cn";
+import { usePrefersReducedMotion } from "./internal";
 
 /*
-  Pointer-driven motion (framer springs):
+  Interaction motion:
 
     <Magnetic><Button>Hover me</Button></Magnetic>
-    <TiltCard className="rounded-xl border …">…</TiltCard>
-    <SpotlightCard className="rounded-xl border …">…</SpotlightCard>
+    <Dock>{apps.map((a) => <DockItem key={a.id}>{a.icon}</DockItem>)}</Dock>
+    <CardStack items={[…]} />
+    <Ripple className="rounded-asbir"><Button>Click me</Button></Ripple>
 
-  All three honor prefers-reduced-motion by rendering a static wrapper.
+  Magnetic and Dock ride framer springs; CardStack and Ripple are
+  timer/DOM-driven. All honor prefers-reduced-motion.
 */
 
 /* ---- Magnetic ---------------------------------------------------------- */
@@ -67,122 +71,169 @@ export function Magnetic({ strength = 14, className, children, ...rest }: Magnet
   );
 }
 
-/* ---- TiltCard ----------------------------------------------------------- */
+/* ---- Dock ----------------------------------------------------------------- */
 
-export interface TiltCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Max tilt in degrees. Default 10. */
-  maxTilt?: number;
-  /** Show the moving specular glare. Default true. */
-  glare?: boolean;
+const DockCtx = React.createContext<MotionValue<number> | null>(null);
+
+export interface DockProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
 }
 
 /**
- * TiltCard — 3D-tilts toward the pointer with a specular glare that tracks
- * it. The card springs flat again on leave.
+ * Dock — the macOS dock: items magnify as the pointer nears them and relax
+ * as it leaves. Compose with <DockItem>.
  */
-export function TiltCard({ maxTilt = 10, glare = true, className, children, ...rest }: TiltCardProps) {
-  const reduced = useReducedMotion();
-  const ref = React.useRef<HTMLDivElement | null>(null);
-  const rx = useMotionValue(0);
-  const ry = useMotionValue(0);
-  const srx = useSpring(rx, { stiffness: 220, damping: 18 });
-  const sry = useSpring(ry, { stiffness: 220, damping: 18 });
-  const gx = useMotionValue(50);
-  const gy = useMotionValue(50);
-  const glareBg = useMotionTemplate`radial-gradient(240px circle at ${gx}% ${gy}%, rgb(255 255 255 / 0.14), transparent 60%)`;
-
-  if (reduced) {
-    return (
-      <div className={cn("relative", className)} {...rest}>
+export function Dock({ className, children, ...rest }: DockProps) {
+  const mouseX = useMotionValue(Infinity);
+  return (
+    <DockCtx.Provider value={mouseX}>
+      <div
+        className={cn(
+          "flex items-end gap-2 rounded-2xl border border-border bg-panel px-3 py-2.5",
+          className
+        )}
+        onMouseMove={(e) => mouseX.set(e.clientX)}
+        onMouseLeave={() => mouseX.set(Infinity)}
+        {...rest}
+      >
         {children}
       </div>
-    );
-  }
+    </DockCtx.Provider>
+  );
+}
+
+export interface DockItemProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** Resting size in px. Default 40. */
+  size?: number;
+  /** Peak size under the pointer. Default 64. */
+  magnification?: number;
+}
+
+/** One dock tile — size springs with the pointer's distance. */
+export function DockItem({ size = 40, magnification = 64, className, children, ...rest }: DockItemProps) {
+  const reduced = useReducedMotion();
+  const mouseX = React.useContext(DockCtx);
+  const ref = React.useRef<HTMLDivElement | null>(null);
+  const fallback = useMotionValue(Infinity);
+  const distance = useTransform(mouseX ?? fallback, (x) => {
+    const r = ref.current?.getBoundingClientRect();
+    if (!r) return Infinity;
+    return x - (r.left + r.width / 2);
+  });
+  const width = useSpring(
+    useTransform(distance, [-110, 0, 110], [size, magnification, size]),
+    { stiffness: 320, damping: 22 }
+  );
 
   return (
     <motion.div
       ref={ref}
-      className={cn("relative", className)}
+      style={reduced ? { width: size, height: size } : { width, height: width }}
+      className={cn(
+        "flex items-center justify-center rounded-xl border border-border bg-overlay/[0.06] text-fg/70",
+        className
+      )}
       {...(rest as object)}
-      style={{ rotateX: srx, rotateY: sry, transformPerspective: 900 }}
-      onPointerMove={(e) => {
-        const r = ref.current?.getBoundingClientRect();
-        if (!r) return;
-        const px = (e.clientX - r.left) / r.width;
-        const py = (e.clientY - r.top) / r.height;
-        ry.set((px - 0.5) * 2 * maxTilt);
-        rx.set(-(py - 0.5) * 2 * maxTilt);
-        gx.set(px * 100);
-        gy.set(py * 100);
-      }}
-      onPointerLeave={() => {
-        rx.set(0);
-        ry.set(0);
-        gx.set(50);
-        gy.set(50);
-      }}
     >
       {children}
-      {glare && (
-        <motion.span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-[inherit]"
-          style={{ background: glareBg }}
-        />
-      )}
     </motion.div>
   );
 }
 
-/* ---- SpotlightCard ------------------------------------------------------- */
+/* ---- CardStack ---------------------------------------------------------------- */
 
-export interface SpotlightCardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Spotlight radius in px. Default 240. */
-  radius?: number;
-  /** CSS color of the glow. Default accent at low alpha. */
-  color?: string;
+export interface CardStackProps extends React.HTMLAttributes<HTMLDivElement> {
+  items: React.ReactNode[];
+  /** ms each card stays on top. Default 2600. */
+  interval?: number;
+  /** px vertical offset between stacked cards. Default 12. */
+  offset?: number;
 }
 
 /**
- * SpotlightCard — a radial glow follows the pointer across the card's
- * surface, fading in on enter and out on leave.
+ * CardStack — cards sit stacked with depth; every interval the top card
+ * springs to the back and the next rises. Size the wrapper; cards fill it.
  */
-export function SpotlightCard({
-  radius = 240,
-  color = "rgb(var(--accent) / 0.14)",
-  className,
-  children,
-  ...rest
-}: SpotlightCardProps) {
-  const ref = React.useRef<HTMLDivElement | null>(null);
-  const [hovered, setHovered] = React.useState(false);
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const bg = useMotionTemplate`radial-gradient(${radius}px circle at ${mx}px ${my}px, ${color}, transparent 70%)`;
+export function CardStack({ items, interval = 2600, offset = 12, className, ...rest }: CardStackProps) {
+  const reduced = usePrefersReducedMotion();
+  const [order, setOrder] = React.useState(() => items.map((_, i) => i));
+
+  React.useEffect(() => {
+    setOrder(items.map((_, i) => i));
+  }, [items.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  React.useEffect(() => {
+    if (reduced || items.length < 2) return;
+    const t = window.setInterval(
+      () => setOrder((o) => [...o.slice(1), o[0]]),
+      interval
+    );
+    return () => window.clearInterval(t);
+  }, [reduced, items.length, interval]);
 
   return (
-    <div
+    <div className={cn("relative", className)} {...rest}>
+      {items.map((item, i) => {
+        const pos = order.indexOf(i);
+        return (
+          <motion.div
+            key={i}
+            className="absolute inset-x-0 top-0 h-full"
+            animate={{
+              y: pos * offset,
+              scale: 1 - pos * 0.05,
+              zIndex: items.length - pos,
+              opacity: pos > 2 ? 0 : 1,
+            }}
+            transition={{ type: "spring", stiffness: 260, damping: 26 }}
+            style={{ transformOrigin: "top center" }}
+          >
+            {item}
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---- Ripple ---------------------------------------------------------------------- */
+
+export type RippleProps = React.HTMLAttributes<HTMLSpanElement>;
+
+/**
+ * Ripple — a material-style ring expands from the click point. Wrap any
+ * clickable; give the wrapper the same border-radius so the ripple clips.
+ */
+export function Ripple({ className, children, ...rest }: RippleProps) {
+  const reduced = usePrefersReducedMotion();
+  const ref = React.useRef<HTMLSpanElement | null>(null);
+
+  const spawn = (e: React.PointerEvent) => {
+    if (reduced) return;
+    const host = ref.current;
+    if (!host) return;
+    const rect = host.getBoundingClientRect();
+    const ripple = document.createElement("span");
+    ripple.className = "as-ripple";
+    const d = Math.max(rect.width, rect.height) * 2;
+    Object.assign(ripple.style, {
+      width: `${d}px`,
+      height: `${d}px`,
+      left: `${e.clientX - rect.left}px`,
+      top: `${e.clientY - rect.top}px`,
+    });
+    ripple.addEventListener("animationend", () => ripple.remove());
+    host.appendChild(ripple);
+  };
+
+  return (
+    <span
       ref={ref}
-      className={cn("relative overflow-hidden", className)}
-      onPointerMove={(e) => {
-        const r = ref.current?.getBoundingClientRect();
-        if (!r) return;
-        mx.set(e.clientX - r.left);
-        my.set(e.clientY - r.top);
-      }}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
+      className={cn("relative inline-flex overflow-hidden", className)}
+      onPointerDown={spawn}
       {...rest}
     >
-      <motion.div
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute inset-0 transition-opacity duration-300",
-          hovered ? "opacity-100" : "opacity-0"
-        )}
-        style={{ background: bg }}
-      />
-      <div className="relative">{children}</div>
-    </div>
+      {children}
+    </span>
   );
 }
