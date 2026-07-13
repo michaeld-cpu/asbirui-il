@@ -30,6 +30,7 @@ const navLinks = [
   { label: "Templates", href: "#templates" },
   { label: "Components", href: "#components" },
   { label: "Blocks", href: "#blocks" },
+  { label: "Motion", href: "#motion" },
   { label: "Brand Kits", href: "#brand-kits" },
   { label: "Test Cases", href: "#test-cases" },
   { label: "Docs", href: "#docs" },

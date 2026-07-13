@@ -66,7 +66,6 @@ export const docsNav: DocsNavGroup[] = [
     items: [
       { label: "Tokens", href: "#tokens" },
       { label: "Colors", href: "#tokens/colors" },
-      { label: "Motion", href: "#motion" },
       { label: "Typography", href: "#tokens", soon: true },
       { label: "Spacing & radius", href: "#tokens", soon: true },
     ],
