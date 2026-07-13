@@ -1,4 +1,5 @@
 import { Button, Checkbox, Input } from "@/index";
+import asbirLogo from "@/assets/logo/asbirlogo-white.svg";
 import type { BlockEntry } from "./entry";
 
 const GitHubIcon = (
@@ -97,7 +98,10 @@ function SplitPanel() {
               "radial-gradient(120% 90% at 0% 0%, rgb(var(--accent) / 0.25), transparent 55%), radial-gradient(120% 90% at 100% 100%, rgb(var(--accent) / 0.12), transparent 55%)",
           }}
         />
-        <p className="relative text-sm font-semibold tracking-tight text-fg">⟐ AsbirTech</p>
+        <p className="relative flex items-center gap-2 text-sm font-semibold tracking-tight text-fg">
+          <img src={asbirLogo} alt="" width={18} height={16} className="[html.light_&]:invert" />
+          AsbirTech
+        </p>
         <blockquote className="relative">
           <p className="text-sm leading-relaxed text-fg/75">
             "We shipped our internal dashboard in a week — every screen started as an AsbirUI
@@ -130,8 +134,8 @@ function SplitPanel() {
 function MagicLink() {
   return (
     <div className="mx-auto w-full max-w-xs text-center">
-      <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-panel text-lg text-fg">
-        ⟐
+      <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-panel">
+        <img src={asbirLogo} alt="" width={20} height={18} className="[html.light_&]:invert" />
       </span>
       <h2 className="mt-4 text-lg font-semibold tracking-tight text-fg">Sign in to AsbirTech</h2>
       <p className="mt-1 text-sm text-fg/60">We'll email you a magic link — no password needed</p>
@@ -226,7 +230,9 @@ export const loginBlock: BlockEntry = {
   <div className="relative hidden flex-col justify-between overflow-hidden p-7 md:flex">
     <div className="absolute inset-0" style={{
       background: "radial-gradient(120% 90% at 0% 0%, rgb(var(--accent) / 0.25), transparent 55%)" }} />
-    <p className="relative text-sm font-semibold tracking-tight text-fg">⟐ AsbirTech</p>
+    <p className="relative flex items-center gap-2 text-sm font-semibold tracking-tight text-fg">
+      <img src={logo} alt="" width={18} /> AsbirTech
+    </p>
     <blockquote className="relative">
       <p className="text-sm leading-relaxed text-fg/75">
         "We shipped our internal dashboard in a week — every screen started
@@ -254,8 +260,8 @@ export const loginBlock: BlockEntry = {
       code: `import { Button, Input } from "@asbirtech/asbir-ui";
 
 <div className="mx-auto w-full max-w-xs text-center">
-  <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-panel text-lg text-fg">
-    ⟐
+  <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-panel">
+    <img src={logo} alt="" width={20} />
   </span>
   <h2 className="mt-4 text-lg font-semibold tracking-tight text-fg">Sign in to AsbirTech</h2>
   <p className="mt-1 text-sm text-fg/60">We'll email you a magic link — no password needed</p>
