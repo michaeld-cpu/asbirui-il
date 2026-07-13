@@ -62,28 +62,33 @@ export function Avatar({ src, name, size = "md", status, className, ...props }: 
   const showImage = src && !errored;
   return (
     <span
-      className={cn("relative inline-flex shrink-0 select-none", sizes[size], className)}
+      className={cn("relative inline-flex shrink-0 select-none align-middle", sizes[size], className)}
       {...props}
     >
-      {showImage ? (
-        <img
-          src={src}
-          alt={name}
-          onError={() => setErrored(true)}
-          className="h-full w-full rounded-full object-cover"
-        />
-      ) : (
-        <span
-          role="img"
-          aria-label={name}
-          className={cn(
-            "flex h-full w-full items-center justify-center rounded-full font-semibold",
-            tintFor(name)
-          )}
-        >
-          {initials(name)}
-        </span>
-      )}
+      {/* overflow-hidden wrapper: clips to the circle AND pins the root's
+          baseline to its border box, so swapping photo ⇄ initials (different
+          intrinsic baselines) can't shift the avatar in the line box */}
+      <span className="block h-full w-full overflow-hidden rounded-full">
+        {showImage ? (
+          <img
+            src={src}
+            alt={name}
+            onError={() => setErrored(true)}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <span
+            role="img"
+            aria-label={name}
+            className={cn(
+              "flex h-full w-full items-center justify-center font-semibold",
+              tintFor(name)
+            )}
+          >
+            {initials(name)}
+          </span>
+        )}
+      </span>
       {status && (
         <span
           aria-hidden="true"
