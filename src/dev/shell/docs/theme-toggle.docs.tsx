@@ -5,12 +5,7 @@ import type { ComponentEntry } from "./entry";
 /* Controlled here so the demo doesn't flip the docs site's own theme. */
 function ThemeToggleDemo() {
   const [theme, setTheme] = React.useState<"light" | "dark">("dark");
-  return (
-    <div className="flex items-center gap-3">
-      <ThemeToggle theme={theme} onThemeChange={setTheme} />
-      <span className="font-mono text-xs text-fg/50">theme: {theme}</span>
-    </div>
-  );
+  return <ThemeToggle theme={theme} onThemeChange={setTheme} />;
 }
 
 export const themeToggleEntry: ComponentEntry = {
