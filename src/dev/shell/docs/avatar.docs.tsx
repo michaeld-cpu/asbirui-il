@@ -42,7 +42,7 @@ export const avatarEntry: ComponentEntry = {
   ],
   render: (v) => (
     <Avatar
-      name="Mikey"
+      name="Mikey Django"
       src={v.image ? AVATAR_SRC : undefined}
       size={v.size as "md"}
       status={v.status === "none" ? undefined : (v.status as "online")}
@@ -51,7 +51,7 @@ export const avatarEntry: ComponentEntry = {
   code: (v) => {
     const lines = [
       v.image ? `  src={user.photo}` : "",
-      `  name="Mikey"`,
+      `  name="Mikey Django"`,
       `  size="${v.size}"`,
       v.status !== "none" ? `  status="${v.status}"` : "",
     ].filter(Boolean);
