@@ -1,11 +1,27 @@
 import * as React from "react";
-import { ChartReveal, Reveal, Stagger, StaggerItem } from "@/motion";
+import {
+  ChartReveal,
+  CountUp,
+  Magnetic,
+  Marquee,
+  Reveal,
+  ShinyText,
+  SpotlightCard,
+  Stagger,
+  StaggerItem,
+  TextReveal,
+  TiltCard,
+  Typewriter,
+} from "@/motion";
+import { Button, FilterChips } from "@/index";
+import asbirLogo from "@/assets/logo/asbirlogo-white.svg";
 
 /*
-  Motion docs (route: #motion) — the destination for "Explore Asbir Motion".
-  Live demos of the motion layer: the framer-free ChartReveal, the scroll
-  Reveal/Stagger (framer), and the zero-runtime CSS utility classes. Each demo
-  can be replayed so the entrance is visible on demand.
+  Motion docs (route: #motion) — a filterable GALLERY of live motion pieces
+  (framer-style template-gallery layout). Every card is the real component
+  animating: pointer demos react to the cursor, loops run continuously, and
+  entrance demos replay on hover. The Copy button on each card copies its
+  usage snippet.
 */
 
 const ArrowIcon = (
@@ -13,67 +29,19 @@ const ArrowIcon = (
     <path d="M5 12h14M13 6l6 6-6 6" />
   </svg>
 );
-const ReplayIcon = (
+const CopyIcon = (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" />
+    <rect x="9" y="9" width="12" height="12" rx="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+);
+const CheckIcon = (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 6 9 17l-5-5" />
   </svg>
 );
 
-/* ---- shared chrome ---------------------------------------------------- */
-
-/** A framed live-demo stage with a Replay button that remounts `render` so the
-    entrance animation plays again on demand. */
-function DemoStage({ render }: { render: (key: number) => React.ReactNode }) {
-  const [key, setKey] = React.useState(0);
-  return (
-    <div className="not-prose mt-4 rounded-xl border border-border bg-panel">
-      <div className="flex items-center justify-end border-b border-border px-3 py-1.5">
-        <button
-          type="button"
-          onClick={() => setKey((k) => k + 1)}
-          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium text-fg/60 transition-colors hover:bg-overlay/[0.06] hover:text-fg"
-        >
-          {ReplayIcon} Replay
-        </button>
-      </div>
-      <div className="flex min-h-[180px] items-center justify-center p-8">
-        <div key={key}>{render(key)}</div>
-      </div>
-    </div>
-  );
-}
-
-function CodeBlock({ code }: { code: string }) {
-  const [copied, setCopied] = React.useState(false);
-  const copy = () => {
-    navigator.clipboard?.writeText(code);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1400);
-  };
-  return (
-    <div className="not-prose mt-3 overflow-hidden rounded-xl border border-border bg-panel">
-      <div className="flex items-center justify-between border-b border-border px-4 py-2">
-        <span className="text-[11px] font-medium tracking-wide text-fg/60">TSX</span>
-        <button type="button" onClick={copy} className="rounded-md px-2 py-1 text-xs text-fg/60 transition-colors hover:bg-overlay/[0.06] hover:text-fg">
-          {copied ? "Copied" : "Copy"}
-        </button>
-      </div>
-      <pre className="overflow-x-auto px-4 py-3 text-[13px] leading-relaxed text-fg/85"><code>{code}</code></pre>
-    </div>
-  );
-}
-
-function Section({ title, tagline, children }: { title: string; tagline: string; children: React.ReactNode }) {
-  return (
-    <section className="mt-12 border-t border-border pt-10 first:mt-8 first:border-0 first:pt-0">
-      <h2 className="text-lg font-semibold tracking-tight text-fg">{title}</h2>
-      <p className="mt-1 max-w-2xl text-sm leading-relaxed text-fg/60">{tagline}</p>
-      {children}
-    </section>
-  );
-}
-
-/* ---- demo: ChartReveal ------------------------------------------------ */
+/* ---- demo helpers ------------------------------------------------------ */
 
 /** A tiny standalone area chart so the Motion page doesn't depend on the AI
     template. Same draw/fill markup ChartReveal looks for. */
@@ -88,7 +56,7 @@ function MiniChart() {
   const line = pts.map((p, i) => `${i ? "L" : "M"} ${p[0]} ${p[1]}`).join(" ");
   const area = `${line} L ${W} ${H} L 0 ${H} Z`;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="h-24 w-full max-w-md overflow-visible" preserveAspectRatio="none">
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-20 w-full max-w-[16rem] overflow-visible" preserveAspectRatio="none">
       <defs>
         <linearGradient id="motion-demo-area" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="rgb(var(--accent))" stopOpacity="0.3" />
@@ -101,96 +69,297 @@ function MiniChart() {
   );
 }
 
-/* ---- CSS utility swatches --------------------------------------------- */
+const MARQUEE_BRANDS = ["AsbirUI", "Lumina", "Tripket PH", "PlanOut", "BeetzeePlay", "ProjectPlaza"];
 
-const CSS_UTILS: { cls: string; label: string; desc: string }[] = [
-  { cls: "as-lift", label: "as-lift", desc: "Hover — nudge up + shadow" },
-  { cls: "as-press", label: "as-press", desc: "Active — subtle squash" },
-  { cls: "as-pulse", label: "as-pulse", desc: "Breathing opacity (live/loading)" },
-  { cls: "as-shimmer", label: "as-shimmer", desc: "Sweeping highlight (skeletons)" },
+/* ---- gallery registry ---------------------------------------------------- */
+
+type Category = "Entrance" | "Pointer" | "Text" | "Looping";
+
+type MotionDemo = {
+  id: string;
+  name: string;
+  category: Category;
+  /** Remount the demo when the pointer enters the preview (entrances). */
+  replayOnHover?: boolean;
+  render: () => React.ReactNode;
+  code: string;
+};
+
+const DEMOS: MotionDemo[] = [
+  {
+    id: "tilt-card",
+    name: "Tilt Card",
+    category: "Pointer",
+    render: () => (
+      <TiltCard className="w-48 rounded-xl border border-border bg-gradient-to-br from-overlay/[0.1] to-transparent bg-panel p-4 shadow-xl">
+        <img src={asbirLogo} alt="" width={22} height={20} className="[html.light_&]:invert" />
+        <p className="mt-5 text-sm font-semibold text-fg">AsbirUI</p>
+        <p className="text-xs text-fg/55">Move your cursor</p>
+      </TiltCard>
+    ),
+    code: `<TiltCard maxTilt={10} className="rounded-xl border border-border bg-panel p-4">
+  …card content…
+</TiltCard>`,
+  },
+  {
+    id: "magnetic",
+    name: "Magnetic",
+    category: "Pointer",
+    render: () => (
+      <Magnetic>
+        <Button>Hover me</Button>
+      </Magnetic>
+    ),
+    code: `<Magnetic strength={14}>
+  <Button>Hover me</Button>
+</Magnetic>`,
+  },
+  {
+    id: "spotlight-card",
+    name: "Spotlight Card",
+    category: "Pointer",
+    render: () => (
+      <SpotlightCard className="w-56 rounded-xl border border-border bg-panel p-5">
+        <p className="text-sm font-semibold text-fg">Spotlight</p>
+        <p className="mt-1 text-xs leading-relaxed text-fg/55">
+          A glow tracks your cursor across the surface
+        </p>
+      </SpotlightCard>
+    ),
+    code: `<SpotlightCard radius={240} className="rounded-xl border border-border bg-panel p-5">
+  …card content…
+</SpotlightCard>`,
+  },
+  {
+    id: "typewriter",
+    name: "Typewriter",
+    category: "Text",
+    render: () => (
+      <p className="text-lg font-semibold tracking-tight text-fg">
+        Ship{" "}
+        <Typewriter
+          words={["components", "templates", "dashboards", "motion"]}
+          className="text-accent-soft-fg"
+        />
+      </p>
+    ),
+    code: `<Typewriter words={["components", "templates", "dashboards"]} />`,
+  },
+  {
+    id: "text-reveal",
+    name: "Text Reveal",
+    category: "Text",
+    replayOnHover: true,
+    render: () => (
+      <TextReveal
+        text="Motion that ships with the system"
+        className="max-w-[16rem] text-center text-lg font-semibold leading-snug tracking-tight text-fg"
+      />
+    ),
+    code: `<TextReveal text="Motion that ships with the system" stagger={0.05} />`,
+  },
+  {
+    id: "count-up",
+    name: "Count Up",
+    category: "Text",
+    replayOnHover: true,
+    render: () => (
+      <div className="text-center">
+        <p className="text-3xl font-semibold tracking-tight text-fg">
+          <CountUp to={1248930} />
+        </p>
+        <p className="mt-1 text-xs text-fg/55">requests this month</p>
+      </div>
+    ),
+    code: `<CountUp to={1248930} duration={1.4} />`,
+  },
+  {
+    id: "shiny-text",
+    name: "Shiny Text",
+    category: "Text",
+    render: () => (
+      <span className="rounded-full border border-border bg-panel px-4 py-1.5">
+        <ShinyText className="text-sm font-medium">✦ Introducing AsbirMotion</ShinyText>
+      </span>
+    ),
+    code: `<ShinyText speed={2.6}>Introducing AsbirMotion</ShinyText>`,
+  },
+  {
+    id: "marquee",
+    name: "Marquee",
+    category: "Looping",
+    render: () => (
+      <Marquee duration={16} className="w-full max-w-[18rem]">
+        {MARQUEE_BRANDS.map((b) => (
+          <span key={b} className="whitespace-nowrap text-sm font-medium text-fg/60">
+            {b}
+          </span>
+        ))}
+      </Marquee>
+    ),
+    code: `<Marquee duration={28} gap={40}>
+  {logos.map((l) => <Logo key={l.id} {...l} />)}
+</Marquee>`,
+  },
+  {
+    id: "reveal",
+    name: "Reveal",
+    category: "Entrance",
+    replayOnHover: true,
+    render: () => (
+      <Reveal className="rounded-xl border border-border bg-panel px-6 py-4 text-sm font-medium text-fg">
+        Revealed on view
+      </Reveal>
+    ),
+    code: `<Reveal direction="up" delay={0.1}>
+  <Card>…</Card>
+</Reveal>`,
+  },
+  {
+    id: "stagger",
+    name: "Stagger",
+    category: "Entrance",
+    replayOnHover: true,
+    render: () => (
+      <Stagger className="flex gap-2.5">
+        {["One", "Two", "Three"].map((t) => (
+          <StaggerItem key={t} className="rounded-lg border border-border bg-panel px-3.5 py-2.5 text-sm text-fg">
+            {t}
+          </StaggerItem>
+        ))}
+      </Stagger>
+    ),
+    code: `<Stagger gap={0.08}>
+  {items.map((i) => (
+    <StaggerItem key={i.id}>{i.label}</StaggerItem>
+  ))}
+</Stagger>`,
+  },
+  {
+    id: "chart-reveal",
+    name: "Chart Reveal",
+    category: "Entrance",
+    replayOnHover: true,
+    render: () => (
+      <ChartReveal>
+        <MiniChart />
+      </ChartReveal>
+    ),
+    code: `<ChartReveal delay={0.1}>
+  <svg>…your chart paths…</svg>
+</ChartReveal>`,
+  },
+  {
+    id: "hover-press",
+    name: "Lift & Press",
+    category: "Pointer",
+    render: () => (
+      <div className="flex gap-3">
+        <span className="as-lift flex h-12 w-24 cursor-pointer items-center justify-center rounded-lg border border-border bg-panel text-xs font-medium text-fg">
+          as-lift
+        </span>
+        <span className="as-press flex h-12 w-24 cursor-pointer select-none items-center justify-center rounded-lg border border-border bg-panel text-xs font-medium text-fg">
+          as-press
+        </span>
+      </div>
+    ),
+    code: `/* zero-JS — from motion.css */
+<button className="as-lift">Hover</button>
+<button className="as-press">Press</button>`,
+  },
 ];
+
+const CATEGORIES = ["All", "Entrance", "Pointer", "Text", "Looping"] as const;
+
+/* ---- gallery card -------------------------------------------------------- */
+
+function GalleryCard({ demo }: { demo: MotionDemo }) {
+  const [key, setKey] = React.useState(0);
+  const [copied, setCopied] = React.useState(false);
+  const copy = () => {
+    navigator.clipboard?.writeText(demo.code);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1400);
+  };
+
+  return (
+    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-panel">
+      {/* live stage */}
+      <div
+        className="relative flex h-56 items-center justify-center overflow-hidden border-b border-border bg-canvas p-6"
+        onMouseEnter={demo.replayOnHover ? () => setKey((k) => k + 1) : undefined}
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage: "radial-gradient(rgb(var(--fg-rgb) / 0.08) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+            maskImage: "radial-gradient(75% 75% at 50% 50%, black, transparent 80%)",
+            WebkitMaskImage: "radial-gradient(75% 75% at 50% 50%, black, transparent 80%)",
+          }}
+        />
+        <div key={key} className="relative flex w-full items-center justify-center">
+          {demo.render()}
+        </div>
+      </div>
+      {/* caption */}
+      <div className="flex items-center justify-between gap-2 px-3.5 py-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-fg">{demo.name}</p>
+          <p className="mt-0.5 text-xs text-fg/55">
+            {demo.category}
+            {demo.replayOnHover ? " · hover to replay" : ""}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={copy}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-fg/70 transition-colors hover:bg-overlay/[0.05] hover:text-fg"
+        >
+          <span className="[&_svg]:h-3.5 [&_svg]:w-3.5">{copied ? CheckIcon : CopyIcon}</span>
+          {copied ? "Copied" : "Copy"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /* ---- page ------------------------------------------------------------- */
 
 export function MotionDocs() {
+  const [category, setCategory] = React.useState<string>("All");
+  const visible = DEMOS.filter((d) => category === "All" || d.category === category);
+
   return (
     <article className="animate-fade-up py-10">
       <h1 className="text-3xl font-semibold tracking-tight text-fg">Asbir Motion</h1>
       <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-fg/70">
-        Microinteractions &amp; animations built to pair with AsbirUI. A
-        zero-runtime CSS layer for microinteractions, plus opt-in React
-        components (framer-motion) for entrances. Everything honors{" "}
+        Microinteractions &amp; animations built to pair with AsbirUI — pointer physics, text
+        effects, loops, and entrances. Everything honors{" "}
         <span className="text-fg">prefers-reduced-motion</span>.
       </p>
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
-        <code className="rounded-md border border-border bg-panel px-2 py-1 text-fg/70">import &#123; ChartReveal, Reveal, Stagger &#125; from "@asbirtech/asbir-ui/motion"</code>
+        <code className="rounded-md border border-border bg-panel px-2 py-1 text-fg/70">import &#123; TiltCard, Magnetic, Typewriter, Marquee &#125; from "@asbirtech/asbir-ui/motion"</code>
         <code className="rounded-md border border-border bg-panel px-2 py-1 text-fg/70">import "@asbirtech/asbir-ui/motion.css"</code>
       </div>
 
-      <Section
-        title="Chart Reveal"
-        tagline="Draws a chart's stroked lines left-to-right and fades the area fills up as they complete. Framer-free — wraps any SVG chart and plays on scroll-into-view."
-      >
-        <DemoStage render={(k) => (
-          <ChartReveal key={k}>
-            <MiniChart />
-          </ChartReveal>
-        )} />
-        <CodeBlock code={`<ChartReveal delay={0.1}>
-  <svg>…your chart paths…</svg>
-</ChartReveal>`} />
-      </Section>
+      {/* category filter */}
+      <div className="mt-8">
+        <FilterChips
+          label="Type"
+          value={category}
+          onValueChange={setCategory}
+          options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+        />
+      </div>
 
-      <Section
-        title="Reveal"
-        tagline="Fades and slides content in as it scrolls into view (framer-motion). Configurable direction, distance, delay, duration."
-      >
-        <DemoStage render={(k) => (
-          <Reveal key={k} className="rounded-xl border border-border bg-canvas px-6 py-4 text-sm font-medium text-fg">
-            Revealed on view
-          </Reveal>
-        )} />
-        <CodeBlock code={`<Reveal direction="up" delay={0.1}>
-  <Card>…</Card>
-</Reveal>`} />
-      </Section>
-
-      <Section
-        title="Stagger"
-        tagline="Reveals a group of children one after another. Wrap items in <StaggerItem>."
-      >
-        <DemoStage render={(k) => (
-          <Stagger key={k} className="flex gap-3">
-            {["One", "Two", "Three", "Four"].map((t) => (
-              <StaggerItem key={t} className="rounded-lg border border-border bg-canvas px-4 py-3 text-sm text-fg">
-                {t}
-              </StaggerItem>
-            ))}
-          </Stagger>
-        )} />
-        <CodeBlock code={`<Stagger gap={0.08}>
-  {items.map((i) => (
-    <StaggerItem key={i.id}>{i.label}</StaggerItem>
-  ))}
-</Stagger>`} />
-      </Section>
-
-      <Section
-        title="CSS utilities"
-        tagline="Zero-runtime classes from motion.css — no JS, no framer. Hover / press / pulse / shimmer."
-      >
-        <div className="not-prose mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {CSS_UTILS.map((u) => (
-            <div key={u.cls} className="flex flex-col items-center gap-2 rounded-xl border border-border bg-panel p-4 text-center">
-              <span className={`${u.cls} flex h-12 w-full items-center justify-center rounded-lg bg-overlay/[0.06] text-xs font-medium text-fg`}>
-                Hover me
-              </span>
-              <code className="text-[11px] text-accent-soft-fg">{u.label}</code>
-              <span className="text-[11px] leading-tight text-fg/55">{u.desc}</span>
-            </div>
-          ))}
-        </div>
-      </Section>
+      {/* gallery */}
+      <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        {visible.map((demo) => (
+          <GalleryCard key={demo.id} demo={demo} />
+        ))}
+      </div>
 
       <div className="mt-12 flex items-center gap-3 border-t border-border pt-8 text-sm text-fg/60">
         <span>Full API + reduced-motion behavior lives in the motion package.</span>

@@ -28,6 +28,18 @@ export type {
 export { ChartReveal } from "./chart-reveal";
 export type { ChartRevealProps } from "./chart-reveal";
 
+// Pointer-driven motion — springs toward/around the cursor (framer).
+export { Magnetic, TiltCard, SpotlightCard } from "./interactive";
+export type { MagneticProps, TiltCardProps, SpotlightCardProps } from "./interactive";
+
+// Text motion — framer-free; pair with "@asbirtech/asbir-ui/motion.css".
+export { Typewriter, CountUp, TextReveal, ShinyText } from "./text";
+export type { TypewriterProps, CountUpProps, TextRevealProps, ShinyTextProps } from "./text";
+
+// Looping strips — framer-free; pair with "@asbirtech/asbir-ui/motion.css".
+export { Marquee } from "./marquee";
+export type { MarqueeProps } from "./marquee";
+
 // Re-export the framer primitives adopters most often reach for, so they can
 // build custom motion without adding framer-motion to their own import graph
 // separately (it's already their peer dep once they use this entry).
