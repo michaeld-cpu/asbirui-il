@@ -17,7 +17,7 @@ export const themeToggleEntry: ComponentEntry = {
   slug: "theme-toggle",
   name: "Theme Toggle",
   tagline:
-    "A light/dark switch. Uncontrolled, it owns the dark class on <html> and persists to localStorage (falling back to the OS preference); controlled, it just reports the flip.",
+    "The navbar-style segmented pill — sun and moon, active theme highlighted. Uncontrolled, it owns the dark class on <html> and persists to localStorage; controlled, it just reports the flip.",
   controls: [],
   render: () => <ThemeToggleDemo />,
   code: () => `// uncontrolled — owns <html class="dark"> + localStorage
