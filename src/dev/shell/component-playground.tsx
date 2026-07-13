@@ -284,13 +284,13 @@ function ColorControl({
 
   const hueColor = rgbToHex(hsvToRgb({ h: hue, s: 1, v: 1 }));
 
-  // The picker renders INLINE and full-width inside this control's own card,
-  // expanding the panel downward (React-Bits style) rather than floating as an
-  // absolute popover — which used to overflow the panel edge / go off-screen.
+  // The picker floats as an absolute popover anchored to this card (z-indexed
+  // over the content below — it must not push the page down). It spans exactly
+  // the card's width, so it can't overflow the panel edge.
   return (
     <div
       ref={wrapRef}
-      className="rounded-lg border border-border bg-panel px-3 py-2.5"
+      className="relative rounded-lg border border-border bg-panel px-3 py-2.5"
     >
       {/* header row: label + swatch toggle + hex input */}
       <div className="flex items-center justify-between gap-3">
@@ -321,7 +321,7 @@ function ColorControl({
       </div>
 
       {open && (
-        <div className="mt-3 border-t border-border/60 pt-3">
+        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-30 rounded-lg border border-border bg-panel p-3 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.7)]">
           {/* saturation / value pad — wide, not too tall */}
           <div
             {...sv}
@@ -462,7 +462,9 @@ function CustomizePanel({
           Reset
         </button>
       </div>
-      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+      {/* items-start: an open inline color picker must not stretch its row's
+          sibling cards (they'd center their content in a huge empty cell) */}
+      <div className="grid grid-cols-1 items-start gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
         {controls.map((c) => (
           <React.Fragment key={c.key}>
             {renderControl(c, values[c.key], (v) => onChange(c.key, v), sliderMaxOverrides, onSliderBlockedAtCap)}

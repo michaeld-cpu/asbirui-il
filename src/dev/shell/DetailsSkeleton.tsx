@@ -12,6 +12,8 @@
   opacity, so light and dark both work.
 */
 
+import * as React from "react";
+
 /* ---- inline glyphs (ride along in the prose) --------------------------- */
 
 const glyphCls =
@@ -69,7 +71,7 @@ function isoPoint(col: number, row: number): [number, number] {
   return [(col - row) * (TILE_W / 2), (col + row) * (TILE_H / 2)];
 }
 
-function Tile({ col, row }: { col: number; row: number }) {
+function Tile({ col, row, index }: { col: number; row: number; index: number }) {
   const [cx, cy] = isoPoint(col, row);
   const t: [number, number] = [cx, cy - TILE_H / 2];
   const r: [number, number] = [cx + TILE_W / 2, cy];
@@ -77,7 +79,7 @@ function Tile({ col, row }: { col: number; row: number }) {
   const l: [number, number] = [cx - TILE_W / 2, cy];
   const pts = (p: [number, number][]) => p.map((q) => q.join(",")).join(" ");
   return (
-    <g>
+    <g className="asbir-iso-tile" style={{ ["--i" as string]: index }}>
       {/* top face */}
       <polygon points={pts([t, r, b, l])} />
       {/* extruded left + right edges */}
@@ -134,7 +136,7 @@ function LightBeam() {
   ]);
 
   return (
-    <g stroke="none">
+    <g stroke="none" className="asbir-iso-beam">
       <defs>
         {/* the hero-backdrop spectrum, mixed across the width */}
         <linearGradient id="beam-spectrum" x1="0" y1="0" x2="1" y2="0">
@@ -202,10 +204,31 @@ function LightBeam() {
 }
 
 function SkeletonCluster() {
+  const ref = React.useRef<SVGSVGElement>(null);
+  const [inView, setInView] = React.useState(false);
+
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setInView(true);
+          io.disconnect(); // play once
+        }
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <svg
+      ref={ref}
+      data-inview={inView ? "true" : "false"}
       viewBox="-64 -164 392 300"
-      className="mx-auto h-auto w-full max-w-[560px] text-fg/25"
+      className="asbir-iso mx-auto h-auto w-full max-w-[560px] text-fg/25"
       fill="none"
       stroke="currentColor"
       strokeWidth="1"
@@ -214,8 +237,8 @@ function SkeletonCluster() {
     >
       {/* light first, so the wireframes draw crisp over it */}
       <LightBeam />
-      {TILES.map((tile) => (
-        <Tile key={`${tile.col},${tile.row}`} {...tile} />
+      {TILES.map((tile, i) => (
+        <Tile key={`${tile.col},${tile.row}`} {...tile} index={i} />
       ))}
     </svg>
   );

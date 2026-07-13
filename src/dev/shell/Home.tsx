@@ -1,9 +1,11 @@
+import * as React from "react";
 import asbirLogo from "@/assets/logo/asbirlogo-white.svg";
 import heroBackdrop from "@/assets/backdrops/herobackdrop.jpeg";
 import { TemplatePreview } from "./TemplatePreview";
 import { MotionPromoFloating } from "./MotionPromoCard";
 import { DetailsSkeleton } from "./DetailsSkeleton";
 import { IntegrationsGrid } from "./IntegrationsGrid";
+import { Reveal } from "@/motion";
 
 const RocketIcon = (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -201,12 +203,50 @@ function FeaturesSection() {
 /* CTA banner (hero-sized)                                             */
 /* ------------------------------------------------------------------ */
 
+const SPECTRUM_GRADIENT =
+  "linear-gradient(90deg, #3E8AFF, #00B8CE, #976CFF, #E14D9F, #F83E3A, #FF751A, #3E8AFF)";
+
+/* Scroll-triggered CTA entrance. When the section scrolls into view, the
+   spectrum band grows from a center block out to the full-bleed strip, then the
+   headline + buttons fade up. Reduced motion jumps straight to the final state. */
 function CtaSection() {
+  const ref = React.useRef<HTMLElement>(null);
+  const [phase, setPhase] = React.useState<"idle" | "band" | "content">("idle");
+
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setPhase("content");
+      return;
+    }
+    const timers: number[] = [];
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        setPhase("band"); // band morphs in immediately
+        timers.push(window.setTimeout(() => setPhase("content"), 650)); // then content
+      },
+      { threshold: 0.4 },
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      timers.forEach(window.clearTimeout);
+    };
+  }, []);
+
+  const bandOpen = phase === "band" || phase === "content";
+  const showContent = phase === "content";
+
   return (
     <section
+      ref={ref}
       id="get-started"
-      className="relative mt-24 flex min-h-[320px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-panel px-6 py-16 text-center sm:px-12"
+      className="relative mt-24 flex min-h-[340px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-panel px-6 pb-40 pt-16 text-center sm:px-12"
     >
+      {/* faint dot-grid floor */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.5]"
         style={{
@@ -218,7 +258,13 @@ function CtaSection() {
             "radial-gradient(80% 70% at 50% 100%, black, transparent 75%)",
         }}
       />
-      <div className="relative z-10 max-w-2xl">
+
+      {/* content — fades up once the band has grown in */}
+      <div
+        className={`relative z-10 max-w-2xl transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          showContent ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+        }`}
+      >
         <h2 className="text-3xl font-semibold leading-[1.1] tracking-tight text-fg sm:text-4xl">
           Stop building from scratch.
         </h2>
@@ -243,6 +289,17 @@ function CtaSection() {
             Read the docs
           </a>
         </div>
+      </div>
+
+      {/* spectrum band — grows from a center block into the full-bleed strip
+          as the cube dissolves */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex h-24 justify-center">
+        <div
+          className={`asbir-spectrum-pan h-full transition-[width,border-radius] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+            bandOpen ? "w-full rounded-none" : "w-0 rounded-t-2xl"
+          }`}
+          style={{ backgroundImage: SPECTRUM_GRADIENT }}
+        />
       </div>
     </section>
   );
@@ -335,9 +392,15 @@ export function Home() {
       <div className="pt-10">
         <IntroPanel />
       </div>
-      <TemplatesSection />
-      <TechnologySection />
-      <FeaturesSection />
+      <Reveal>
+        <TemplatesSection />
+      </Reveal>
+      <Reveal>
+        <TechnologySection />
+      </Reveal>
+      <Reveal>
+        <FeaturesSection />
+      </Reveal>
       <CtaSection />
       <Footer />
 
