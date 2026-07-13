@@ -1,5 +1,5 @@
 import { Badge } from "@/index";
-import type { ComponentEntry } from "./entry";
+import { hexToRgbTriplet, type ComponentEntry } from "./entry";
 
 export const badgeEntry: ComponentEntry = {
   slug: "badge",
@@ -11,7 +11,7 @@ export const badgeEntry: ComponentEntry = {
       type: "select",
       key: "variant",
       label: "Variant",
-      default: "success",
+      default: "accent",
       options: [
         { value: "neutral", label: "neutral" },
         { value: "accent", label: "accent" },
@@ -22,11 +22,15 @@ export const badgeEntry: ComponentEntry = {
       ],
     },
     { type: "toggle", key: "dot", label: "Status dot", default: true },
+    { type: "color", key: "accent", label: "Accent", default: "#8b5cf6" },
   ],
   render: (v) => (
-    <Badge variant={v.variant as "success"} dot={v.dot as boolean}>
-      Operational
-    </Badge>
+    // scope the accent override to the demo — drives the "accent" variant
+    <div style={{ ["--accent" as string]: hexToRgbTriplet(v.accent as string) }}>
+      <Badge variant={v.variant as "accent"} dot={v.dot as boolean}>
+        Operational
+      </Badge>
+    </div>
   ),
   code: (v) =>
     `<Badge variant="${v.variant}"${v.dot ? " dot" : ""}>Operational</Badge>`,

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/index";
-import type { ComponentEntry } from "./entry";
+import { hexToRgbTriplet, type ComponentEntry } from "./entry";
 import type { ControlValues } from "../component-playground";
 
 function TabsDemo({ v }: { v: ControlValues }) {
@@ -46,8 +46,14 @@ export const tabsEntry: ComponentEntry = {
         { value: "pills", label: "pills" },
       ],
     },
+    { type: "color", key: "accent", label: "Accent", default: "#8b5cf6" },
   ],
-  render: (v) => <TabsDemo v={v} />,
+  render: (v) => (
+    // scope the accent override to the demo — drives the active underline
+    <div style={{ ["--accent" as string]: hexToRgbTriplet(v.accent as string) }}>
+      <TabsDemo v={v} />
+    </div>
+  ),
   code: (v) => `<Tabs value={tab} onValueChange={setTab} variant="${v.variant}">
   <TabsList>
     <TabsTrigger value="overview">Overview</TabsTrigger>

@@ -1,5 +1,5 @@
 import { Badge, DataTable, type DataTableColumn } from "@/index";
-import type { ComponentEntry } from "./entry";
+import { hexToRgbTriplet, type ComponentEntry } from "./entry";
 import type { ControlValues } from "../component-playground";
 
 type Run = { id: string; project: string; status: "ready" | "building" | "failed"; duration: number };
@@ -56,8 +56,14 @@ export const dataTableEntry: ComponentEntry = {
     { type: "toggle", key: "selectable", label: "Selectable rows", default: true },
     { type: "toggle", key: "sortable", label: "Sortable columns", default: true },
     { type: "toggle", key: "empty", label: "Empty state", default: false },
+    { type: "color", key: "accent", label: "Accent", default: "#8b5cf6" },
   ],
-  render: (v) => <DataTableDemo v={v} />,
+  render: (v) => (
+    // scope the accent override to the demo — drives checkboxes + selected rows
+    <div style={{ ["--accent" as string]: hexToRgbTriplet(v.accent as string) }}>
+      <DataTableDemo v={v} />
+    </div>
+  ),
   code: (v) => `const columns: DataTableColumn<Run>[] = [
   { key: "project", header: "Project"${v.sortable ? ", sortable: true" : ""} },
   { key: "status", header: "Status", cell: (r) => <Badge dot>{r.status}</Badge> },

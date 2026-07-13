@@ -10,6 +10,15 @@ import type { Control, ControlValues } from "../component-playground";
 
 export type PropRow = { name: string; type: string; description: string };
 
+/** "#rrggbb" → "r g b" triplet for the --accent CSS var (rgb(var(--accent))).
+    Entries with an "Accent" color control scope it to their demo:
+    <div style={{ ["--accent" as string]: hexToRgbTriplet(v.accent as string) }}> */
+export function hexToRgbTriplet(hex: string): string {
+  const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(hex.trim());
+  if (!m) return "139 92 246"; // fallback violet
+  return `${parseInt(m[1], 16)} ${parseInt(m[2], 16)} ${parseInt(m[3], 16)}`;
+}
+
 export type ComponentEntry = {
   slug: string;
   name: string;

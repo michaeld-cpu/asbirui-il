@@ -12,7 +12,7 @@ import {
   ComponentPlayground,
   type ControlValues,
 } from "./component-playground";
-import type { ComponentEntry, PropRow } from "./docs/entry";
+import { hexToRgbTriplet, type ComponentEntry, type PropRow } from "./docs/entry";
 import { avatarEntry } from "./docs/avatar.docs";
 import { badgeEntry } from "./docs/badge.docs";
 import { buttonEntry } from "./docs/button.docs";
@@ -206,13 +206,6 @@ function filterChipsCode(v: ControlValues): string {
     { value: "5xx", label: "5xx" },
   ]}
 />`;
-}
-
-/** "#rrggbb" → "r g b" triplet for the --accent CSS var (rgb(var(--accent))). */
-function hexToRgbTriplet(hex: string): string {
-  const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(hex.trim());
-  if (!m) return "139 92 246"; // fallback violet
-  return `${parseInt(m[1], 16)} ${parseInt(m[2], 16)} ${parseInt(m[3], 16)}`;
 }
 
 /* ---- registry --------------------------------------------------------- */

@@ -240,7 +240,7 @@ function SelectBox({
       aria-label={label}
       checked={checked}
       onChange={onChange}
-      className="h-3.5 w-3.5 cursor-pointer accent-[var(--as-accent,#8b5cf6)] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="h-3.5 w-3.5 cursor-pointer accent-[rgb(var(--accent))] outline-none focus-visible:ring-2 focus-visible:ring-ring"
     />
   );
 }

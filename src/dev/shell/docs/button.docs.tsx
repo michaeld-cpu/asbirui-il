@@ -1,5 +1,5 @@
 import { Button } from "@/index";
-import type { ComponentEntry } from "./entry";
+import { hexToRgbTriplet, type ComponentEntry } from "./entry";
 
 export const buttonEntry: ComponentEntry = {
   slug: "button",
@@ -11,7 +11,7 @@ export const buttonEntry: ComponentEntry = {
       type: "select",
       key: "variant",
       label: "Variant",
-      default: "primary",
+      default: "accent",
       options: [
         { value: "primary", label: "primary" },
         { value: "secondary", label: "secondary" },
@@ -34,16 +34,20 @@ export const buttonEntry: ComponentEntry = {
     },
     { type: "toggle", key: "loading", label: "Loading", default: false },
     { type: "toggle", key: "disabled", label: "Disabled", default: false },
+    { type: "color", key: "accent", label: "Accent", default: "#8b5cf6" },
   ],
   render: (v) => (
-    <Button
-      variant={v.variant as "primary"}
-      size={v.size as "md"}
-      loading={v.loading as boolean}
-      disabled={v.disabled as boolean}
-    >
-      Deploy project
-    </Button>
+    // scope the accent override to the demo — drives the "accent" variant
+    <div style={{ ["--accent" as string]: hexToRgbTriplet(v.accent as string) }}>
+      <Button
+        variant={v.variant as "primary"}
+        size={v.size as "md"}
+        loading={v.loading as boolean}
+        disabled={v.disabled as boolean}
+      >
+        Deploy project
+      </Button>
+    </div>
   ),
   code: (v) => {
     const flags = `${v.loading ? " loading" : ""}${v.disabled ? " disabled" : ""}`;
