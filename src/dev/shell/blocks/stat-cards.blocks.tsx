@@ -97,75 +97,12 @@ function CompactPanel() {
   );
 }
 
-/* ---- 04 · icon tiles ------------------------------------------------------ */
-
-const ICON_STATS = [
-  {
-    label: "Deployments",
-    value: "312",
-    tint: "bg-sky-500/15 text-sky-600 dark:text-sky-400",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5" />
-      </svg>
-    ),
-  },
-  {
-    label: "API requests",
-    value: "1.2M",
-    tint: "bg-violet-500/15 text-violet-600 dark:text-violet-400",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" />
-      </svg>
-    ),
-  },
-  {
-    label: "Error rate",
-    value: "0.42%",
-    tint: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01" />
-      </svg>
-    ),
-  },
-  {
-    label: "Uptime",
-    value: "99.98%",
-    tint: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
-      </svg>
-    ),
-  },
-];
-
-function IconTiles() {
-  return (
-    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {ICON_STATS.map((s) => (
-        <div key={s.label} className="flex items-center gap-3 rounded-xl border border-border bg-panel p-4">
-          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg [&_svg]:h-5 [&_svg]:w-5 ${s.tint}`}>
-            {s.icon}
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate text-xs font-medium text-fg/60">{s.label}</span>
-            <span className="block whitespace-nowrap text-xl font-semibold tracking-tight text-fg">{s.value}</span>
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 /* ---- registry ----------------------------------------------------------- */
 
 export const statCardsBlock: BlockEntry = {
   slug: "stat-cards",
   name: "Stat cards",
-  tagline: "KPI tiles for dashboards — label, value, trend. From pill deltas and sparklines to icon tiles and a compact panel.",
+  tagline: "KPI tiles for dashboards — label, value, trend. Three densities, from pill deltas to a single compact panel.",
   wide: true,
   variants: [
     {
@@ -236,32 +173,6 @@ export const statCardsBlock: BlockEntry = {
         <span className={cn("ml-2 text-[11px] font-medium",
           s.up ? "text-emerald-600" : "text-rose-600")}>{s.delta}</span>
       </p>
-    </div>
-  ))}
-</div>`,
-    },
-    {
-      id: "stat-cards-04",
-      title: "Icon tiles",
-      description: "Horizontal tiles with a tinted icon square — when the metric's domain matters as much as the number.",
-      render: () => <IconTiles />,
-      code: `const stats = [
-  { label: "Deployments", value: "312",    icon: <LayersIcon />, tint: "bg-sky-500/15 text-sky-600" },
-  { label: "API requests", value: "1.2M",  icon: <BoltIcon />,   tint: "bg-violet-500/15 text-violet-600" },
-  { label: "Error rate",  value: "0.42%",  icon: <AlertIcon />,  tint: "bg-amber-500/15 text-amber-600" },
-  { label: "Uptime",      value: "99.98%", icon: <ShieldIcon />, tint: "bg-emerald-500/15 text-emerald-600" },
-];
-
-<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-  {stats.map((s) => (
-    <div key={s.label} className="flex items-center gap-3 rounded-xl border border-border bg-panel p-4">
-      <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-lg", s.tint)}>
-        {s.icon}
-      </span>
-      <span className="min-w-0">
-        <span className="block truncate text-xs font-medium text-fg/60">{s.label}</span>
-        <span className="block whitespace-nowrap text-xl font-semibold tracking-tight text-fg">{s.value}</span>
-      </span>
     </div>
   ))}
 </div>`,
