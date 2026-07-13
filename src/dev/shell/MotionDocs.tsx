@@ -42,11 +42,20 @@ const ReplayIcon = (
 
 /* ---- demo helpers ------------------------------------------------------ */
 
+/* The exact series behind the Lumina AI landing card's overview chart —
+   s(0.3, "rising") from the AI template store, so the motion demo reads the
+   same as the product. */
+const LUMINA_SERIES = [
+  0.416, 0.39, 0.351, 0.39, 0.307, 0.45, 0.609, 0.371, 0.569, 0.517, 0.617,
+  0.491, 0.501, 0.529, 0.538, 0.392, 0.585, 0.571, 0.892, 0.626, 0.643, 0.755,
+  0.747, 0.633, 0.818, 0.806, 0.829, 0.764, 0.807, 0.702,
+];
+
 /** The Lumina AI overview chart's look — a Catmull-Rom smoothed area with a
     gradient wash and an end-dot that pops in after the draw — in white (fg),
     with the draw/fill/dot markup ChartReveal expects. */
 function MiniChart() {
-  const data = [12, 18, 14, 26, 22, 34, 28, 44, 38, 52];
+  const data = LUMINA_SERIES;
   const W = 300, H = 100, padY = 10;
   const max = Math.max(...data);
   const n = data.length;
@@ -158,25 +167,6 @@ const DEMOS: MotionDemo[] = [
     code: `<Confetti count={26}>
   <Button>Ship it</Button>
 </Confetti>`,
-  },
-  {
-    id: "lift-press",
-    name: "Lift & Press",
-    category: "Pointer",
-    description: "Zero-JS hover lift and active squash from motion.css.",
-    render: () => (
-      <div className="flex gap-3">
-        <span className="as-lift flex h-12 w-24 cursor-pointer items-center justify-center rounded-lg border border-border bg-panel text-xs font-medium text-fg">
-          as-lift
-        </span>
-        <span className="as-press flex h-12 w-24 cursor-pointer select-none items-center justify-center rounded-lg border border-border bg-panel text-xs font-medium text-fg">
-          as-press
-        </span>
-      </div>
-    ),
-    code: `/* zero-JS — from motion.css */
-<button className="as-lift">Hover</button>
-<button className="as-press">Press</button>`,
   },
 
   /* ---- Text ---- */
