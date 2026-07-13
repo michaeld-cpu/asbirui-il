@@ -497,7 +497,7 @@ function GalleryCard({ demo }: { demo: MotionDemo }) {
   return (
     <a
       href={`#motion/${demo.id}`}
-      className="flex flex-col overflow-hidden rounded-xl border border-border bg-panel transition-colors hover:border-fg/20"
+      className="flex flex-col overflow-hidden rounded-xl border border-border bg-canvas transition-colors hover:border-fg/20"
     >
       <Stage demo={demo} />
       <div className="flex items-center justify-between gap-2 px-3.5 py-3">
