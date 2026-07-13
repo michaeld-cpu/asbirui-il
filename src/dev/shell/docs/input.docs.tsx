@@ -1,5 +1,5 @@
 import { Input } from "@/index";
-import type { ComponentEntry } from "./entry";
+import { hexToHslTriplet, type ComponentEntry } from "./entry";
 
 const SearchIcon = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -28,16 +28,21 @@ export const inputEntry: ComponentEntry = {
     { type: "toggle", key: "prefix", label: "Search icon", default: true },
     { type: "toggle", key: "invalid", label: "Invalid", default: false },
     { type: "toggle", key: "disabled", label: "Disabled", default: false },
+    { type: "color", key: "ring", label: "Focus ring", default: "#f97316" },
   ],
   render: (v) => (
-    <Input
-      size={v.size as "md"}
-      prefix={v.prefix ? SearchIcon : undefined}
-      invalid={v.invalid as boolean}
-      disabled={v.disabled as boolean}
-      placeholder="Search components…"
-      wrapperClassName="w-64 max-w-full"
-    />
+    // scope the ring override to the demo — shows when the field is focused
+    // (the invalid state keeps its red ring on purpose)
+    <div style={{ ["--as-ring" as string]: hexToHslTriplet(v.ring as string) }}>
+      <Input
+        size={v.size as "md"}
+        prefix={v.prefix ? SearchIcon : undefined}
+        invalid={v.invalid as boolean}
+        disabled={v.disabled as boolean}
+        placeholder="Search components…"
+        wrapperClassName="w-64 max-w-full"
+      />
+    </div>
   ),
   code: (v) => {
     const lines = [

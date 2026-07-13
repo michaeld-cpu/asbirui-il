@@ -19,6 +19,30 @@ export function hexToRgbTriplet(hex: string): string {
   return `${parseInt(m[1], 16)} ${parseInt(m[2], 16)} ${parseInt(m[3], 16)}`;
 }
 
+/** "#rrggbb" → "H S% L%" triplet for the --as-ring CSS var
+    (ring: hsl(var(--as-ring) / <alpha>)). */
+export function hexToHslTriplet(hex: string): string {
+  const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(hex.trim());
+  if (!m) return "24 95% 53%"; // fallback: the house orange ring
+  const r = parseInt(m[1], 16) / 255;
+  const g = parseInt(m[2], 16) / 255;
+  const b = parseInt(m[3], 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  const d = max - min;
+  let h = 0;
+  let s = 0;
+  if (d !== 0) {
+    s = d / (1 - Math.abs(2 * l - 1));
+    if (max === r) h = 60 * (((g - b) / d) % 6);
+    else if (max === g) h = 60 * ((b - r) / d + 2);
+    else h = 60 * ((r - g) / d + 4);
+    if (h < 0) h += 360;
+  }
+  return `${Math.round(h)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+}
+
 /** Demo-scoped accent override that ALSO picks a readable --accent-fg
     (black/white by luminance) — for demos whose glyphs sit on a solid
     accent fill (checkbox check, selected states). */
