@@ -1,5 +1,5 @@
 import { Badge, DataTable, type DataTableColumn } from "@/index";
-import { hexToRgbTriplet, type ComponentEntry } from "./entry";
+import { accentVars, type ComponentEntry } from "./entry";
 import type { ControlValues } from "../component-playground";
 
 type Run = { id: string; project: string; status: "ready" | "building" | "failed"; duration: number };
@@ -60,7 +60,7 @@ export const dataTableEntry: ComponentEntry = {
   ],
   render: (v) => (
     // scope the accent override to the demo — drives checkboxes + selected rows
-    <div style={{ ["--accent" as string]: hexToRgbTriplet(v.accent as string) }}>
+    <div style={accentVars(v.accent as string)}>
       <DataTableDemo v={v} />
     </div>
   ),

@@ -22,6 +22,7 @@ entries in sync as items land.
 - [x] EmptyState
 - [x] CopyButton
 - [x] ThemeToggle
+- [x] Checkbox
 
 ## Motion / Interaction
 
@@ -47,7 +48,7 @@ CommandPalette
 
 ## Forms
 
-IconButton · Textarea · Select · Combobox · Checkbox · RadioGroup · Switch ·
+IconButton · Textarea · Select · Combobox · RadioGroup · Switch ·
 Slider · StepperInput · DatePicker · FileDropzone · SearchInput · FormField ·
 PasswordInput · OTPInput
 

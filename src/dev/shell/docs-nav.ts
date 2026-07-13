@@ -78,6 +78,7 @@ export const docsNav: DocsNavGroup[] = [
       { label: "Badge", href: "#components/badge" },
       { label: "Button", href: "#components/button" },
       { label: "Card", href: "#components/card" },
+      { label: "Checkbox", href: "#components/checkbox" },
       { label: "Command Menu", href: "#components/command-menu" },
       { label: "Copy Button", href: "#components/copy-button" },
       { label: "Data Table", href: "#components/data-table" },

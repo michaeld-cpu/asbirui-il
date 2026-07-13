@@ -17,6 +17,7 @@ import { avatarEntry } from "./docs/avatar.docs";
 import { badgeEntry } from "./docs/badge.docs";
 import { buttonEntry } from "./docs/button.docs";
 import { cardEntry } from "./docs/card.docs";
+import { checkboxEntry } from "./docs/checkbox.docs";
 import { commandMenuEntry } from "./docs/command-menu.docs";
 import { copyButtonEntry } from "./docs/copy-button.docs";
 import { dataTableEntry } from "./docs/data-table.docs";
@@ -213,6 +214,7 @@ function filterChipsCode(v: ControlValues): string {
 const COMPONENTS: ComponentEntry[] = [
   buttonEntry,
   inputEntry,
+  checkboxEntry,
   dialogEntry,
   tooltipEntry,
   tabsEntry,

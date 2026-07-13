@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "../../lib/cn";
+import { Checkbox } from "../checkbox";
 
 /*
   DataTable — typed, sortable table with optional row selection.
@@ -229,18 +230,13 @@ function SelectBox({
   onChange: () => void;
   label: string;
 }) {
-  const ref = React.useRef<HTMLInputElement | null>(null);
-  React.useEffect(() => {
-    if (ref.current) ref.current.indeterminate = indeterminate;
-  }, [indeterminate]);
   return (
-    <input
-      ref={ref}
-      type="checkbox"
+    <Checkbox
       aria-label={label}
       checked={checked}
-      onChange={onChange}
-      className="h-3.5 w-3.5 cursor-pointer accent-[rgb(var(--accent))] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      indeterminate={indeterminate}
+      onCheckedChange={onChange}
+      className="h-3.5 w-3.5 align-middle"
     />
   );
 }

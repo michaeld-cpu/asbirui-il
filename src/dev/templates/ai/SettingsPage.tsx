@@ -1,5 +1,6 @@
 import * as React from "react";
 import { PageHeader, Tabs, Button, Badge, Field, FormSelect, inputCls, CodeBlock, ConfirmDialog, Modal, useToast } from "./ai-states";
+import { Checkbox } from "@/index";
 import { MODELS } from "./store";
 
 type Session = { id: string; device: string; location: string; lastActive: string; current: boolean };
@@ -122,13 +123,11 @@ function SecurityTab() {
             <p className="mt-1 text-sm text-fg/70 dark:text-fg/55">Require a second factor for all members when signing in.</p>
           </div>
           <label className="inline-flex shrink-0 cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              className="h-4 w-4 accent-[rgb(var(--accent))]"
+            <Checkbox
               checked={twoFa}
-              onChange={(e) => {
-                setTwoFa(e.target.checked);
-                toast(e.target.checked ? "2FA enabled" : "2FA disabled");
+              onCheckedChange={(next) => {
+                setTwoFa(next);
+                toast(next ? "2FA enabled" : "2FA disabled");
               }}
             />
             <span className="text-sm text-fg/70">{twoFa ? "Enabled" : "Disabled"}</span>
@@ -256,11 +255,10 @@ function WebhooksTab() {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {EVENT_TYPES.map((evt) => (
                 <label key={evt} className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-xs text-fg/70 transition-colors hover:bg-overlay/[0.05]">
-                  <input
-                    type="checkbox"
-                    className="h-3.5 w-3.5 accent-[rgb(var(--accent))]"
+                  <Checkbox
+                    className="h-3.5 w-3.5"
                     checked={events.includes(evt)}
-                    onChange={() => toggleEvent(evt)}
+                    onCheckedChange={() => toggleEvent(evt)}
                   />
                   <span className="font-mono">{evt}</span>
                 </label>

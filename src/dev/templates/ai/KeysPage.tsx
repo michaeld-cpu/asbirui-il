@@ -11,6 +11,7 @@ import {
   Modal,
   useToast,
 } from "./ai-states";
+import { Checkbox } from "@/index";
 import { Icons } from "./ai-ui";
 import { useApiKeys, createApiKey, revokeApiKey, deleteApiKey, keyStatusTone } from "./store";
 import type { ApiKey } from "./store";
@@ -269,11 +270,10 @@ export function KeysPage() {
                       key={s.id}
                       className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-canvas px-3 py-2.5 transition-colors hover:bg-overlay/[0.03]"
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={checked}
-                        onChange={() => toggleScope(s.id)}
-                        className="mt-0.5 h-4 w-4 accent-[rgb(var(--accent))]"
+                        onCheckedChange={() => toggleScope(s.id)}
+                        className="mt-0.5"
                       />
                       <span>
                         <span className="block font-mono text-sm text-fg">{s.label}</span>

@@ -19,6 +19,19 @@ export function hexToRgbTriplet(hex: string): string {
   return `${parseInt(m[1], 16)} ${parseInt(m[2], 16)} ${parseInt(m[3], 16)}`;
 }
 
+/** Demo-scoped accent override that ALSO picks a readable --accent-fg
+    (black/white by luminance) — for demos whose glyphs sit on a solid
+    accent fill (checkbox check, selected states). */
+export function accentVars(hex: string): React.CSSProperties {
+  const triplet = hexToRgbTriplet(hex);
+  const [r, g, b] = triplet.split(" ").map(Number);
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return {
+    ["--accent" as string]: triplet,
+    ["--accent-fg" as string]: luminance > 160 ? "23 23 23" : "255 255 255",
+  } as React.CSSProperties;
+}
+
 export type ComponentEntry = {
   slug: string;
   name: string;
