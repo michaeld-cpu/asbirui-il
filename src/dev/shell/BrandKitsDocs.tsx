@@ -120,13 +120,6 @@ function inkFor(hex: string): { fg: string; sub: string } {
     : { fg: "rgba(255,255,255,0.92)", sub: "rgba(255,255,255,0.55)" };
 }
 
-/** "R 255 G 255 B 255" for a hex. */
-function rgbLabel(hex: string): string {
-  const { r, g, b } = hexToRgb(hex);
-  const p = (n: number) => String(n).padStart(3, "0");
-  return `R ${p(r)} G ${p(g)} B ${p(b)}`;
-}
-
 /* ---- project index ---------------------------------------------------- */
 
 function ProjectIndex() {
@@ -164,7 +157,9 @@ function ProjectIndex() {
 
 /* ---- per-project kit -------------------------------------------------- */
 
-function ColorBand({ swatch }: { swatch: Swatch }) {
+/** A single color swatch chip in the tokens-Colors style: a fixed-size tile
+    with the name + hex printed in legible ink, and a "Copied!" pop on click. */
+function SwatchChip({ swatch }: { swatch: Swatch }) {
   const [copied, setCopied] = React.useState(false);
   const ink = inkFor(swatch.hex);
   const copy = () => {
@@ -176,19 +171,31 @@ function ColorBand({ swatch }: { swatch: Swatch }) {
     <button
       type="button"
       onClick={copy}
-      title={`Copy ${swatch.hex}`}
-      className="grid w-full grid-cols-3 items-center px-6 py-5 text-left transition-opacity hover:opacity-95 sm:px-8"
+      title={`${swatch.name} — click to copy ${swatch.hex}`}
+      aria-label={`${swatch.name}, ${swatch.hex}`}
+      className="group relative flex h-24 w-full flex-col justify-end rounded-xl p-3 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
       style={{ backgroundColor: swatch.hex }}
     >
-      <span className="truncate text-sm font-medium" style={{ color: ink.fg }}>
+      <span
+        className={`text-xs font-semibold leading-none transition-opacity ${copied ? "opacity-0" : ""}`}
+        style={{ color: ink.fg }}
+      >
         {swatch.name}
       </span>
-      <span className="justify-self-center font-mono text-xs" style={{ color: ink.sub }}>
-        {copied ? "Copied" : `# ${swatch.hex.replace("#", "").toUpperCase()}`}
+      <span
+        className={`mt-1 font-mono text-[10px] leading-none transition-opacity ${copied ? "opacity-0" : ""}`}
+        style={{ color: ink.sub }}
+      >
+        {swatch.hex.toUpperCase()}
       </span>
-      <span className="justify-self-end font-mono text-xs" style={{ color: ink.sub }}>
-        {rgbLabel(swatch.hex)}
-      </span>
+      {copied && (
+        <span
+          className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs font-semibold tracking-tight motion-safe:animate-copied-pop"
+          style={{ color: ink.fg }}
+        >
+          Copied!
+        </span>
+      )}
     </button>
   );
 }
@@ -249,7 +256,7 @@ function KitView({ project }: { project: Project }) {
   ];
 
   return (
-    <article className="animate-fade-up py-10">
+    <article className="animate-fade-up pb-10 pt-16 lg:pt-20">
       {/* header — top-left, no eyebrow */}
       <div className="flex items-center gap-4">
         <span
@@ -273,13 +280,14 @@ function KitView({ project }: { project: Project }) {
         <KitRail sections={sections} />
 
         <div className="min-w-0 space-y-16">
-          {/* Colors — full-width stacked bands */}
+          {/* Colors — swatch chips, tokens-style */}
           {has(project.colors) && (
             <section id="colors" className="scroll-mt-24">
               <h2 className="text-2xl font-semibold tracking-tight text-fg">Colors</h2>
-              <div className="mt-6 overflow-hidden rounded-xl">
+              <p className="mt-1.5 text-sm text-fg/50">Click any swatch to copy its hex.</p>
+              <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
                 {project.colors!.map((c) => (
-                  <ColorBand key={c.name} swatch={c} />
+                  <SwatchChip key={c.name} swatch={c} />
                 ))}
               </div>
             </section>
