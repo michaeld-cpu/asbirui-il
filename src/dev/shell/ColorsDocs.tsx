@@ -106,10 +106,10 @@ const FamilyRow = React.memo(function FamilyRow({
           Contrast grid
         </button>
       </div>
-      {/* Chips flex to share the row width evenly on desktop; below a min width
-          the row scrolls horizontally instead of squashing the chips. */}
-      <div className="-mx-1 overflow-x-auto px-1">
-        <div className="flex min-w-[660px] gap-1.5">
+      {/* 11 chips in an even grid that fills the full content width, each chip
+          square (aspect-square) so they read as cubes and their right edge
+          lines up with the headings — no stretched bars, no wrap, no gutter. */}
+      <div className="grid grid-cols-[repeat(11,minmax(0,1fr))] gap-1.5">
           {family.hues.map((hex, i) => {
             const rgb = hexToRgb(hex);
             const ink = inkOn(rgb);
@@ -122,7 +122,7 @@ const FamilyRow = React.memo(function FamilyRow({
                 onClick={() => onCopy(hex)}
                 title={`${family.name}-${step} — click to copy ${hex}`}
                 aria-label={`${family.name} ${step}, ${hex}`}
-                className="group relative flex h-16 min-w-0 flex-1 flex-col justify-end overflow-hidden rounded-lg p-1.5 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
+                className="group relative flex aspect-square min-w-0 flex-col justify-end overflow-hidden rounded-lg p-1.5 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
                 style={{ backgroundColor: hex }}
               >
                 {/* step + hex — fade out on copy so "Copied!" is the sole focus */}
@@ -149,7 +149,6 @@ const FamilyRow = React.memo(function FamilyRow({
               </button>
             );
           })}
-        </div>
       </div>
     </div>
   );

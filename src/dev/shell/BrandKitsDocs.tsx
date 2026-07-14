@@ -155,8 +155,8 @@ function FamilyRow({ family }: { family: { name: string; base: string } }) {
   return (
     <div>
       <p className="mb-2 text-sm font-semibold text-fg">{family.name}</p>
-      <div className="-mx-1 overflow-x-auto px-1">
-        <div className="flex gap-1">
+      <div>
+        <div className="grid grid-cols-[repeat(11,minmax(0,1fr))] gap-1.5">
           {ramp.map((hex, i) => {
             const ink = inkFor(hex);
             const step = RAMP_STEPS[i];
@@ -168,7 +168,7 @@ function FamilyRow({ family }: { family: { name: string; base: string } }) {
                 onClick={() => copy(hex)}
                 title={`${family.name}-${step} — click to copy ${hex}`}
                 aria-label={`${family.name} ${step}, ${hex}`}
-                className="group relative flex h-16 w-[62px] shrink-0 flex-col justify-end overflow-hidden rounded-lg p-1.5 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
+                className="group relative flex aspect-square min-w-0 flex-col justify-end overflow-hidden rounded-lg p-1 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
                 style={{ backgroundColor: hex }}
               >
                 <span
@@ -178,7 +178,7 @@ function FamilyRow({ family }: { family: { name: string; base: string } }) {
                   {step}
                 </span>
                 <span
-                  className={`mt-0.5 font-mono text-[9px] leading-none transition-opacity ${isCopied ? "opacity-0" : ""}`}
+                  className={`mt-0.5 font-mono text-[8px] leading-none transition-opacity ${isCopied ? "opacity-0" : ""}`}
                   style={{ color: ink.sub }}
                 >
                   {hex}
