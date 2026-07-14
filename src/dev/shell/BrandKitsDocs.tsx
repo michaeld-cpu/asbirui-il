@@ -138,22 +138,22 @@ function ProjectIndex() {
         voice, in one place. Open a project for its full identity.
       </p>
 
-      <div className="mt-10 space-y-6">
+      <div className="mt-8 space-y-4">
         {PROJECTS.map((p) => (
           <a
             key={p.slug}
             href={`#brand-kits/${p.slug}`}
-            className="group flex items-center gap-6"
+            className="group flex items-center gap-4"
           >
             <span
-              className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl text-white transition-transform group-hover:scale-[1.03] [&_svg]:h-10 [&_svg]:w-10"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white transition-transform group-hover:scale-[1.04] [&_svg]:h-6 [&_svg]:w-6"
               style={{ backgroundColor: p.accent }}
             >
-              {p.logomark ? <Glyph svg={p.logomark} /> : <span className="text-2xl font-semibold">{p.name.slice(0, 1)}</span>}
+              {p.logomark ? <Glyph svg={p.logomark} /> : <span className="text-base font-semibold">{p.name.slice(0, 1)}</span>}
             </span>
             <span className="min-w-0">
-              <span className="block text-2xl font-semibold tracking-tight text-fg">{p.name}</span>
-              <span className="mt-1 block text-[15px] text-fg/50">{p.tagline}</span>
+              <span className="block text-base font-semibold tracking-tight text-fg">{p.name}</span>
+              <span className="mt-0.5 block text-sm text-fg/50">{p.tagline}</span>
             </span>
           </a>
         ))}
@@ -193,8 +193,61 @@ function ColorBand({ swatch }: { swatch: Swatch }) {
   );
 }
 
+const SearchIcon = (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+  </svg>
+);
+
+/** Left column: a search box over a nav railing of the kit's sections.
+    Typing filters the railing; clicking a section jumps to it. */
+function KitRail({ sections }: { sections: { id: string; label: string }[] }) {
+  const [query, setQuery] = React.useState("");
+  const shown = sections.filter((s) => s.label.toLowerCase().includes(query.toLowerCase().trim()));
+
+  return (
+    <div className="lg:sticky lg:top-24">
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/40">
+          {SearchIcon}
+        </span>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search…"
+          className="w-full rounded-full border border-border bg-panel py-2.5 pl-10 pr-4 text-sm text-fg placeholder:text-fg/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      </div>
+      <nav className="mt-5 space-y-0.5">
+        {shown.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className="block rounded-lg px-3 py-2 text-sm text-fg/70 transition-colors hover:bg-overlay/[0.05] hover:text-fg"
+          >
+            {s.label}
+          </a>
+        ))}
+        {!shown.length && <p className="px-3 py-2 text-sm text-fg/40">No matches</p>}
+      </nav>
+    </div>
+  );
+}
+
 function KitView({ project }: { project: Project }) {
   const has = <T,>(v: T[] | undefined): v is T[] => Boolean(v && v.length);
+
+  // railing entries — only sections that actually render
+  const sections = [
+    ...(has(project.colors) ? [{ id: "colors", label: "Colors" }] : []),
+    { id: "font", label: "Font" },
+  ];
+
   return (
     <article className="animate-fade-up py-10">
       {/* header — top-left, no eyebrow */}
@@ -215,22 +268,29 @@ function KitView({ project }: { project: Project }) {
         </div>
       </div>
 
-      {/* Colors — full-width stacked bands */}
-      {has(project.colors) && (
-        <section className="mt-16">
-          <h2 className="text-2xl font-semibold tracking-tight text-fg">Colors</h2>
-          <div className="mt-6 overflow-hidden rounded-xl">
-            {project.colors!.map((c) => (
-              <ColorBand key={c.name} swatch={c} />
-            ))}
-          </div>
-        </section>
-      )}
+      {/* search + railing | content */}
+      <div className="mt-12 grid gap-8 lg:grid-cols-[16rem_1fr] lg:gap-12">
+        <KitRail sections={sections} />
 
-      {/* Font — heading only for now, awaiting the Figma design */}
-      <section className="mt-16">
-        <h2 className="text-2xl font-semibold tracking-tight text-fg">Font</h2>
-      </section>
+        <div className="min-w-0 space-y-16">
+          {/* Colors — full-width stacked bands */}
+          {has(project.colors) && (
+            <section id="colors" className="scroll-mt-24">
+              <h2 className="text-2xl font-semibold tracking-tight text-fg">Colors</h2>
+              <div className="mt-6 overflow-hidden rounded-xl">
+                {project.colors!.map((c) => (
+                  <ColorBand key={c.name} swatch={c} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Font — heading only for now, awaiting the Figma design */}
+          <section id="font" className="scroll-mt-24">
+            <h2 className="text-2xl font-semibold tracking-tight text-fg">Font</h2>
+          </section>
+        </div>
+      </div>
     </article>
   );
 }
