@@ -545,11 +545,6 @@ export function MotionDocs({ slug = "" }: { slug?: string }) {
             effects, charts, and loops. Everything honors{" "}
             <span className="text-fg">prefers-reduced-motion</span>.
           </p>
-          <div className="mt-4 flex flex-wrap gap-2 text-xs">
-            <code className="rounded-md border border-border bg-panel px-2 py-1 text-fg/70">import &#123; Magnetic, Typewriter, BorderBeam, BarsReveal &#125; from "@asbirtech/asbir-ui/motion"</code>
-            <code className="rounded-md border border-border bg-panel px-2 py-1 text-fg/70">import "@asbirtech/asbir-ui/motion.css"</code>
-          </div>
-
           <div className="mt-8">
             <FilterChips
               label="Type"

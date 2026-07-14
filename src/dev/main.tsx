@@ -9,6 +9,7 @@ import { DocsSidebar } from "./shell/DocsSidebar";
 import { DocsContent } from "./shell/DocsContent";
 import { ComponentDocs } from "./shell/ComponentDocs";
 import { BlocksDocs } from "./shell/BlocksDocs";
+import { BrandKitsDocs } from "./shell/BrandKitsDocs";
 import { ColorsDocs } from "./shell/ColorsDocs";
 import { MotionDocs } from "./shell/MotionDocs";
 import { TemplatesPage } from "./shell/TemplatesPage";
@@ -27,6 +28,7 @@ import {
   blocksSubPath,
   motionSubPath,
   tokensSubPath,
+  brandKitsSubPath,
 } from "./shell/use-hash-route";
 
 /** Landing view: marketing navbar only, no sidebar. */
@@ -67,11 +69,13 @@ function DocsView({ route }: { route: string }) {
   const isComponents = base === "components";
   const isBlocks = base === "blocks";
   const isMotion = base === "motion";
+  const isBrandKits = base === "brand-kits";
 
   let body: React.ReactNode;
   // bare "#components" → gallery index (empty slug); "#components/<slug>" → detail
   if (isComponents) body = <ComponentDocs slug={componentSlug} />;
   else if (isBlocks) body = <BlocksDocs slug={blocksSubPath(route)} />;
+  else if (isBrandKits) body = <BrandKitsDocs slug={brandKitsSubPath(route)} />;
   else if (tokensSub === "colors") body = <ColorsDocs />;
   else if (isTemplates) body = <TemplatesPage />;
   else if (isMotion) body = <MotionDocs slug={motionSubPath(route)} />;
