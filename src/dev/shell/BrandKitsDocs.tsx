@@ -436,8 +436,9 @@ function KitView({ project }: { project: Project }) {
                             key={w}
                             className="flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:gap-6"
                           >
-                            <span className="w-24 shrink-0 font-mono text-xs text-fg/40">
-                              {w} · {WEIGHT_NAMES[w] ?? "Weight"}
+                            <span className="w-32 shrink-0 text-sm font-semibold text-fg">
+                              {WEIGHT_NAMES[w] ?? "Weight"}{" "}
+                              <span className="font-normal text-fg/45">{w}</span>
                             </span>
                             <span
                               className="min-w-0 truncate text-fg/90"
