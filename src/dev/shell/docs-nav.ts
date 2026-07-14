@@ -40,7 +40,8 @@ export function landingRouteFor(base: string): string | null {
    sections whose "Overview" landing was removed — visiting the bare route now
    redirects to the group's first real item. */
 const CATEGORY_HEADINGS: Record<string, string> = {
-  components: "Components",
+  // NOTE: no "components" — "#components" is a real landing page (the paginated
+  // component gallery), so it renders as-is rather than redirecting.
   // NOTE: no "templates" — "#templates" is a real landing page (the template
   // catalogue), so it must render as-is, not redirect to its first item.
   "test-cases": "Test Cases",
@@ -73,6 +74,7 @@ export const docsNav: DocsNavGroup[] = [
   {
     heading: "Components",
     items: [
+      { label: "All components", href: "#components" },
       { label: "Accordion", href: "#components/accordion" },
       { label: "Alert", href: "#components/alert" },
       { label: "Avatar", href: "#components/avatar" },

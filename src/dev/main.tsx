@@ -59,11 +59,13 @@ function DocsView({ route }: { route: string }) {
   const componentSlug = componentsSubPath(route);
   const tokensSub = tokensSubPath(route);
   const isTemplates = route === "templates";
+  const isComponents = base === "components";
   const isBlocks = base === "blocks";
   const isMotion = base === "motion";
 
   let body: React.ReactNode;
-  if (componentSlug) body = <ComponentDocs slug={componentSlug} />;
+  // bare "#components" → gallery index (empty slug); "#components/<slug>" → detail
+  if (isComponents) body = <ComponentDocs slug={componentSlug} />;
   else if (isBlocks) body = <BlocksDocs slug={blocksSubPath(route)} />;
   else if (tokensSub === "colors") body = <ColorsDocs />;
   else if (isTemplates) body = <TemplatesPage />;
@@ -75,14 +77,19 @@ function DocsView({ route }: { route: string }) {
       <Navbar active={base} wide />
       <div className="flex pt-16 md:pt-0">
         <DocsSidebar active={route} />
-        <main className="min-w-0 flex-1 px-6 lg:px-12">
-          {/* templates + blocks + motion use wide, full-width previews → a wider column */}
-          <div className={`mx-auto ${isTemplates || isBlocks || isMotion ? "max-w-5xl" : "max-w-3xl"}`}>
-            {body}
-          </div>
-        </main>
-        {/* templates + blocks + motion previews are full-width; no right promo aside */}
-        {!isTemplates && !isBlocks && !isMotion && <DocsAside />}
+        {/* the components GALLERY index is wide; a component DETAIL page is not */}
+        {(() => {
+          const wide = isTemplates || isBlocks || isMotion || (isComponents && !componentSlug);
+          return (
+            <>
+              <main className="min-w-0 flex-1 px-6 lg:px-12">
+                <div className={`mx-auto ${wide ? "max-w-5xl" : "max-w-3xl"}`}>{body}</div>
+              </main>
+              {/* wide, full-width pages get no right promo aside */}
+              {!wide && <DocsAside />}
+            </>
+          );
+        })()}
       </div>
     </div>
   );

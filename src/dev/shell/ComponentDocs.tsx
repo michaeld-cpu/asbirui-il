@@ -8,8 +8,10 @@ import {
   DropdownMenuSeparator,
   FilterChips,
 } from "@/index";
+import { Pagination } from "@/index";
 import {
   ComponentPlayground,
+  defaultsFor,
   type ControlValues,
 } from "./component-playground";
 import { hexToRgbTriplet, type ComponentEntry, type PropRow } from "./docs/entry";
@@ -361,9 +363,118 @@ import { Dropdown } from "@asbirtech/asbir-ui";`,
 
 export const COMPONENT_SLUGS = COMPONENTS.map((c) => c.slug);
 
+/* ---- index gallery (#components) -------------------------------------- */
+
+const PER_PAGE = 12;
+
+/** A gallery tile: the component's name over a scaled-down, non-interactive
+    thumbnail of its live default render. The whole card navigates to the
+    component's detail page. Mirrors the Blocks/Motion gallery treatment
+    (bg-canvas + hover:border-fg/20).
+
+    The card is a <div role="link"> — NOT an <a> — because the thumbnail may
+    render a demo that itself contains anchors (e.g. Breadcrumbs), and an <a>
+    inside an <a> is invalid DOM. Navigation is a hash write with Enter/Space
+    handled for keyboard. */
+function ComponentGalleryCard({ entry }: { entry: ComponentEntry }) {
+  const boxRef = React.useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = React.useState(0.75);
+  const DESIGN_W = 360; // width the demo renders at before scaling to fit
+
+  React.useEffect(() => {
+    const box = boxRef.current;
+    if (!box) return;
+    const update = () => setScale(Math.min(1, box.clientWidth / DESIGN_W));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(box);
+    return () => ro.disconnect();
+  }, []);
+
+  const go = () => {
+    window.location.hash = `#components/${entry.slug}`;
+  };
+
+  return (
+    <div
+      role="link"
+      tabIndex={0}
+      aria-label={entry.name}
+      onClick={go}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          go();
+        }
+      }}
+      className="flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-canvas outline-none transition-colors hover:border-fg/20 focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {/* thumbnail stage — clips a scaled, non-interactive default render */}
+      <div ref={boxRef} className="relative flex h-40 items-center justify-center overflow-hidden border-b border-border">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-1/2 origin-center"
+          style={{ width: DESIGN_W, transform: `translate(-50%, -50%) scale(${scale})` }}
+        >
+          <div className="flex items-center justify-center px-4">
+            {entry.render(defaultsFor(entry.controls))}
+          </div>
+        </div>
+      </div>
+      <div className="px-3.5 py-3">
+        <p className="truncate text-sm font-semibold text-fg">{entry.name}</p>
+      </div>
+    </div>
+  );
+}
+
+function ComponentsIndex() {
+  const [page, setPage] = React.useState(1);
+  const sorted = React.useMemo(
+    () => [...COMPONENTS].sort((a, b) => a.name.localeCompare(b.name)),
+    []
+  );
+  const totalPages = Math.ceil(sorted.length / PER_PAGE);
+  const start = (page - 1) * PER_PAGE;
+  const visible = sorted.slice(start, start + PER_PAGE);
+
+  const gotoPage = (p: number) => {
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <article className="animate-fade-up py-10">
+      <h1 className="text-3xl font-semibold tracking-tight text-fg">Components</h1>
+      <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-fg/70">
+        {sorted.length} accessible, token-driven React components — each with a live playground,
+        prop reference, and copy-paste install. Pick one to dive in.
+      </p>
+
+      <div className="not-prose mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {visible.map((entry) => (
+          <ComponentGalleryCard key={entry.slug} entry={entry} />
+        ))}
+      </div>
+
+      {totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-between gap-4">
+          <p className="text-xs text-fg/45">
+            {start + 1}–{Math.min(start + PER_PAGE, sorted.length)} of {sorted.length}
+          </p>
+          <Pagination page={page} total={totalPages} onPageChange={gotoPage} />
+        </div>
+      )}
+    </article>
+  );
+}
+
 /* ---- page ------------------------------------------------------------- */
 
 export function ComponentDocs({ slug }: { slug: string }) {
+  // bare #components → the browsable, paginated gallery index
+  if (!slug) return <ComponentsIndex />;
+
   const entry = COMPONENTS.find((c) => c.slug === slug) ?? COMPONENTS[0];
 
   return (

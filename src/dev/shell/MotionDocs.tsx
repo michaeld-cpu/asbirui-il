@@ -20,7 +20,7 @@ import {
   Typewriter,
   WaveText,
 } from "@/motion";
-import { Button, FilterChips } from "@/index";
+import { Button, FilterChips, Pagination } from "@/index";
 
 /*
   Motion docs. #motion is a filterable GALLERY of live motion pieces; each
@@ -512,10 +512,26 @@ function GalleryCard({ demo }: { demo: MotionDemo }) {
 
 /* ---- page ------------------------------------------------------------- */
 
+// 9 per page = 3 full rows at the gallery's own lg:grid-cols-3, so the last
+// page rarely dangles a single lonely card.
+const PAGE_SIZE = 9;
+
 export function MotionDocs({ slug = "" }: { slug?: string }) {
   const [category, setCategory] = React.useState<string>("All");
+  const [page, setPage] = React.useState(1);
   const detail = slug ? DEMOS.find((d) => d.id === slug) : undefined;
-  const visible = DEMOS.filter((d) => category === "All" || d.category === category);
+  const filtered = DEMOS.filter((d) => category === "All" || d.category === category);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const clampedPage = Math.min(page, pageCount);
+  const visible = filtered.slice((clampedPage - 1) * PAGE_SIZE, clampedPage * PAGE_SIZE);
+
+  // changing the filter can shrink pageCount out from under the current page
+  // (e.g. paged to 3, then filter to a category with only 1 page) — reset
+  // rather than land on a page that no longer exists.
+  const setCategoryAndReset = (next: string) => {
+    setCategory(next);
+    setPage(1);
+  };
 
   return (
     <article className="animate-fade-up py-10">
@@ -538,7 +554,7 @@ export function MotionDocs({ slug = "" }: { slug?: string }) {
             <FilterChips
               label="Type"
               value={category}
-              onValueChange={setCategory}
+              onValueChange={setCategoryAndReset}
               options={CATEGORIES.map((c) => ({ value: c, label: c }))}
             />
           </div>
@@ -548,6 +564,19 @@ export function MotionDocs({ slug = "" }: { slug?: string }) {
               <GalleryCard key={demo.id} demo={demo} />
             ))}
           </div>
+
+          {pageCount > 1 && (
+            <div className="mt-8 flex justify-center">
+              <Pagination
+                page={clampedPage}
+                total={pageCount}
+                onPageChange={(p) => {
+                  setPage(p);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              />
+            </div>
+          )}
 
           <div className="mt-12 flex items-center gap-3 border-t border-border pt-8 text-sm text-fg/60">
             <span>Every piece resolves to a readable static state under reduced motion.</span>
@@ -560,3 +589,4 @@ export function MotionDocs({ slug = "" }: { slug?: string }) {
     </article>
   );
 }
+
