@@ -10,12 +10,12 @@ import * as React from "react";
   A kit page is a Mobbin-style reference: a sticky section rail on the left
   (with scrollspy — the rail highlights the section you're currently viewing),
   and stacked sections on the right: Overview, Colors, Gradients, Typography,
-  Logo, Layout & radius, Motion, Brand voice. Every section renders from the
-  Project data below, so onboarding / editing a project is a single data edit.
+  Logo, Layout & radius, Motion, Brand voice.
 
-  Asbir Tech Web is filled in with the REAL brand system pulled from the live
-  site source (dark theme, #FF6900 orange, Inter, the "A" logomark). The other
-  projects carry the same structure with their own values.
+  The scaffolding (rail + every section page) always renders. Each section's
+  values live in the Project data below; a section with no data yet shows a
+  "Coming soon" placeholder so the shell stays complete while content is filled
+  in. Onboarding / editing a project is a single data edit.
 */
 
 /* ---- data model ------------------------------------------------------- */
@@ -29,23 +29,22 @@ type Project = {
   slug: string;
   name: string;
   tagline: string;
-  /* the mark's base color — drives the index card accent */
+  /* the mark's base color — drives the index card accent + logo panels */
   accent: string;
-  status: "live" | "draft";
-  /* one-liner shown at the top of the kit */
-  summary: string;
-  /* short factual meta rows (Founded, Location, Site, …) */
-  facts?: { label: string; value: string }[];
-  /* inline SVG logomark (paste-ready) + optional wordmark, both single-color
-     so they can flip fg on any surface. If absent, a lettermark tile is used. */
+  /* inline SVG logomark (paste-ready), single-color so it flips fg on any
+     surface. If absent, a lettermark tile is used. */
   logomark?: string;
-  colors: Swatch[];
+  /* one-liner shown at the top of the kit (Overview) */
+  summary?: string;
+  /* short factual meta rows (Founded, Location, …) */
+  facts?: { label: string; value: string }[];
+  colors?: Swatch[];
   gradients?: Gradient[];
-  fonts: { family: string; source: string; weights: string };
-  type: TypeSpec[];
+  fonts?: { family: string; source: string; weights: string };
+  type?: TypeSpec[];
   radius?: { label: string; value: string }[];
   motion?: Motion[];
-  voice: string;
+  voice?: string;
   voiceTraits?: string[];
   /* real copy lines that characterize the brand voice */
   voiceLines?: string[];
@@ -57,225 +56,23 @@ const PROJECTS: Project[] = [
     name: "Asbir Tech Web",
     tagline: "Web development & IT consulting",
     accent: "#FF6900",
-    status: "live",
-    summary:
-      "A web development and IT consulting studio founded in 2016 in Dumaguete, Philippines, and brought to Australia in 2022. The site is a dark, confident, enterprise-B2B statement built on a single Inter typeface and one hot orange.",
-    facts: [
-      { label: "Founded", value: "2016 · Dumaguete, PH" },
-      { label: "Expanded", value: "2022 · Australia" },
-      { label: "Sector", value: "Studio & product engineering" },
-      { label: "Theme", value: "Dark only" },
-    ],
     // The real "A" logomark from the live site (three stacked chevron paths).
     logomark:
       '<svg viewBox="0 0 26 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16.5205 8.94012L14.6933 5.28149C14.1219 6.42815 13.3659 7.92302 13.2099 8.2437L13.5647 8.93742H13.5673L13.5657 8.94012L19.0029 19.8685C15.2648 18.5809 10.3785 18.5804 6.63992 19.8668C6.87398 19.3972 7.10909 18.9253 7.34367 18.454C5.23767 18.8303 4.19547 19.2406 3.93927 19.3507C3.5418 20.1497 3.14485 20.9471 2.75 21.7418L2.80535 21.8098C2.81537 21.8222 4.57187 23.9892 4.58083 24C8.35371 21.0049 17.2854 21.0065 21.0588 24C21.0656 23.9914 22.8221 21.8179 22.8306 21.8076L22.8875 21.7374L16.5205 8.94012Z"/><path d="M25.0622 17.1719C22.3489 11.7182 19.5534 6.09987 16.839 0.644592C16.1458 0.50153 13.7588 0.0620839 13.5759 0L6.27051 14.6669C7.04754 14.5141 8.13454 14.3306 9.46984 14.1832C9.98119 13.1558 14.6661 3.73853 15.0446 2.97625L21.3874 15.725C21.0574 15.6316 20.7231 15.5442 20.3858 15.4621L22.0964 18.9048C22.884 19.1817 23.6615 19.504 24.3995 19.8668C24.5319 19.6806 25.4359 18.4211 25.5403 18.2672L25.0622 17.1719Z"/><path d="M15.8274 14.71C13.6466 14.5092 11.344 14.5313 9.17575 14.7731C7.88526 14.9297 6.97433 15.0825 5.95743 15.2941L5.95532 15.2984C5.37756 15.4248 4.80928 15.5662 4.2526 15.7244C5.37861 13.4629 6.50673 11.196 7.62589 8.9378C7.62906 8.93996 7.6338 8.92593 7.6338 8.92593C8.58638 7.02238 9.57111 5.03948 10.5453 3.07979L10.9633 3.79618L12.4468 0.83397L12.0546 0.0317383C11.6824 0.0949019 9.08507 0.592112 8.80832 0.634221C6.60953 5.05351 2.36537 13.5779 0.225624 17.8811L0 18.3346C0 18.3346 0.00737998 18.3492 0.0195047 18.3735L1.23303 19.8705C3.55095 18.8189 4.67749 18.3616 7.65014 17.8412L7.65173 17.8385C10.6866 17.2916 14.257 17.2522 17.3283 17.731L15.828 14.7116L15.8274 14.71Z"/></svg>',
-    colors: [
-      { name: "Orange", hex: "#FF6900", role: "Primary" },
-      { name: "Ember", hex: "#FF4500", role: "Primary / gradient end" },
-      { name: "Amber", hex: "#FFB800", role: "Accent" },
-      { name: "Black", hex: "#000000", role: "Background" },
-      { name: "Card", hex: "#111111", role: "Surface" },
-      { name: "Panel", hex: "#0A0A0A", role: "Surface deep" },
-      { name: "White", hex: "#FFFFFF", role: "Text primary" },
-      { name: "Grey", hex: "#A0A0A0", role: "Text secondary" },
-      { name: "Peach", hex: "#FFEEDB", role: "Text on warm" },
-      { name: "Bloom", hex: "#FFAF76", role: "Gradient accent" },
-    ],
-    gradients: [
-      {
-        name: "Primary",
-        css: "linear-gradient(135deg, #FF6900 0%, #FF4500 100%)",
-        role: "Buttons · text gradient",
-      },
-      {
-        name: "Hero glow",
-        css: "radial-gradient(circle at center, rgba(255,100,0,0.28), transparent 70%)",
-        role: "Ambient hero light",
-      },
-      {
-        name: "Vision",
-        css: "linear-gradient(to bottom, #ffffff 40%, #FFAF76 100%)",
-        role: "Heading text gradient",
-      },
-    ],
-    fonts: {
-      family: "Inter",
-      source: "Google Fonts · variable (opsz 14–32)",
-      weights: "300 · 400 · 500 · 600 · 700",
-    },
-    type: [
-      {
-        label: "Display / H1",
-        sample: "Modern Problems Require Modern Solutions",
-        meta: "Inter · 500 · clamp(2.5rem, 6vw, 4.8rem) · letter-spacing -2px",
-        style: { fontWeight: 500, letterSpacing: "-0.03em", lineHeight: 1.1 },
-      },
-      {
-        label: "Section / H2",
-        sample: "Our services enable businesses to scale & transform",
-        meta: "Inter · 500 · 3rem · line-height 1.1",
-        style: { fontWeight: 500, letterSpacing: "-0.01em" },
-      },
-      {
-        label: "Card / H3",
-        sample: "Web Development",
-        meta: "Inter · 300 · 1.8rem",
-        style: { fontWeight: 300 },
-      },
-      {
-        label: "Body",
-        sample:
-          "We take our time understanding the IT needs of businesses and provide a modern approach to the solution.",
-        meta: "Inter · 400 · 1.1rem · line-height 1.6–1.8",
-        style: { fontWeight: 400, lineHeight: 1.7 },
-      },
-    ],
-    radius: [
-      { label: "Pill", value: "100px / 50px" },
-      { label: "Card", value: "24px" },
-      { label: "Panel", value: "12px" },
-      { label: "Icon box", value: "8px" },
-      { label: "Container", value: "max 1500px" },
-      { label: "Section rhythm", value: "8rem 0" },
-    ],
-    motion: [
-      { name: "Expo out", value: "cubic-bezier(0.16, 1, 0.3, 1)", role: "Buttons · menus" },
-      { name: "Navbar collapse", value: "cubic-bezier(0.4, 0, 0.2, 1) · 1.2s", role: "Scroll shrink" },
-      { name: "Reveal card", value: "opacity + translateY(30px) scale(0.98) · 0.8s", role: "On-scroll reveal" },
-      { name: "Orbit", value: "rotate · linear infinite · 15/25/40s", role: "Decorative orbits" },
-      { name: "Button lift", value: "translateY(-2px) + glow 0 0 40px rgba(255,106,0,0.5)", role: "Hover" },
-    ],
-    voice:
-      "Asbir Tech Web is the confident craftsperson. Consultative, enterprise, and quietly ambitious — it speaks in outcomes (scale, transform, competitive advantage), uses AU/British spelling, and lets robust, well-built work carry the message.",
-    voiceTraits: ["Consultative", "Enterprise B2B", "Outcome-led", "Understated", "AU / British spelling"],
-    voiceLines: [
-      "Modern Problems Require Modern Solutions.",
-      "We enable businesses to scale, transform, and gain a competitive advantage.",
-      "Delivering technology services that fit the way your business works.",
-      "Robust and flexible web and mobile solutions.",
-    ],
-  },
-  {
-    slug: "tripket-ph",
-    name: "Tripket PH",
-    tagline: "Vessel booking & ticketing",
-    accent: "#0D9488",
-    status: "live",
-    summary:
-      "A maritime ferry-booking admin for the Philippine inter-island network — a light, friendly-yet-precise product that makes booking a boat feel effortless.",
-    facts: [
-      { label: "Sector", value: "Maritime booking admin" },
-      { label: "Region", value: "Philippines" },
-      { label: "Theme", value: "Light" },
-    ],
-    colors: [
-      { name: "Teal", hex: "#0D9488", role: "Primary" },
-      { name: "Deep", hex: "#0F766E", role: "Primary dark" },
-      { name: "Ink", hex: "#0C1B1A", role: "Surface" },
-      { name: "Foam", hex: "#5EEAD4", role: "Accent soft" },
-      { name: "Lime", hex: "#65A30D", role: "Positive" },
-      { name: "Coral", hex: "#FB7185", role: "Attention" },
-    ],
-    gradients: [
-      { name: "Primary", css: "linear-gradient(135deg, #0D9488 0%, #0F766E 100%)", role: "Buttons" },
-    ],
-    fonts: { family: "Inter", source: "Google Fonts", weights: "400 · 500 · 600" },
-    type: [
-      { label: "Display", sample: "Book your crossing", meta: "Inter · 600 · 2.5rem", style: { fontWeight: 600 } },
-      { label: "Body", sample: "Real-time seats across the inter-island network.", meta: "Inter · 400 · 15px / 1.6", style: { fontWeight: 400, lineHeight: 1.6 } },
-    ],
-    radius: [{ label: "Card", value: "12px" }, { label: "Control", value: "8px" }],
-    voice:
-      "Tripket PH is the friendly guide at the dock. Warm, clear, and reassuring — we make booking a boat feel as easy as it should be.",
-    voiceTraits: ["Warm", "Clear", "Reassuring"],
-    voiceLines: ["Book your crossing in a tap.", "Every route, every vessel, one place."],
-  },
-  {
-    slug: "planout",
-    name: "PlanOut",
-    tagline: "Planning & scheduling workspace",
-    accent: "#2563EB",
-    status: "draft",
-    summary:
-      "A planning and scheduling workspace for operators — direct, structured, and numbers-first. The plan and the data lead; the hype stays out.",
-    facts: [{ label: "Sector", value: "Planning workspace" }, { label: "Theme", value: "Dark" }],
-    colors: [
-      { name: "Blue", hex: "#2563EB", role: "Primary" },
-      { name: "Deep", hex: "#1E3A8A", role: "Primary dark" },
-      { name: "Slate", hex: "#0F172A", role: "Surface" },
-      { name: "Sky", hex: "#93C5FD", role: "Accent soft" },
-      { name: "Emerald", hex: "#10B981", role: "Positive" },
-      { name: "Amber", hex: "#F59E0B", role: "Attention" },
-    ],
-    gradients: [{ name: "Primary", css: "linear-gradient(135deg, #2563EB 0%, #1E3A8A 100%)", role: "Buttons" }],
-    fonts: { family: "Inter", source: "Google Fonts", weights: "400 · 500 · 600" },
-    type: [
-      { label: "Display", sample: "Ship the plan", meta: "Inter · 600 · 2.5rem", style: { fontWeight: 600 } },
-      { label: "Body", sample: "Surface the plan and the numbers, never the hype.", meta: "Inter · 400 · 15px / 1.6", style: { fontWeight: 400, lineHeight: 1.6 } },
-    ],
-    radius: [{ label: "Card", value: "12px" }],
-    voice:
-      "PlanOut is the steady operator. We're direct, structured, and confident — we surface the plan and the numbers, never the hype.",
-    voiceTraits: ["Direct", "Structured", "Confident"],
-    voiceLines: ["The plan and the numbers, up front."],
-  },
-  {
-    slug: "projectplaza",
-    name: "ProjectPlaza",
-    tagline: "Project marketplace & collaboration",
-    accent: "#EA580C",
-    status: "draft",
-    summary:
-      "A project marketplace and collaboration space — energetic, approachable, and community-first, built to make jumping in and shipping together easy.",
-    facts: [{ label: "Sector", value: "Marketplace" }, { label: "Theme", value: "Dark" }],
-    colors: [
-      { name: "Orange", hex: "#EA580C", role: "Primary" },
-      { name: "Deep", hex: "#9A3412", role: "Primary dark" },
-      { name: "Charcoal", hex: "#1C1512", role: "Surface" },
-      { name: "Peach", hex: "#FDBA74", role: "Accent soft" },
-      { name: "Teal", hex: "#0D9488", role: "Positive" },
-      { name: "Rose", hex: "#F43F5E", role: "Attention" },
-    ],
-    gradients: [{ name: "Primary", css: "linear-gradient(135deg, #EA580C 0%, #9A3412 100%)", role: "Buttons" }],
-    fonts: { family: "Inter", source: "Google Fonts", weights: "400 · 500 · 600" },
-    type: [
-      { label: "Display", sample: "Build it together", meta: "Inter · 600 · 2.5rem", style: { fontWeight: 600 } },
-      { label: "Body", sample: "Jump in and get building together.", meta: "Inter · 400 · 15px / 1.6", style: { fontWeight: 400, lineHeight: 1.6 } },
-    ],
-    radius: [{ label: "Card", value: "12px" }],
-    voice:
-      "ProjectPlaza is the welcoming host. Energetic, approachable, and community-first — we make it easy to jump in and get building together.",
-    voiceTraits: ["Energetic", "Approachable", "Community-first"],
-    voiceLines: ["Jump in and get building together."],
-  },
-  {
-    slug: "beetzeeplay",
-    name: "BeetzeePlay",
-    tagline: "Music & audio streaming",
-    accent: "#DB2777",
-    status: "draft",
-    summary:
-      "A music and audio streaming experience — bold, playful, and full of rhythm, bringing energy and personality to every beat.",
-    facts: [{ label: "Sector", value: "Streaming" }, { label: "Theme", value: "Dark" }],
-    colors: [
-      { name: "Pink", hex: "#DB2777", role: "Primary" },
-      { name: "Deep", hex: "#9D174D", role: "Primary dark" },
-      { name: "Void", hex: "#140A12", role: "Surface" },
-      { name: "Blush", hex: "#F9A8D4", role: "Accent soft" },
-      { name: "Cyan", hex: "#06B6D4", role: "Positive" },
-      { name: "Amber", hex: "#F59E0B", role: "Attention" },
-    ],
-    gradients: [{ name: "Primary", css: "linear-gradient(135deg, #DB2777 0%, #9D174D 100%)", role: "Buttons" }],
-    fonts: { family: "Inter", source: "Google Fonts", weights: "400 · 500 · 700" },
-    type: [
-      { label: "Display", sample: "Turn it up", meta: "Inter · 700 · 2.5rem", style: { fontWeight: 700 } },
-      { label: "Body", sample: "Energy and personality on every beat.", meta: "Inter · 400 · 15px / 1.6", style: { fontWeight: 400, lineHeight: 1.6 } },
-    ],
-    radius: [{ label: "Card", value: "16px" }],
-    voice:
-      "BeetzeePlay is the after-hours DJ. Bold, playful, and full of rhythm — we bring energy and personality to every beat.",
-    voiceTraits: ["Bold", "Playful", "Rhythmic"],
-    voiceLines: ["Energy and personality on every beat."],
+    // Content intentionally left empty for now — the rail + section pages still
+    // render (each section shows a placeholder). Fill these arrays in to
+    // populate the kit.
+    summary: "",
+    facts: [],
+    colors: [],
+    gradients: [],
+    fonts: undefined,
+    type: [],
+    radius: [],
+    motion: [],
+    voice: "",
+    voiceTraits: [],
+    voiceLines: [],
   },
 ];
 
@@ -323,39 +120,14 @@ function ProjectIndex() {
               {p.logomark ? <Glyph svg={p.logomark} /> : p.name.slice(0, 1)}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="flex items-center gap-2">
-                <span className="truncate text-sm font-semibold text-fg">{p.name}</span>
-                <span
-                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
-                    p.status === "live"
-                      ? "bg-lime-500/15 text-lime-600 dark:text-lime-400"
-                      : "bg-overlay/[0.08] text-fg/50"
-                  }`}
-                >
-                  {p.status}
-                </span>
-              </span>
+              <span className="truncate text-sm font-semibold text-fg">{p.name}</span>
               <span className="mt-0.5 block truncate text-xs text-fg/60 dark:text-fg/45">
                 {p.tagline}
               </span>
             </span>
-            <span className="flex -space-x-1">
-              {p.colors.slice(0, 4).map((c) => (
-                <span
-                  key={c.hex}
-                  className="h-4 w-4 rounded-full ring-2 ring-panel"
-                  style={{ backgroundColor: c.hex }}
-                />
-              ))}
-            </span>
           </a>
         ))}
       </div>
-
-      <p className="mt-8 text-xs text-fg/50">
-        {PROJECTS.length} projects · add more in{" "}
-        <span className="font-mono">BrandKitsDocs.tsx</span>
-      </p>
     </article>
   );
 }
@@ -445,14 +217,16 @@ function KitSection({
 function KitView({ project }: { project: Project }) {
   const { copied, copy } = useCopy();
 
+  // the full kit structure is always present — the rail and every section page
+  // render regardless of whether their data is filled in yet.
   const sections: Section[] = [
     { id: "overview", label: "Overview" },
     { id: "colors", label: "Colors" },
-    ...(project.gradients?.length ? [{ id: "gradients", label: "Gradients" }] : []),
+    { id: "gradients", label: "Gradients" },
     { id: "typography", label: "Typography" },
     { id: "logo", label: "Logo" },
-    ...(project.radius?.length ? [{ id: "layout", label: "Layout & radius" }] : []),
-    ...(project.motion?.length ? [{ id: "motion", label: "Motion" }] : []),
+    { id: "layout", label: "Layout & radius" },
+    { id: "motion", label: "Motion" },
     { id: "voice", label: "Brand voice" },
   ];
 
@@ -462,6 +236,8 @@ function KitView({ project }: { project: Project }) {
     ) : (
       <span className={className}>{project.name.slice(0, 1)}</span>
     );
+
+  const has = <T,>(v: T[] | undefined): v is T[] => Boolean(v && v.length);
 
   return (
     <article className="animate-fade-up py-10">
@@ -481,18 +257,7 @@ function KitView({ project }: { project: Project }) {
           <Mark />
         </span>
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-fg">{project.name}</h1>
-            <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${
-                project.status === "live"
-                  ? "bg-lime-500/15 text-lime-600 dark:text-lime-400"
-                  : "bg-overlay/[0.08] text-fg/50"
-              }`}
-            >
-              {project.status}
-            </span>
-          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-fg">{project.name}</h1>
           <p className="mt-1 text-[15px] text-fg/70">{project.tagline}</p>
         </div>
       </div>
@@ -504,12 +269,16 @@ function KitView({ project }: { project: Project }) {
         <div className="min-w-0 space-y-10">
           {/* Overview */}
           <section id="overview" className="scroll-mt-24">
-            <p className="max-w-2xl text-[15px] leading-relaxed text-fg/80 dark:text-fg/70">
-              {project.summary}
-            </p>
-            {project.facts && (
+            {project.summary ? (
+              <p className="max-w-2xl text-[15px] leading-relaxed text-fg/80 dark:text-fg/70">
+                {project.summary}
+              </p>
+            ) : (
+              null
+            )}
+            {has(project.facts) && (
               <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-4">
-                {project.facts.map((f) => (
+                {project.facts!.map((f) => (
                   <div key={f.label} className="bg-panel p-4">
                     <dt className="text-[11px] uppercase tracking-wide text-fg/50">{f.label}</dt>
                     <dd className="mt-1 text-sm font-medium text-fg">{f.value}</dd>
@@ -521,38 +290,38 @@ function KitView({ project }: { project: Project }) {
 
           {/* Colors */}
           <KitSection id="colors" title="Colors" desc="Click any swatch to copy its hex.">
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
-              {project.colors.map((c) => (
-                <button
-                  key={c.name}
-                  type="button"
-                  onClick={() => copy(c.hex)}
-                  className="group overflow-hidden rounded-lg border border-border text-left transition-colors hover:border-fg/20"
-                >
-                  <span className="block h-16 w-full" style={{ backgroundColor: c.hex }} />
-                  <span className="block px-2.5 py-2">
-                    <span className="block truncate text-xs font-medium text-fg">{c.name}</span>
-                    <span className="block truncate text-[10px] uppercase tracking-wide text-fg/50">
-                      {c.role}
+            {has(project.colors) ? (
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
+                {project.colors!.map((c) => (
+                  <button
+                    key={c.name}
+                    type="button"
+                    onClick={() => copy(c.hex)}
+                    className="group overflow-hidden rounded-lg border border-border text-left transition-colors hover:border-fg/20"
+                  >
+                    <span className="block h-16 w-full" style={{ backgroundColor: c.hex }} />
+                    <span className="block px-2.5 py-2">
+                      <span className="block truncate text-xs font-medium text-fg">{c.name}</span>
+                      <span className="block truncate text-[10px] uppercase tracking-wide text-fg/50">
+                        {c.role}
+                      </span>
+                      <span className="mt-0.5 block font-mono text-[10px] text-fg/60">
+                        {copied === c.hex ? "Copied!" : c.hex}
+                      </span>
                     </span>
-                    <span className="mt-0.5 block font-mono text-[10px] text-fg/60">
-                      {copied === c.hex ? "Copied!" : c.hex}
-                    </span>
-                  </span>
-                </button>
-              ))}
-            </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              null
+            )}
           </KitSection>
 
           {/* Gradients */}
-          {project.gradients && project.gradients.length > 0 && (
-            <KitSection
-              id="gradients"
-              title="Gradients"
-              desc="Signature blends. Click to copy the CSS."
-            >
+          <KitSection id="gradients" title="Gradients" desc="Signature blends. Click to copy the CSS.">
+            {has(project.gradients) ? (
               <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
-                {project.gradients.map((g) => (
+                {project.gradients!.map((g) => (
                   <button
                     key={g.name}
                     type="button"
@@ -572,26 +341,36 @@ function KitView({ project }: { project: Project }) {
                   </button>
                 ))}
               </div>
-            </KitSection>
-          )}
+            ) : (
+              null
+            )}
+          </KitSection>
 
           {/* Typography */}
           <KitSection
             id="typography"
             title="Typography"
-            desc={`${project.fonts.family} · ${project.fonts.source} · weights ${project.fonts.weights}`}
+            desc={
+              project.fonts
+                ? `${project.fonts.family} · ${project.fonts.source} · weights ${project.fonts.weights}`
+                : undefined
+            }
           >
-            <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-panel">
-              {project.type.map((t) => (
-                <div key={t.label} className="p-5">
-                  <p className="text-[11px] uppercase tracking-wide text-fg/50">{t.label}</p>
-                  <p className="mt-2 text-fg" style={{ fontSize: "clamp(1.1rem, 2.6vw, 1.9rem)", ...t.style }}>
-                    {t.sample}
-                  </p>
-                  <p className="mt-2 font-mono text-[11px] text-fg/55">{t.meta}</p>
-                </div>
-              ))}
-            </div>
+            {has(project.type) ? (
+              <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-panel">
+                {project.type!.map((t) => (
+                  <div key={t.label} className="p-5">
+                    <p className="text-[11px] uppercase tracking-wide text-fg/50">{t.label}</p>
+                    <p className="mt-2 text-fg" style={{ fontSize: "clamp(1.1rem, 2.6vw, 1.9rem)", ...t.style }}>
+                      {t.sample}
+                    </p>
+                    <p className="mt-2 font-mono text-[11px] text-fg/55">{t.meta}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              null
+            )}
           </KitSection>
 
           {/* Logo */}
@@ -608,10 +387,7 @@ function KitView({ project }: { project: Project }) {
               </div>
               {/* on surface */}
               <div className="flex h-40 items-center justify-center rounded-xl border border-border bg-canvas">
-                <span
-                  className="[&_svg]:h-12 [&_svg]:w-12"
-                  style={{ color: project.accent }}
-                >
+                <span className="[&_svg]:h-12 [&_svg]:w-12" style={{ color: project.accent }}>
                   <Mark className="text-3xl font-semibold" />
                 </span>
               </div>
@@ -622,24 +398,26 @@ function KitView({ project }: { project: Project }) {
           </KitSection>
 
           {/* Layout & radius */}
-          {project.radius && project.radius.length > 0 && (
-            <KitSection id="layout" title="Layout & radius" desc="Corner radii, container, and rhythm.">
+          <KitSection id="layout" title="Layout & radius" desc="Corner radii, container, and rhythm.">
+            {has(project.radius) ? (
               <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
-                {project.radius.map((r) => (
+                {project.radius!.map((r) => (
                   <div key={r.label} className="bg-panel p-4">
                     <dt className="text-[11px] uppercase tracking-wide text-fg/50">{r.label}</dt>
                     <dd className="mt-1 font-mono text-sm text-fg">{r.value}</dd>
                   </div>
                 ))}
               </dl>
-            </KitSection>
-          )}
+            ) : (
+              null
+            )}
+          </KitSection>
 
           {/* Motion */}
-          {project.motion && project.motion.length > 0 && (
-            <KitSection id="motion" title="Motion" desc="Signature easing curves and interaction patterns.">
+          <KitSection id="motion" title="Motion" desc="Signature easing curves and interaction patterns.">
+            {has(project.motion) ? (
               <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-panel">
-                {project.motion.map((m) => (
+                {project.motion!.map((m) => (
                   <div key={m.name} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 p-4">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-fg">{m.name}</p>
@@ -649,17 +427,23 @@ function KitView({ project }: { project: Project }) {
                   </div>
                 ))}
               </div>
-            </KitSection>
-          )}
+            ) : (
+              null
+            )}
+          </KitSection>
 
           {/* Brand voice */}
           <KitSection id="voice" title="Brand voice" desc="How this project should sound in product and marketing.">
-            <p className="max-w-2xl text-sm leading-relaxed text-fg/80 dark:text-fg/70">
-              {project.voice}
-            </p>
-            {project.voiceTraits && (
+            {project.voice ? (
+              <p className="max-w-2xl text-sm leading-relaxed text-fg/80 dark:text-fg/70">
+                {project.voice}
+              </p>
+            ) : (
+              null
+            )}
+            {has(project.voiceTraits) && (
               <div className="mt-4 flex flex-wrap gap-2">
-                {project.voiceTraits.map((tr) => (
+                {project.voiceTraits!.map((tr) => (
                   <span
                     key={tr}
                     className="rounded-full border px-2.5 py-1 text-xs font-medium"
@@ -674,9 +458,9 @@ function KitView({ project }: { project: Project }) {
                 ))}
               </div>
             )}
-            {project.voiceLines && (
+            {has(project.voiceLines) && (
               <ul className="mt-5 space-y-2">
-                {project.voiceLines.map((line) => (
+                {project.voiceLines!.map((line) => (
                   <li
                     key={line}
                     className="rounded-lg border border-border bg-panel px-4 py-3 text-sm italic text-fg/80"

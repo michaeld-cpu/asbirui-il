@@ -139,11 +139,7 @@ export const docsNav: DocsNavGroup[] = [
        each project's kit lives at "#brand-kits/<slug>". Add real projects to
        PROJECTS in BrandKitsDocs.tsx as they're onboarded. */
     items: [
-      { label: "Tripket PH", href: "#brand-kits/tripket-ph" },
-      { label: "PlanOut", href: "#brand-kits/planout" },
       { label: "Asbir Tech Web", href: "#brand-kits/asbir-tech-web" },
-      { label: "ProjectPlaza", href: "#brand-kits/projectplaza" },
-      { label: "BeetzeePlay", href: "#brand-kits/beetzeeplay" },
     ],
   },
   {
