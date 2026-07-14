@@ -93,7 +93,7 @@ function DocsView({ route }: { route: string }) {
                     components index) get a roomy column so 3-col grids + live
                     previews breathe; prose/detail pages stay a comfortable
                     reading measure */}
-                <div className={`mx-auto ${wide ? "max-w-[88rem]" : "max-w-4xl"}`}>{body}</div>
+                <div className={`mx-auto ${wide ? "max-w-7xl" : "max-w-4xl"}`}>{body}</div>
               </main>
               {/* wide, full-width pages get no right promo aside */}
               {!wide && <DocsAside />}

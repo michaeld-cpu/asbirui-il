@@ -106,6 +106,8 @@ type Template = {
   liveUrl?: string;
   /** Preview strip theme — default "dark". */
   previewTheme?: "light" | "dark";
+  /** Second preview frame device — "mobile" (phone) or "tablet". Default "mobile". */
+  previewDevice?: "mobile" | "tablet";
   /** Source repo for this template — each template ships from its own repo,
       separate from the main AsbirUI library repo linked in the navbar. */
   repoUrl?: string;
@@ -123,6 +125,7 @@ const TEMPLATES: Template[] = [
     previewRoute: "preview/tripket",
     liveUrl: "https://tripket-ph.vercel.app/",
     previewTheme: "light",
+    previewDevice: "tablet", // Tripket admin is desktop + tablet only
     repoUrl: "https://github.com/michaeld-cpu/tripket-ph",
   },
   {
@@ -138,12 +141,25 @@ const TEMPLATES: Template[] = [
 
 /* ---- rows ------------------------------------------------------------- */
 
-/** Big preview pair for the live template: a wide desktop and a
-    tablet-proportioned frame beside it. The tablet frame keeps the 834×1112
-    iPad aspect so the preview reads as a real tablet, not a stretched panel;
-    it's centered in its column and matched to the desktop's height. */
-function LivePreviews({ route, theme = "dark" }: { route?: string; theme?: "light" | "dark" }) {
+/** Big preview pair for the live template: a wide desktop, plus a second frame
+    that is either a phone (390×844) or a tablet (834×1112). The second frame
+    keeps the real device aspect so it reads as an actual phone/tablet rather
+    than a stretched panel; it's centered in its column and matched to the
+    desktop's height. */
+function LivePreviews({
+  route,
+  theme = "dark",
+  device = "mobile",
+}: {
+  route?: string;
+  theme?: "light" | "dark";
+  device?: "mobile" | "tablet";
+}) {
   const label = theme === "light" ? "light" : "dark";
+  const second =
+    device === "tablet"
+      ? { width: 834, name: "Tablet", widthClass: "w-[calc(22rem*834/1112)]" }
+      : { width: 390, name: "Mobile", widthClass: "w-[calc(22rem*390/844)]" };
   return (
     <div className="grid grid-cols-1 items-center gap-5 sm:grid-cols-[1fr_auto]">
       <PreviewThumb
@@ -155,10 +171,10 @@ function LivePreviews({ route, theme = "dark" }: { route?: string; theme?: "ligh
       />
       <PreviewThumb
         route={route ?? ""}
-        width={834}
+        width={second.width}
         forceTheme={theme}
-        title={`Tablet preview (${label})`}
-        className="h-[22rem] w-[calc(22rem*834/1112)] justify-self-center"
+        title={`${second.name} preview (${label})`}
+        className={`h-[22rem] justify-self-center ${second.widthClass}`}
       />
     </div>
   );
@@ -220,7 +236,7 @@ function TemplateRow({ t }: { t: Template }) {
 
       {/* preview strip */}
       <div>
-        <LivePreviews route={t.previewRoute} theme={t.previewTheme} />
+        <LivePreviews route={t.previewRoute} theme={t.previewTheme} device={t.previewDevice} />
       </div>
     </div>
   );
