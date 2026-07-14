@@ -317,6 +317,63 @@ function LogoTile({
   );
 }
 
+/** Logo anatomy — a construction diagram: the mark rendered as a ghost (low-
+    opacity fill + outline) with grid, diagonal, and concentric-circle guides
+    overlaid, in the vein of a golden-ratio spec sheet. */
+function LogoAnatomy({ mark, accent }: { mark: string; accent: string }) {
+  const line = "rgba(255,255,255,0.16)";
+  const lineFaint = "rgba(255,255,255,0.09)";
+  // guides sit in a 100×100 field; the mark ghost is centered and ~52% wide.
+  const cx = 50;
+  const cy = 50;
+  const thirds = [100 / 3, 200 / 3];
+  return (
+    <div className="relative aspect-square w-72 max-w-full overflow-hidden rounded-xl border border-border bg-canvas">
+      {/* guide overlay */}
+      <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
+        {/* outer frame + thirds grid */}
+        <rect x="8" y="8" width="84" height="84" stroke={line} strokeWidth="0.4" />
+        {thirds.map((t) => (
+          <line key={`v${t}`} x1={8 + (t * 84) / 100} y1="8" x2={8 + (t * 84) / 100} y2="92" stroke={lineFaint} strokeWidth="0.4" />
+        ))}
+        {thirds.map((t) => (
+          <line key={`h${t}`} x1="8" y1={8 + (t * 84) / 100} x2="92" y2={8 + (t * 84) / 100} stroke={lineFaint} strokeWidth="0.4" />
+        ))}
+        {/* center axes */}
+        <line x1={cx} y1="8" x2={cx} y2="92" stroke={lineFaint} strokeWidth="0.4" />
+        <line x1="8" y1={cy} x2="92" y2={cy} stroke={lineFaint} strokeWidth="0.4" />
+        {/* corner diagonals */}
+        <line x1="8" y1="8" x2="92" y2="92" stroke={lineFaint} strokeWidth="0.4" />
+        <line x1="92" y1="8" x2="8" y2="92" stroke={lineFaint} strokeWidth="0.4" />
+        {/* concentric construction circles, centered on the mark */}
+        <circle cx={cx} cy={cy} r="34" stroke={line} strokeWidth="0.4" strokeDasharray="1.5 1.5" />
+        <circle cx={cx} cy={cy} r="21" stroke={line} strokeWidth="0.4" strokeDasharray="1.5 1.5" />
+        <circle cx={cx} cy={cy} r="10.5" stroke={line} strokeWidth="0.4" strokeDasharray="1.5 1.5" />
+      </svg>
+
+      {/* the ghost mark: soft filled silhouette + a crisper outline on top */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative" style={{ width: "48%" }}>
+          {/* ghost fill */}
+          <span
+            className="block [&_svg]:h-full [&_svg]:w-full"
+            style={{ color: accent, opacity: 0.22 }}
+          >
+            <Glyph svg={mark} />
+          </span>
+          {/* outline: same mark stroked, sitting exactly on top */}
+          <span
+            className="absolute inset-0 block [&_svg_path]:!fill-none [&_svg_path]:!stroke-current [&_svg]:h-full [&_svg]:w-full [&_svg_path]:[stroke-width:0.5]"
+            style={{ color: accent, opacity: 0.9 }}
+          >
+            <Glyph svg={mark} />
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Favicon deliverables — a size ladder plus a plain divided file list per
     platform (no boxy cards; matches the calm section language). */
 function FaviconList({ mark, accent }: { mark: string; accent: string }) {
@@ -671,14 +728,7 @@ function KitView({ project }: { project: Project }) {
               <h2 className="text-2xl font-semibold tracking-tight text-fg">Logo anatomy</h2>
               <p className="mt-1.5 text-sm text-fg/50">Give the mark room to breathe; don't shrink it too far.</p>
               <div className="mt-6 grid gap-8 sm:grid-cols-[auto_1fr] sm:items-center">
-                <div className="flex items-center justify-center rounded-xl border border-border bg-canvas px-10 py-12">
-                  <div className="relative inline-flex p-9">
-                    <span className="pointer-events-none absolute inset-0 rounded-lg border border-dashed border-fg/20" />
-                    <span className="[&_svg]:h-16 [&_svg]:w-16" style={{ color: project.accent }}>
-                      <Glyph svg={project.logomark} />
-                    </span>
-                  </div>
-                </div>
+                <LogoAnatomy mark={project.logomark} accent={project.accent} />
                 <dl className="space-y-5 text-sm">
                   <div>
                     <dt className="font-medium text-fg">Clear space</dt>
