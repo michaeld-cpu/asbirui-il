@@ -60,11 +60,13 @@ function compositeOver(fg: [number, number, number, number], backdrop: Rgb): Rgb
 
 function useCopy() {
   const [copied, setCopied] = React.useState<string | null>(null);
-  const copy = (value: string) => {
+  // stable identity so memoized rows don't re-render just because copy() was
+  // recreated on the parent's re-render.
+  const copy = React.useCallback((value: string) => {
     navigator.clipboard?.writeText(value);
     setCopied(value);
     window.setTimeout(() => setCopied((c) => (c === value ? null : c)), 1200);
-  };
+  }, []);
   return { copied, copy };
 }
 
@@ -72,22 +74,25 @@ function useCopy() {
 
 /** A single family: a labeled header row with the Contrast-grid action, then a
     strip of step chips (step # + hex printed in-chip in legible ink). */
-function FamilyRow({
+/* Memoized so copying a swatch in ONE family doesn't re-render all 22 families
+   (which caused a visible layout jitter). Each row only receives the copied hex
+   that belongs to IT (`copied`), so a copy elsewhere is a no-op for this row. */
+const FamilyRow = React.memo(function FamilyRow({
   family,
   copied,
   onCopy,
   onContrast,
 }: {
   family: PaletteFamily;
+  /** the copied hex IF it belongs to this family, else null */
   copied: string | null;
   onCopy: (v: string) => void;
   onContrast: (f: PaletteFamily) => void;
 }) {
   return (
-    // width-capped to the swatch strip (11 × 62px + 10 × 4px gap ≈ 722px) so the
-    // header's "Contrast grid" action sits directly above the right end of the
-    // swatches instead of floating far out in the empty column.
-    <div className="max-w-[722px]">
+    // full-width row — the swatches flex to fill the whole content column so the
+    // strip's right edge lines up with the headings above (no dead gutter).
+    <div>
       {/* header stays at page width (NOT inside the horizontal scroll) so the
           label + Contrast-grid button are always visible without scrolling the
           color strip to the end */}
@@ -101,11 +106,10 @@ function FamilyRow({
           Contrast grid
         </button>
       </div>
-      {/* Fixed-size chips (same box on every screen). The row scrolls
-          horizontally on mobile rather than resizing the swatches, so a chip
-          looks identical on desktop and mobile. */}
+      {/* Chips flex to share the row width evenly on desktop; below a min width
+          the row scrolls horizontally instead of squashing the chips. */}
       <div className="-mx-1 overflow-x-auto px-1">
-        <div className="flex gap-1">
+        <div className="flex min-w-[660px] gap-1.5">
           {family.hues.map((hex, i) => {
             const rgb = hexToRgb(hex);
             const ink = inkOn(rgb);
@@ -118,7 +122,7 @@ function FamilyRow({
                 onClick={() => onCopy(hex)}
                 title={`${family.name}-${step} — click to copy ${hex}`}
                 aria-label={`${family.name} ${step}, ${hex}`}
-                className="group relative flex h-16 w-[62px] shrink-0 flex-col justify-end rounded-lg p-1.5 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
+                className="group relative flex h-16 min-w-0 flex-1 flex-col justify-end overflow-hidden rounded-lg p-1.5 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
                 style={{ backgroundColor: hex }}
               >
                 {/* step + hex — fade out on copy so "Copied!" is the sole focus */}
@@ -149,7 +153,7 @@ function FamilyRow({
       </div>
     </div>
   );
-}
+});
 
 /** Contrast-grid overlay: for the family's key steps, shows WCAG contrast of
     white and black text on each swatch, with the AA (4.5:1) verdict.
@@ -254,7 +258,9 @@ function PaletteMatrix({
           <FamilyRow
             key={family.name}
             family={family}
-            copied={copied}
+            // pass the copied hex only if it belongs to THIS family — so a copy
+            // in another family leaves this row's props unchanged (memo skips it)
+            copied={copied && family.hues.includes(copied) ? copied : null}
             onCopy={onCopy}
             onContrast={setGrid}
           />

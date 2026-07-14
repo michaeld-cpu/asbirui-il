@@ -168,7 +168,7 @@ function FamilyRow({ family }: { family: { name: string; base: string } }) {
                 onClick={() => copy(hex)}
                 title={`${family.name}-${step} — click to copy ${hex}`}
                 aria-label={`${family.name} ${step}, ${hex}`}
-                className="group relative flex h-16 w-[62px] shrink-0 flex-col justify-end rounded-lg p-1.5 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
+                className="group relative flex h-16 w-[62px] shrink-0 flex-col justify-end overflow-hidden rounded-lg p-1.5 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
                 style={{ backgroundColor: hex }}
               >
                 <span
