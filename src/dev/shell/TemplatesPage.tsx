@@ -230,14 +230,6 @@ function TemplateRow({ t }: { t: Template }) {
             {external ? "Visit live site" : "Open template"}
             <span>{external ? ExternalIcon : ArrowIcon}</span>
           </a>
-          {t.previewRoute && external && (
-            <a
-              href={`#${t.previewRoute}`}
-              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-asbir border border-border px-4 py-2 text-sm font-semibold text-fg/80 transition-colors hover:bg-overlay/[0.05] hover:text-fg"
-            >
-              Preview dashboard
-            </a>
-          )}
           {t.repoUrl && (
             <a
               href={t.repoUrl}
