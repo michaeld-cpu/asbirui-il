@@ -24,6 +24,20 @@ entries in sync as items land.
 - [x] ThemeToggle
 - [x] Checkbox
 
+## Batch 2 (shipped)
+
+Forms — [x] Switch · [x] RadioGroup · [x] Select · [x] Textarea · [x] Slider ·
+[x] FormField (+ Label) · [x] SearchInput
+
+Data display — [x] Accordion · [x] Progress · [x] CircularProgress ·
+[x] AvatarGroup · [x] Timeline · [x] Kbd
+
+Overlays / nav — [x] Popover · [x] HoverCard · [x] Drawer · [x] Breadcrumbs ·
+[x] Pagination · [x] SegmentedControl
+
+Feedback / SaaS — [x] Alert · [x] Spinner · [x] StatusBadge · [x] UsageMeter ·
+[x] DescriptionList
+
 ## Motion / Interaction
 
 Reveal · Stagger · MagneticButton · TiltCard · HoverLift · SpotlightCard ·

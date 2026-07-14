@@ -29,6 +29,31 @@ import { tabsEntry } from "./docs/tabs.docs";
 import { themeToggleEntry } from "./docs/theme-toggle.docs";
 import { toastEntry } from "./docs/toast.docs";
 import { tooltipEntry } from "./docs/tooltip.docs";
+// batch 2 (24 components)
+import { switchEntry } from "./docs/switch.docs";
+import { radioGroupEntry } from "./docs/radio-group.docs";
+import { selectEntry } from "./docs/select.docs";
+import { textareaEntry } from "./docs/textarea.docs";
+import { sliderEntry } from "./docs/slider.docs";
+import { formFieldEntry } from "./docs/form-field.docs";
+import { searchInputEntry } from "./docs/search-input.docs";
+import { accordionEntry } from "./docs/accordion.docs";
+import { progressEntry } from "./docs/progress.docs";
+import { circularProgressEntry } from "./docs/circular-progress.docs";
+import { avatarGroupEntry } from "./docs/avatar-group.docs";
+import { timelineEntry } from "./docs/timeline.docs";
+import { kbdEntry } from "./docs/kbd.docs";
+import { popoverEntry } from "./docs/popover.docs";
+import { hoverCardEntry } from "./docs/hover-card.docs";
+import { drawerEntry } from "./docs/drawer.docs";
+import { breadcrumbsEntry } from "./docs/breadcrumbs.docs";
+import { paginationEntry } from "./docs/pagination.docs";
+import { segmentedControlEntry } from "./docs/segmented-control.docs";
+import { alertEntry } from "./docs/alert.docs";
+import { spinnerEntry } from "./docs/spinner.docs";
+import { statusBadgeEntry } from "./docs/status-badge.docs";
+import { usageMeterEntry } from "./docs/usage-meter.docs";
+import { descriptionListEntry } from "./docs/description-list.docs";
 
 /*
   Live component documentation for the #components/<slug> routes.
@@ -212,22 +237,46 @@ function filterChipsCode(v: ControlValues): string {
 /* ---- registry --------------------------------------------------------- */
 
 const COMPONENTS: ComponentEntry[] = [
-  buttonEntry,
-  inputEntry,
-  checkboxEntry,
-  dialogEntry,
-  tooltipEntry,
-  tabsEntry,
-  toastEntry,
-  commandMenuEntry,
-  dataTableEntry,
-  cardEntry,
-  badgeEntry,
+  accordionEntry,
+  alertEntry,
   avatarEntry,
-  skeletonEntry,
-  emptyStateEntry,
+  avatarGroupEntry,
+  badgeEntry,
+  breadcrumbsEntry,
+  buttonEntry,
+  cardEntry,
+  checkboxEntry,
+  circularProgressEntry,
+  commandMenuEntry,
   copyButtonEntry,
+  dataTableEntry,
+  descriptionListEntry,
+  dialogEntry,
+  drawerEntry,
+  emptyStateEntry,
+  formFieldEntry,
+  hoverCardEntry,
+  inputEntry,
+  kbdEntry,
+  paginationEntry,
+  popoverEntry,
+  progressEntry,
+  radioGroupEntry,
+  searchInputEntry,
+  segmentedControlEntry,
+  selectEntry,
+  skeletonEntry,
+  sliderEntry,
+  spinnerEntry,
+  statusBadgeEntry,
+  switchEntry,
+  tabsEntry,
+  textareaEntry,
   themeToggleEntry,
+  timelineEntry,
+  toastEntry,
+  tooltipEntry,
+  usageMeterEntry,
   {
     slug: "dropdown-menu",
     name: "Dropdown Menu",
