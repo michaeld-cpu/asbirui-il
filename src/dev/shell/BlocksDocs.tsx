@@ -125,18 +125,31 @@ function TabButton({
    family page. The thumbnail renders the real block at a fixed "design
    width" and scales it to fit, so it reads as a faithful mini-preview. */
 const THUMB_W = 640; // design width the block renders at before scaling
+const THUMB_PAD = 24; // breathing room so nothing kisses the stage edges
 
 function BlockGalleryCard({ block }: { block: BlockEntry }) {
   const boxRef = React.useRef<HTMLDivElement | null>(null);
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = React.useState(0.4);
 
+  // Fit the fixed design-width block into the stage on BOTH axes (same as the
+  // components gallery) so tall/short blocks scale to fit rather than crop, and
+  // are always centered — the inner render is centered within THUMB_W too.
   React.useEffect(() => {
     const box = boxRef.current;
-    if (!box) return;
-    const update = () => setScale(box.clientWidth / THUMB_W);
+    const content = contentRef.current;
+    if (!box || !content) return;
+    const update = () => {
+      const availW = box.clientWidth - THUMB_PAD * 2;
+      const availH = box.clientHeight - THUMB_PAD * 2;
+      const rawH = content.scrollHeight || 1;
+      const next = Math.min(1, availW / THUMB_W, availH / rawH);
+      setScale(next > 0 ? next : 0.4);
+    };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(box);
+    ro.observe(content);
     return () => ro.disconnect();
   }, []);
 
@@ -145,14 +158,15 @@ function BlockGalleryCard({ block }: { block: BlockEntry }) {
       href={`#blocks/${block.slug}`}
       className="flex flex-col overflow-hidden rounded-xl border border-border bg-canvas transition-colors hover:border-fg/20"
     >
-      {/* thumbnail stage — fixed aspect, clips the scaled block, centered */}
+      {/* thumbnail stage — fixed aspect, scales the block to fit both axes, centered */}
       <div ref={boxRef} className="relative aspect-[4/3] w-full overflow-hidden border-b border-border">
         <div
+          ref={contentRef}
           className="pointer-events-none absolute left-1/2 top-1/2 origin-center"
           style={{ width: THUMB_W, transform: `translate(-50%, -50%) scale(${scale})` }}
           aria-hidden="true"
         >
-          <div className="px-4">{block.variants[0].render()}</div>
+          <div className="flex items-center justify-center px-4">{block.variants[0].render()}</div>
         </div>
       </div>
       {/* caption */}
