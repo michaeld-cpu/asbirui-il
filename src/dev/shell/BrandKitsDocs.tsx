@@ -405,7 +405,7 @@ function KitView({ project }: { project: Project }) {
                     .map((w) => parseInt(w, 10))
                     .filter((n) => !Number.isNaN(n));
                   const sample = f.mono
-                    ? "0123456789 { } < /> $ npm i @asbirtech/asbir-ui"
+                    ? "0123456789 { } < /> = => !== +"
                     : "The quick brown fox jumps 0123456789";
                   return (
                     <div key={f.family} className="py-8 first:pt-0">
