@@ -53,7 +53,7 @@ type Project = {
   gradients?: Gradient[];
   fonts?: { family: string; role: string; source: string; weights: string; stack: string; mono?: boolean }[];
   type?: TypeSpec[];
-  radius?: { label: string; value: string }[];
+  radius?: { label: string; value: string; px?: number }[];
   motion?: Motion[];
   voice?: string;
   voiceTraits?: string[];
@@ -118,10 +118,10 @@ const PROJECTS: Project[] = [
       { label: "Button text", size: 18, lineHeight: "100%", tracking: "-2.5%", weight: 600, upper: true },
     ],
     radius: [
-      { label: "Pill", value: "100px / 50px" },
-      { label: "Card", value: "24px" },
-      { label: "Panel", value: "12px" },
-      { label: "Icon box", value: "8px" },
+      { label: "Pill", value: "9999px", px: 9999 },
+      { label: "Card", value: "24px", px: 24 },
+      { label: "Panel", value: "12px", px: 12 },
+      { label: "Icon box", value: "8px", px: 8 },
       { label: "Container", value: "max 1500px" },
       { label: "Section rhythm", value: "8rem 0" },
     ],
@@ -317,61 +317,90 @@ function LogoTile({
   );
 }
 
-/** Logo anatomy — a construction diagram: the mark rendered as a ghost (low-
-    opacity fill + outline) with grid, diagonal, and concentric-circle guides
-    overlaid, in the vein of a golden-ratio spec sheet. */
+/** Logo anatomy — a construction diagram whose guides are DERIVED from the
+    mark's real geometry: we measure the rendered paths' bounding box, then draw
+    a tight box, center crosshair, and a circle sized to the mark's true extent,
+    all in the mark's own coordinate space so everything lines up exactly. The
+    mark itself is a ghost (soft fill + stroked outline). */
 function LogoAnatomy({ mark, accent }: { mark: string; accent: string }) {
-  const line = "rgba(255,255,255,0.16)";
-  const lineFaint = "rgba(255,255,255,0.09)";
-  // guides sit in a 100×100 field; the mark ghost is centered and ~52% wide.
-  const cx = 50;
-  const cy = 50;
-  const thirds = [100 / 3, 200 / 3];
+  const groupRef = React.useRef<SVGGElement | null>(null);
+  // measured bbox of the actual painted paths (mark's own units)
+  const [bb, setBb] = React.useState<{ x: number; y: number; w: number; h: number } | null>(null);
+
+  React.useEffect(() => {
+    const g = groupRef.current;
+    if (!g) return;
+    try {
+      const box = g.getBBox();
+      setBb({ x: box.x, y: box.y, w: box.width, h: box.height });
+    } catch {
+      /* getBBox can throw if not yet laid out; leave guides hidden */
+    }
+  }, [mark]);
+
+  const line = "rgba(255,255,255,0.22)";
+  const faint = "rgba(255,255,255,0.1)";
+  // frame the mark in a padded square viewBox so guides have room; padding is
+  // half the mark's larger dimension (the clear-space rule made literal).
+  const size = bb ? Math.max(bb.w, bb.h) : 26;
+  const pad = size * 0.5;
+  const vb = bb
+    ? { x: bb.x - pad, y: bb.y - pad, w: bb.w + pad * 2, h: bb.h + pad * 2 }
+    : { x: 0, y: 0, w: 26, h: 24 };
+  const viewBox = `${vb.x} ${vb.y} ${vb.w} ${vb.h}`;
+  const sw = Math.max(vb.w, vb.h) / 320; // hairline stroke in view units
+
+  const cx = bb ? bb.x + bb.w / 2 : 13;
+  const cy = bb ? bb.y + bb.h / 2 : 12;
+
   return (
     <div className="relative aspect-square w-72 max-w-full overflow-hidden rounded-xl border border-border bg-canvas">
-      {/* guide overlay */}
-      <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
-        {/* outer frame + thirds grid */}
-        <rect x="8" y="8" width="84" height="84" stroke={line} strokeWidth="0.4" />
-        {thirds.map((t) => (
-          <line key={`v${t}`} x1={8 + (t * 84) / 100} y1="8" x2={8 + (t * 84) / 100} y2="92" stroke={lineFaint} strokeWidth="0.4" />
-        ))}
-        {thirds.map((t) => (
-          <line key={`h${t}`} x1="8" y1={8 + (t * 84) / 100} x2="92" y2={8 + (t * 84) / 100} stroke={lineFaint} strokeWidth="0.4" />
-        ))}
-        {/* center axes */}
-        <line x1={cx} y1="8" x2={cx} y2="92" stroke={lineFaint} strokeWidth="0.4" />
-        <line x1="8" y1={cy} x2="92" y2={cy} stroke={lineFaint} strokeWidth="0.4" />
-        {/* corner diagonals */}
-        <line x1="8" y1="8" x2="92" y2="92" stroke={lineFaint} strokeWidth="0.4" />
-        <line x1="92" y1="8" x2="8" y2="92" stroke={lineFaint} strokeWidth="0.4" />
-        {/* concentric construction circles, centered on the mark */}
-        <circle cx={cx} cy={cy} r="34" stroke={line} strokeWidth="0.4" strokeDasharray="1.5 1.5" />
-        <circle cx={cx} cy={cy} r="21" stroke={line} strokeWidth="0.4" strokeDasharray="1.5 1.5" />
-        <circle cx={cx} cy={cy} r="10.5" stroke={line} strokeWidth="0.4" strokeDasharray="1.5 1.5" />
-      </svg>
+      <svg viewBox={viewBox} className="absolute inset-0 h-full w-full" fill="none" aria-hidden="true">
+        {/* offscreen measured copy: fills define the true bbox */}
+        <g ref={groupRef} opacity="0" dangerouslySetInnerHTML={{ __html: markInner(mark) }} />
 
-      {/* the ghost mark: soft filled silhouette + a crisper outline on top */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative" style={{ width: "48%" }}>
-          {/* ghost fill */}
-          <span
-            className="block [&_svg]:h-full [&_svg]:w-full"
-            style={{ color: accent, opacity: 0.22 }}
-          >
-            <Glyph svg={mark} />
-          </span>
-          {/* outline: same mark stroked, sitting exactly on top */}
-          <span
-            className="absolute inset-0 block [&_svg_path]:!fill-none [&_svg_path]:!stroke-current [&_svg]:h-full [&_svg]:w-full [&_svg_path]:[stroke-width:0.5]"
-            style={{ color: accent, opacity: 0.9 }}
-          >
-            <Glyph svg={mark} />
-          </span>
-        </div>
-      </div>
+        {bb && (
+          <>
+            {/* clear-space frame (mark box + 0.5× padding) */}
+            <rect x={vb.x} y={vb.y} width={vb.w} height={vb.h} stroke={faint} strokeWidth={sw} strokeDasharray={`${sw * 3} ${sw * 3}`} />
+            {/* tight bounding box on the real mark */}
+            <rect x={bb.x} y={bb.y} width={bb.w} height={bb.h} stroke={line} strokeWidth={sw} />
+            {/* center crosshair at the mark's optical center, spanning the box */}
+            <line x1={cx} y1={vb.y} x2={cx} y2={vb.y + vb.h} stroke={faint} strokeWidth={sw} />
+            <line x1={vb.x} y1={cy} x2={vb.x + vb.w} y2={cy} stroke={faint} strokeWidth={sw} />
+            {/* diagonals across the mark's true box */}
+            <line x1={bb.x} y1={bb.y} x2={bb.x + bb.w} y2={bb.y + bb.h} stroke={faint} strokeWidth={sw} />
+            <line x1={bb.x + bb.w} y1={bb.y} x2={bb.x} y2={bb.y + bb.h} stroke={faint} strokeWidth={sw} />
+            {/* circle circumscribing the mark (r = half its larger side) + an
+                inner circle at the box's smaller half-dimension */}
+            <circle cx={cx} cy={cy} r={Math.max(bb.w, bb.h) / 2} stroke={line} strokeWidth={sw} strokeDasharray={`${sw * 3} ${sw * 3}`} />
+            <circle cx={cx} cy={cy} r={Math.min(bb.w, bb.h) / 2} stroke={faint} strokeWidth={sw} strokeDasharray={`${sw * 3} ${sw * 3}`} />
+          </>
+        )}
+
+        {/* visible ghost mark, in the SAME coordinate space as the guides */}
+        <g style={{ color: accent }}>
+          {/* soft fill silhouette (paths keep their own fill="currentColor") */}
+          <g opacity="0.2" dangerouslySetInnerHTML={{ __html: markInner(mark) }} />
+          {/* crisp outline: strip per-path fills, stroke instead */}
+          <g
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={sw * 1.4}
+            opacity="0.95"
+            dangerouslySetInnerHTML={{ __html: markInner(mark).replace(/fill="[^"]*"/g, 'fill="none"') }}
+          />
+        </g>
+      </svg>
     </div>
   );
+}
+
+/** Extract the inner markup (paths etc.) of an inline <svg> string so it can be
+    dropped into another <svg> that shares its coordinate space. */
+function markInner(svg: string): string {
+  const m = svg.match(/<svg[^>]*>([\s\S]*)<\/svg>/i);
+  return m ? m[1] : svg;
 }
 
 /** Favicon deliverables — a size ladder plus a plain divided file list per
@@ -794,14 +823,32 @@ function KitView({ project }: { project: Project }) {
             <section id="layout" className="scroll-mt-24 border-t border-border pt-14">
               <h2 className="text-2xl font-semibold tracking-tight text-fg">Layout &amp; radius</h2>
               <p className="mt-1.5 text-sm text-fg/50">Corner radii, container, and rhythm.</p>
-              <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-3">
-                {project.radius!.map((r) => (
+
+              {/* corner radii — dashed ghost rounded-rect per step */}
+              <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                {project.radius!.filter((r) => r.px != null).map((r) => (
                   <div key={r.label}>
-                    <dt className="text-xs text-fg/45">{r.label}</dt>
-                    <dd className="mt-1 font-mono text-sm text-fg">{r.value}</dd>
+                    <div
+                      className="flex h-24 w-full items-center justify-center border border-dashed border-fg/25 bg-fg/[0.04]"
+                      style={{ borderRadius: Math.min(r.px!, 48) }}
+                    />
+                    <p className="mt-2 text-xs text-fg/45">{r.label}</p>
+                    <p className="font-mono text-sm text-fg">{r.value}</p>
                   </div>
                 ))}
-              </dl>
+              </div>
+
+              {/* container / rhythm — plain label/value */}
+              {project.radius!.some((r) => r.px == null) && (
+                <dl className="mt-8 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-3">
+                  {project.radius!.filter((r) => r.px == null).map((r) => (
+                    <div key={r.label}>
+                      <dt className="text-xs text-fg/45">{r.label}</dt>
+                      <dd className="mt-1 font-mono text-sm text-fg">{r.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
             </section>
           )}
         </div>
