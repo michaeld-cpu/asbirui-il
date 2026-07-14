@@ -61,14 +61,19 @@ const NAV: ({ href: string; label: string; icon: keyof typeof icons } | "divider
 ];
 
 function Sidebar() {
+  // Collapses to the icon rail below lg (tablet) and expands to the full
+  // labeled sidebar at lg+ (desktop) — mirroring the source app's compact mode
+  // so the tablet preview gives the dashboard more room. `lg:` toggles apply
+  // because the preview iframe renders at a real tablet (834px, < lg) or
+  // desktop (1280px, ≥ lg) width.
   return (
     <aside
-      className="relative flex h-full w-60 shrink-0 flex-col border-r border-slate-200/70 px-3 py-5"
+      className="relative flex h-full w-[72px] shrink-0 flex-col border-r border-slate-200/70 px-2 py-5 lg:w-60 lg:px-3"
       style={{ background: "linear-gradient(180deg, rgb(248 250 252 / 0.7) 0%, rgb(248 250 252 / 0.5) 60%, rgb(255 255 255 / 0.6) 100%)" }}
     >
-      <div className="mb-6 flex items-center gap-2.5 px-2">
+      <div className="mb-6 flex items-center justify-center gap-2.5 lg:justify-start lg:px-2">
         <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-600 text-sm font-bold text-white">T</div>
-        <div className="truncate text-[15px] font-semibold tracking-tight text-slate-900">Tripket PH</div>
+        <div className="hidden truncate text-[15px] font-semibold tracking-tight text-slate-900 lg:block">Tripket PH</div>
       </div>
       <nav className="flex flex-1 flex-col gap-px">
         {NAV.map((e, i) =>
@@ -82,13 +87,14 @@ function Sidebar() {
                 <a
                   key={e.href}
                   href={`#tripket${e.href ? `/${e.href}` : ""}`}
-                  className={`group relative flex items-center gap-3 rounded-md px-3 py-1.5 text-[13.5px] transition-colors duration-200 ${
+                  title={e.label}
+                  className={`group relative flex items-center justify-center gap-3 rounded-md py-2.5 text-[13.5px] transition-colors duration-200 lg:justify-start lg:px-3 lg:py-1.5 ${
                     active ? "font-medium tracking-tight text-slate-900" : "font-normal text-slate-600 hover:bg-slate-100/70 hover:text-slate-900"
                   }`}
                 >
-                  {active && <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-brand-500" />}
+                  {active && <span className="absolute left-0 top-1/2 hidden h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-brand-500 lg:block" />}
                   <Icon className={`h-[18px] w-[18px] shrink-0 ${active ? "text-brand-600" : "text-slate-400 group-hover:text-slate-700"}`} />
-                  <span>{e.label}</span>
+                  <span className="hidden lg:inline">{e.label}</span>
                 </a>
               );
             })()
@@ -96,9 +102,9 @@ function Sidebar() {
         )}
       </nav>
       <div className="mt-4 border-t border-slate-200/70 pt-3">
-        <div className="flex items-center gap-2.5 px-2 py-2">
+        <div className="flex items-center justify-center gap-2.5 py-2 lg:justify-start lg:px-2">
           <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-100 text-[11px] font-bold text-brand-600">{CURRENT_USER.initials}</div>
-          <div className="min-w-0 flex-1">
+          <div className="hidden min-w-0 flex-1 lg:block">
             <div className="truncate text-[13px] font-medium text-slate-900">Admin</div>
             <div className="truncate text-[11px] text-slate-500">{CURRENT_USER.email}</div>
           </div>
