@@ -467,6 +467,210 @@ function LogoUsage({ mark, accent }: { mark?: string; accent: string }) {
   );
 }
 
+/* ---- favicon & app icons --------------------------------------------- */
+
+type IconSpec = {
+  file: string;
+  size: string;
+  px: number;
+  /** how the mark sits: bare on transparent, or on a rounded brand tile */
+  fill: "bare" | "tile";
+  use: string;
+};
+
+/** Every icon deliverable a dev actually ships, grouped by platform. Each row
+    previews the mark at (a capped version of) its real pixel size so you can
+    see how it holds up, alongside the filename / dimensions / purpose. Ends
+    with copy-paste <head> + web-manifest snippets. */
+function FaviconSizes({ mark, accent }: { mark?: string; accent: string }) {
+  const { copied, copy } = useCopy();
+
+  const GROUPS: { platform: string; note: string; icons: IconSpec[] }[] = [
+    {
+      platform: "Browser",
+      note: "Tab, bookmarks, address bar. Ship the SVG + a multi-res .ico.",
+      icons: [
+        { file: "favicon.svg", size: "any", px: 32, fill: "bare", use: "Modern browsers — scales crisp at any size" },
+        { file: "favicon.ico", size: "16 · 32 · 48", px: 32, fill: "bare", use: "Legacy fallback (multi-resolution)" },
+        { file: "favicon-16x16.png", size: "16×16", px: 16, fill: "bare", use: "Browser tab" },
+        { file: "favicon-32x32.png", size: "32×32", px: 32, fill: "bare", use: "Taskbar / retina tab" },
+        { file: "favicon-48x48.png", size: "48×48", px: 48, fill: "bare", use: "Windows site icon" },
+      ],
+    },
+    {
+      platform: "Apple",
+      note: "Home-screen & Safari pinned tab. Icon fills the tile — no transparency.",
+      icons: [
+        { file: "apple-touch-icon.png", size: "180×180", px: 60, fill: "tile", use: "iOS/iPadOS home screen (default)" },
+        { file: "apple-touch-icon-152x152.png", size: "152×152", px: 52, fill: "tile", use: "iPad home screen" },
+        { file: "safari-pinned-tab.svg", size: "any", px: 32, fill: "bare", use: "Safari pinned tab (monochrome mask)" },
+      ],
+    },
+    {
+      platform: "Android · PWA",
+      note: "Referenced from site.webmanifest. Ship a maskable variant with safe-zone padding.",
+      icons: [
+        { file: "icon-192.png", size: "192×192", px: 56, fill: "tile", use: "Android home screen / manifest" },
+        { file: "icon-512.png", size: "512×512", px: 64, fill: "tile", use: "Splash screen / install prompt" },
+        { file: "icon-maskable-512.png", size: "512×512", px: 60, fill: "tile", use: 'Adaptive icon ("maskable" purpose)' },
+      ],
+    },
+    {
+      platform: "Social / OG",
+      note: "Link previews. Not a favicon, but the same source mark, exported large.",
+      icons: [
+        { file: "og-image.png", size: "1200×630", px: 64, fill: "tile", use: "Open Graph / Twitter card" },
+        { file: "logo-mark-256.png", size: "256×256", px: 64, fill: "bare", use: "Master export — everything scales from here" },
+      ],
+    },
+  ];
+
+  const MarkAt = ({ px, fill }: { px: number; fill: "bare" | "tile" }) => {
+    if (!mark) return <span style={{ width: px, height: px }} className="block" />;
+    if (fill === "tile") {
+      // mark in a rounded brand tile, glyph ~62% of the tile (icon-grid standard)
+      return (
+        <span
+          className="flex shrink-0 items-center justify-center rounded-[22%]"
+          style={{ width: px, height: px, backgroundColor: accent }}
+        >
+          <span className="text-white" style={{ width: px * 0.62, height: px * 0.62 }}>
+            <Glyph svg={mark} className="[&_svg]:h-full [&_svg]:w-full" />
+          </span>
+        </span>
+      );
+    }
+    return (
+      <span className="shrink-0" style={{ width: px, height: px, color: accent }}>
+        <Glyph svg={mark} className="[&_svg]:h-full [&_svg]:w-full" />
+      </span>
+    );
+  };
+
+  const HEAD_SNIPPET = `<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">`;
+
+  const MANIFEST_SNIPPET = `{
+  "name": "Asbir Tech Web",
+  "short_name": "Asbir",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512",
+      "type": "image/png", "purpose": "maskable" }
+  ],
+  "theme_color": "${accent}",
+  "background_color": "#000000"
+}`;
+
+  return (
+    <div className="space-y-5">
+      {/* size ladder — a quick visual of the mark from 16 → 64px */}
+      <div className="overflow-hidden rounded-xl border border-border bg-panel">
+        <div className="flex items-end gap-6 overflow-x-auto px-5 py-6">
+          {[16, 32, 48, 64, 96, 128].map((px) => (
+            <div key={px} className="flex shrink-0 flex-col items-center gap-2">
+              <MarkAt px={Math.min(px, 72)} fill="bare" />
+              <span className="font-mono text-[10px] text-fg/50">{px}px</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* per-platform spec tables */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {GROUPS.map((g) => (
+          <div key={g.platform} className="overflow-hidden rounded-xl border border-border">
+            <div className="border-b border-border bg-panel px-4 py-3">
+              <p className="text-sm font-semibold text-fg">{g.platform}</p>
+              <p className="mt-0.5 text-xs text-fg/55">{g.note}</p>
+            </div>
+            <ul className="divide-y divide-border">
+              {g.icons.map((ic) => (
+                <li key={ic.file} className="flex items-center gap-3 px-4 py-3">
+                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-border bg-canvas">
+                    <MarkAt px={ic.px} fill={ic.fill} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <button
+                      type="button"
+                      onClick={() => copy(ic.file)}
+                      className="block truncate text-left font-mono text-xs text-fg transition-colors hover:text-[color:var(--kit-accent)]"
+                      style={{ ["--kit-accent" as string]: accent }}
+                      title="Copy filename"
+                    >
+                      {copied === ic.file ? "Copied!" : ic.file}
+                    </button>
+                    <span className="mt-0.5 block truncate text-[11px] text-fg/55">{ic.use}</span>
+                  </span>
+                  <span className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-fg/60">
+                    {ic.size}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {/* copy-paste code */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <FaviconSnippet
+          title="index.html"
+          label="Drop into <head>"
+          code={HEAD_SNIPPET}
+          copied={copied}
+          onCopy={copy}
+        />
+        <FaviconSnippet
+          title="site.webmanifest"
+          label="PWA manifest"
+          code={MANIFEST_SNIPPET}
+          copied={copied}
+          onCopy={copy}
+        />
+      </div>
+    </div>
+  );
+}
+
+function FaviconSnippet({
+  title,
+  label,
+  code,
+  copied,
+  onCopy,
+}: {
+  title: string;
+  label: string;
+  code: string;
+  copied: string | null;
+  onCopy: (v: string) => void;
+}) {
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-panel">
+      <div className="flex items-center justify-between border-b border-border px-4 py-2">
+        <div className="min-w-0">
+          <p className="truncate font-mono text-xs text-fg">{title}</p>
+          <p className="text-[10px] uppercase tracking-wide text-fg/45">{label}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => onCopy(code)}
+          className="shrink-0 rounded-md border border-border px-2.5 py-1 text-[11px] font-medium text-fg/70 transition-colors hover:bg-overlay/[0.05] hover:text-fg"
+        >
+          {copied === code ? "Copied" : "Copy"}
+        </button>
+      </div>
+      <pre className="overflow-auto px-4 py-3 text-[12px] leading-relaxed text-fg/85">
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
+}
+
 /* ---- per-project kit -------------------------------------------------- */
 
 function KitView({ project }: { project: Project }) {
@@ -482,6 +686,7 @@ function KitView({ project }: { project: Project }) {
     { id: "logo", label: "Logo" },
     { id: "anatomy", label: "Logo anatomy" },
     { id: "usage", label: "Logo usage" },
+    { id: "favicon", label: "Favicon & app icons" },
     { id: "layout", label: "Layout & radius" },
     { id: "motion", label: "Motion" },
     { id: "voice", label: "Brand voice" },
@@ -683,6 +888,15 @@ function KitView({ project }: { project: Project }) {
             desc="Keep the mark legible and consistent. Follow the rules below."
           >
             <LogoUsage mark={project.logomark} accent={project.accent} />
+          </KitSection>
+
+          {/* Favicon & app icons — the exact deliverables devs ship */}
+          <KitSection
+            id="favicon"
+            title="Favicon & app icons"
+            desc="Every icon a dev actually ships — file, size, and where it's used. Export the mark at each size from a 256px master."
+          >
+            <FaviconSizes mark={project.logomark} accent={project.accent} />
           </KitSection>
 
           {/* Layout & radius */}
