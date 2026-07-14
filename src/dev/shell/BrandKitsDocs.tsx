@@ -114,6 +114,19 @@ function Glyph({ svg, className = "" }: { svg: string; className?: string }) {
   return <span className={className} dangerouslySetInnerHTML={{ __html: svg }} />;
 }
 
+/** Human-readable name for a numeric font-weight. */
+const WEIGHT_NAMES: Record<number, string> = {
+  100: "Thin",
+  200: "Extralight",
+  300: "Light",
+  400: "Regular",
+  500: "Medium",
+  600: "Semibold",
+  700: "Bold",
+  800: "Extrabold",
+  900: "Black",
+};
+
 /** Parse a #RRGGBB into its r/g/b components. */
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const h = hex.replace("#", "");
@@ -384,37 +397,65 @@ function KitView({ project }: { project: Project }) {
             <h2 className="text-2xl font-semibold tracking-tight text-fg">Font</h2>
             {has(project.fonts) ? (
               <div className="mt-6 divide-y divide-border">
-                {project.fonts!.map((f) => (
-                  <div key={f.family} className="py-8 first:pt-0">
-                    <p className="text-xs text-fg/45">{f.role}</p>
-                    {/* big live specimen */}
-                    <div
-                      className="mt-2 text-fg"
-                      style={{
-                        fontFamily: f.stack,
-                        fontSize: "clamp(2.25rem, 5vw, 3rem)",
-                        fontWeight: 500,
-                        letterSpacing: f.mono ? "0" : "-0.02em",
-                        lineHeight: 1.1,
-                      }}
-                    >
-                      {f.family}
+                {project.fonts!.map((f) => {
+                  // parse the weights string ("400 · 500 · 600") into numbers,
+                  // each rendered as its own specimen line below.
+                  const weights = f.weights
+                    .split(/[·,\s]+/)
+                    .map((w) => parseInt(w, 10))
+                    .filter((n) => !Number.isNaN(n));
+                  const sample = f.mono
+                    ? "0123456789 { } < /> $ npm i @asbirtech/asbir-ui"
+                    : "The quick brown fox jumps 0123456789";
+                  return (
+                    <div key={f.family} className="py-8 first:pt-0">
+                      {/* header: role + family name + source */}
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                        <div>
+                          <p className="text-xs text-fg/45">{f.role}</p>
+                          <p
+                            className="mt-1 text-fg"
+                            style={{
+                              fontFamily: f.stack,
+                              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+                              fontWeight: 600,
+                              letterSpacing: f.mono ? "0" : "-0.02em",
+                              lineHeight: 1.1,
+                            }}
+                          >
+                            {f.family}
+                          </p>
+                        </div>
+                        <p className="text-xs text-fg/50">{f.source}</p>
+                      </div>
+
+                      {/* one live specimen per weight used in the project */}
+                      <div className="mt-6 divide-y divide-border/60">
+                        {weights.map((w) => (
+                          <div
+                            key={w}
+                            className="flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:gap-6"
+                          >
+                            <span className="w-24 shrink-0 font-mono text-xs text-fg/40">
+                              {w} · {WEIGHT_NAMES[w] ?? "Weight"}
+                            </span>
+                            <span
+                              className="min-w-0 truncate text-fg/90"
+                              style={{
+                                fontFamily: f.stack,
+                                fontWeight: w,
+                                fontSize: "clamp(1.1rem, 2.4vw, 1.5rem)",
+                                letterSpacing: f.mono ? "0" : "-0.01em",
+                              }}
+                            >
+                              {sample}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    {/* alphabet / sample run */}
-                    <div
-                      className="mt-3 text-fg/55"
-                      style={{ fontFamily: f.stack, fontSize: "16px", lineHeight: 1.5 }}
-                    >
-                      {f.mono
-                        ? "0123456789 { } < /> $ npm i @asbirtech/asbir-ui"
-                        : "ABCDEFGHIJKLM abcdefghijklm 0123456789"}
-                    </div>
-                    {/* metadata */}
-                    <p className="mt-3 text-xs text-fg/50">
-                      {f.source} · {f.weights}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <p className="mt-1.5 text-sm text-fg/50">Coming soon.</p>
