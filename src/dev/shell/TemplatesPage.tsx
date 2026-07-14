@@ -108,6 +108,8 @@ type Template = {
   previewTheme?: "light" | "dark";
   /** Second preview frame device — "mobile" (phone) or "tablet". Default "mobile". */
   previewDevice?: "mobile" | "tablet";
+  /** Taller preview frames (30rem vs the default 26rem). */
+  previewTall?: boolean;
   /** Source repo for this template — each template ships from its own repo,
       separate from the main AsbirUI library repo linked in the navbar. */
   repoUrl?: string;
@@ -135,6 +137,7 @@ const TEMPLATES: Template[] = [
       "A production-shaped AI gateway console — overview metrics, playground, prompt library, API keys, logs, team & billing. Fully responsive, themeable.",
     href: "#ai",
     previewRoute: "preview/ai",
+    previewTall: true,
     repoUrl: "https://github.com/asbirtech/lumina-ai",
   },
 ];
@@ -150,18 +153,31 @@ function LivePreviews({
   route,
   theme = "dark",
   device = "mobile",
+  tall = false,
 }: {
   route?: string;
   theme?: "light" | "dark";
   device?: "mobile" | "tablet";
+  /** Taller preview frames (30rem vs 26rem). */
+  tall?: boolean;
 }) {
   const label = theme === "light" ? "light" : "dark";
-  // frames are taller now (26rem); the second frame's width follows its device
-  // aspect against that height so it stays a true phone/tablet shape
+  // frame height + the second frame's width (which follows its device aspect
+  // against that height so it stays a true phone/tablet shape). Static class
+  // pairs so Tailwind can compile the arbitrary values.
+  const h = tall ? "h-[30rem]" : "h-[26rem]";
   const second =
     device === "tablet"
-      ? { width: 834, name: "Tablet", widthClass: "w-[calc(26rem*834/1112)]" }
-      : { width: 390, name: "Mobile", widthClass: "w-[calc(26rem*390/844)]" };
+      ? {
+          width: 834,
+          name: "Tablet",
+          widthClass: tall ? "w-[calc(30rem*834/1112)]" : "w-[calc(26rem*834/1112)]",
+        }
+      : {
+          width: 390,
+          name: "Mobile",
+          widthClass: tall ? "w-[calc(30rem*390/844)]" : "w-[calc(26rem*390/844)]",
+        };
   return (
     // desktop column is capped (minmax) rather than a raw 1fr so it doesn't
     // sprawl to the full content width; the second frame sits beside it
@@ -171,14 +187,14 @@ function LivePreviews({
         width={1280}
         forceTheme={theme}
         title={`Desktop preview (${label})`}
-        className="h-[26rem]"
+        className={h}
       />
       <PreviewThumb
         route={route ?? ""}
         width={second.width}
         forceTheme={theme}
         title={`${second.name} preview (${label})`}
-        className={`h-[26rem] justify-self-center ${second.widthClass}`}
+        className={`${h} justify-self-center ${second.widthClass}`}
       />
     </div>
   );
@@ -240,7 +256,7 @@ function TemplateRow({ t }: { t: Template }) {
 
       {/* preview strip */}
       <div>
-        <LivePreviews route={t.previewRoute} theme={t.previewTheme} device={t.previewDevice} />
+        <LivePreviews route={t.previewRoute} theme={t.previewTheme} device={t.previewDevice} tall={t.previewTall} />
       </div>
     </div>
   );
