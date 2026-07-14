@@ -21,7 +21,16 @@ import * as React from "react";
 /* ---- data model ------------------------------------------------------- */
 
 type Gradient = { name: string; css: string; role: string };
-type TypeSpec = { label: string; sample: string; meta: string; style?: React.CSSProperties };
+/** One row in the type scale: a sample rendered at `size` px with the given
+    line-height / tracking, shown with a metadata line beneath. */
+type TypeSpec = {
+  label: string;
+  size: number; // px
+  lineHeight: string; // e.g. "100%"
+  tracking: string; // e.g. "-3.5%"
+  weight?: number;
+  upper?: boolean;
+};
 type Motion = { name: string; value: string; role: string };
 
 type Project = {
@@ -98,7 +107,16 @@ const PROJECTS: Project[] = [
         mono: true,
       },
     ],
-    type: [],
+    type: [
+      { label: "Headline 0", size: 110, lineHeight: "100%", tracking: "-3.5%", weight: 600 },
+      { label: "Headline 1", size: 62, lineHeight: "120%", tracking: "-3.5%", weight: 600 },
+      { label: "Headline 2", size: 38, lineHeight: "120%", tracking: "-2.5%", weight: 600 },
+      { label: "Headline 3", size: 28, lineHeight: "130%", tracking: "-2.5%", weight: 600 },
+      { label: "Text 1", size: 18, lineHeight: "130%", tracking: "-1.5%", weight: 400 },
+      { label: "Text 2", size: 16, lineHeight: "140%", tracking: "-1.5%", weight: 400 },
+      { label: "Text 3", size: 14, lineHeight: "150%", tracking: "-0.5%", weight: 400 },
+      { label: "Button text", size: 18, lineHeight: "100%", tracking: "-2.5%", weight: 600, upper: true },
+    ],
     radius: [],
     motion: [],
     voice: "",
@@ -460,6 +478,41 @@ function KitView({ project }: { project: Project }) {
               </div>
             ) : (
               <p className="mt-1.5 text-sm text-fg/50">Coming soon.</p>
+            )}
+
+            {/* Type scale — each step sampled at its real size, with a spec
+                line (muted labels, emphasized values) and an underline. */}
+            {has(project.type) && (
+              <div className="mt-14">
+                <h3 className="text-sm font-semibold text-fg">Type scale</h3>
+                <div className="mt-4">
+                  {project.type!.map((t) => {
+                    const stack = project.fonts?.find((f) => !f.mono)?.stack;
+                    return (
+                      <div key={t.label} className="border-b border-border py-6">
+                        <div
+                          className="truncate text-fg"
+                          style={{
+                            fontFamily: stack,
+                            fontSize: `${t.size}px`,
+                            fontWeight: t.weight ?? 500,
+                            lineHeight: 1.05,
+                            letterSpacing: `${parseFloat(t.tracking) / 100}em`,
+                            textTransform: t.upper ? "uppercase" : undefined,
+                          }}
+                        >
+                          {t.label}
+                        </div>
+                        <p className="mt-3 flex flex-wrap gap-x-8 gap-y-1 text-sm text-fg/45">
+                          <span>Type size: <span className="font-medium text-fg">{t.size}</span></span>
+                          <span>Line-height: <span className="font-medium text-fg">{t.lineHeight}</span></span>
+                          <span>Tracking: <span className="font-medium text-fg">{t.tracking}</span></span>
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             )}
           </section>
         </div>
