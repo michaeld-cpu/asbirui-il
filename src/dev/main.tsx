@@ -7,7 +7,6 @@ import { SidebarProvider } from "./shell/sidebar-context";
 import { Navbar } from "./shell/Navbar";
 import { DocsSidebar } from "./shell/DocsSidebar";
 import { DocsContent } from "./shell/DocsContent";
-import { DocsAside } from "./shell/DocsAside";
 import { ComponentDocs } from "./shell/ComponentDocs";
 import { BlocksDocs } from "./shell/BlocksDocs";
 import { ColorsDocs } from "./shell/ColorsDocs";
@@ -83,23 +82,12 @@ function DocsView({ route }: { route: string }) {
       <Navbar active={base} wide />
       <div className="flex pt-16 md:pt-0">
         <DocsSidebar active={route} />
-        {/* the components GALLERY index is wide; a component DETAIL page is not */}
-        {(() => {
-          const wide = isTemplates || isBlocks || isMotion || (isComponents && !componentSlug);
-          return (
-            <>
-              <main className="min-w-0 flex-1 px-6 lg:px-10 xl:px-14">
-                {/* wide pages (galleries, templates, blocks, motion, the
-                    components index) get a roomy column so 3-col grids + live
-                    previews breathe; prose/detail pages stay a comfortable
-                    reading measure */}
-                <div className={`mx-auto ${wide ? "max-w-7xl" : "max-w-4xl"}`}>{body}</div>
-              </main>
-              {/* wide, full-width pages get no right promo aside */}
-              {!wide && <DocsAside />}
-            </>
-          );
-        })()}
+        {/* every docs page uses one roomy, uniform column (max-w-7xl) so
+            galleries, previews, grids, playgrounds, and prose all share the
+            same generous width */}
+        <main className="min-w-0 flex-1 px-6 lg:px-10 xl:px-14">
+          <div className="mx-auto max-w-7xl">{body}</div>
+        </main>
       </div>
     </div>
   );
