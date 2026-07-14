@@ -138,10 +138,10 @@ const TEMPLATES: Template[] = [
 
 /* ---- rows ------------------------------------------------------------- */
 
-/** Big preview pair for the live template: a wide dark-mode desktop and a
-    true phone-proportioned dark-mode mobile beside it. The mobile frame keeps
-    the 390×844 aspect so the preview reads as a real phone, not a stretched
-    panel; it's centered in its column and matched to the desktop's height. */
+/** Big preview pair for the live template: a wide desktop and a
+    tablet-proportioned frame beside it. The tablet frame keeps the 834×1112
+    iPad aspect so the preview reads as a real tablet, not a stretched panel;
+    it's centered in its column and matched to the desktop's height. */
 function LivePreviews({ route, theme = "dark" }: { route?: string; theme?: "light" | "dark" }) {
   const label = theme === "light" ? "light" : "dark";
   return (
@@ -155,10 +155,10 @@ function LivePreviews({ route, theme = "dark" }: { route?: string; theme?: "ligh
       />
       <PreviewThumb
         route={route ?? ""}
-        width={390}
+        width={834}
         forceTheme={theme}
-        title={`Mobile preview (${label})`}
-        className="h-[22rem] w-[calc(22rem*390/844)] justify-self-center"
+        title={`Tablet preview (${label})`}
+        className="h-[22rem] w-[calc(22rem*834/1112)] justify-self-center"
       />
     </div>
   );
