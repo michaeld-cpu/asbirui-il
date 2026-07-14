@@ -176,9 +176,7 @@ function SectionRail({ sections }: { sections: Section[] }) {
   return (
     <nav aria-label="Brand kit sections" className="hidden lg:block">
       <div className="sticky top-24 space-y-1">
-        <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-fg/40">
-          On this kit
-        </p>
+        <p className="mb-2 px-3 text-xs font-medium text-fg/40">On this kit</p>
         {sections.map((s) => (
           <a
             key={s.id}
@@ -440,48 +438,42 @@ function FaviconSizes({ mark, accent }: { mark?: string; accent: string }) {
 }`;
 
   return (
-    <div className="space-y-5">
-      {/* size ladder — a quick visual of the mark from 16 → 64px */}
-      <div className="overflow-hidden rounded-xl border border-border bg-panel">
-        <div className="flex items-end gap-6 overflow-x-auto px-5 py-6">
-          {[16, 32, 48, 64, 96, 128].map((px) => (
-            <div key={px} className="flex shrink-0 flex-col items-center gap-2">
-              <MarkAt px={Math.min(px, 72)} fill="bare" />
-              <span className="font-mono text-[10px] text-fg/50">{px}px</span>
-            </div>
-          ))}
-        </div>
+    <div className="space-y-8">
+      {/* size ladder — the mark from 16 → 128px, no framing box */}
+      <div className="flex items-end gap-6 overflow-x-auto pb-1">
+        {[16, 32, 48, 64, 96, 128].map((px) => (
+          <div key={px} className="flex shrink-0 flex-col items-center gap-2">
+            <MarkAt px={Math.min(px, 72)} fill="bare" />
+            <span className="text-[11px] text-fg/45">{px}px</span>
+          </div>
+        ))}
       </div>
 
-      {/* per-platform spec tables */}
-      <div className="grid gap-4 lg:grid-cols-2">
+      {/* per-platform lists — plain headings + divided rows, no cards */}
+      <div className="grid gap-x-12 gap-y-8 lg:grid-cols-2">
         {GROUPS.map((g) => (
-          <div key={g.platform} className="overflow-hidden rounded-xl border border-border">
-            <div className="border-b border-border bg-panel px-4 py-3">
-              <p className="text-sm font-semibold text-fg">{g.platform}</p>
-              <p className="mt-0.5 text-xs text-fg/55">{g.note}</p>
-            </div>
-            <ul className="divide-y divide-border">
+          <div key={g.platform}>
+            <p className="text-sm font-medium text-fg">{g.platform}</p>
+            <p className="mt-0.5 text-xs text-fg/50">{g.note}</p>
+            <ul className="mt-3 divide-y divide-border border-t border-border">
               {g.icons.map((ic) => (
-                <li key={ic.file} className="flex items-center gap-3 px-4 py-3">
-                  <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-border bg-canvas">
+                <li key={ic.file} className="flex items-center gap-3 py-3">
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center">
                     <MarkAt px={ic.px} fill={ic.fill} />
                   </span>
                   <span className="min-w-0 flex-1">
                     <button
                       type="button"
                       onClick={() => copy(ic.file)}
-                      className="block truncate text-left font-mono text-xs text-fg transition-colors hover:text-[color:var(--kit-accent)]"
+                      className="block truncate text-left font-mono text-xs text-fg/85 transition-colors hover:text-[color:var(--kit-accent)]"
                       style={{ ["--kit-accent" as string]: accent }}
                       title="Copy filename"
                     >
-                      {copied === ic.file ? "Copied!" : ic.file}
+                      {copied === ic.file ? "Copied" : ic.file}
                     </button>
-                    <span className="mt-0.5 block truncate text-[11px] text-fg/55">{ic.use}</span>
+                    <span className="mt-0.5 block truncate text-[11px] text-fg/50">{ic.use}</span>
                   </span>
-                  <span className="shrink-0 rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-fg/60">
-                    {ic.size}
-                  </span>
+                  <span className="shrink-0 font-mono text-[11px] text-fg/45">{ic.size}</span>
                 </li>
               ))}
             </ul>
@@ -491,20 +483,8 @@ function FaviconSizes({ mark, accent }: { mark?: string; accent: string }) {
 
       {/* copy-paste code */}
       <div className="grid gap-4 lg:grid-cols-2">
-        <FaviconSnippet
-          title="index.html"
-          label="Drop into <head>"
-          code={HEAD_SNIPPET}
-          copied={copied}
-          onCopy={copy}
-        />
-        <FaviconSnippet
-          title="site.webmanifest"
-          label="PWA manifest"
-          code={MANIFEST_SNIPPET}
-          copied={copied}
-          onCopy={copy}
-        />
+        <FaviconSnippet title="index.html" label="Drop into <head>" code={HEAD_SNIPPET} copied={copied} onCopy={copy} />
+        <FaviconSnippet title="site.webmanifest" label="PWA manifest" code={MANIFEST_SNIPPET} copied={copied} onCopy={copy} />
       </div>
     </div>
   );
@@ -528,7 +508,7 @@ function FaviconSnippet({
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <div className="min-w-0">
           <p className="truncate font-mono text-xs text-fg">{title}</p>
-          <p className="text-[10px] uppercase tracking-wide text-fg/45">{label}</p>
+          <p className="text-[11px] text-fg/45">{label}</p>
         </div>
         <button
           type="button"
@@ -613,10 +593,10 @@ function KitView({ project }: { project: Project }) {
               null
             )}
             {has(project.facts) && (
-              <dl className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-4">
+              <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-4">
                 {project.facts!.map((f) => (
-                  <div key={f.label} className="bg-panel p-4">
-                    <dt className="text-[11px] uppercase tracking-wide text-fg/50">{f.label}</dt>
+                  <div key={f.label}>
+                    <dt className="text-xs text-fg/45">{f.label}</dt>
                     <dd className="mt-1 text-sm font-medium text-fg">{f.value}</dd>
                   </div>
                 ))}
@@ -627,24 +607,25 @@ function KitView({ project }: { project: Project }) {
           {/* Colors */}
           <KitSection id="colors" title="Colors" desc="Click any swatch to copy its hex.">
             {has(project.colors) ? (
-              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-3 xl:grid-cols-4">
                 {project.colors!.map((c) => (
                   <button
                     key={c.name}
                     type="button"
                     onClick={() => copy(c.hex)}
-                    className="group overflow-hidden rounded-lg border border-border text-left transition-colors hover:border-fg/20"
+                    className="group text-left"
                   >
-                    <span className="block h-16 w-full" style={{ backgroundColor: c.hex }} />
-                    <span className="block px-2.5 py-2">
-                      <span className="block truncate text-xs font-medium text-fg">{c.name}</span>
-                      <span className="block truncate text-[10px] uppercase tracking-wide text-fg/50">
-                        {c.role}
-                      </span>
-                      <span className="mt-0.5 block font-mono text-[10px] text-fg/60">
-                        {copied === c.hex ? "Copied!" : c.hex}
+                    <span
+                      className="block h-16 w-full rounded-lg ring-1 ring-inset ring-black/10 dark:ring-white/10"
+                      style={{ backgroundColor: c.hex }}
+                    />
+                    <span className="mt-2 flex items-baseline justify-between gap-2">
+                      <span className="truncate text-sm text-fg">{c.name}</span>
+                      <span className="shrink-0 font-mono text-[11px] text-fg/45 group-hover:text-fg/70">
+                        {copied === c.hex ? "Copied" : c.hex}
                       </span>
                     </span>
+                    <span className="mt-0.5 block truncate text-xs text-fg/45">{c.role}</span>
                   </button>
                 ))}
               </div>
@@ -656,23 +637,24 @@ function KitView({ project }: { project: Project }) {
           {/* Gradients */}
           <KitSection id="gradients" title="Gradients" desc="Signature blends. Click to copy the CSS.">
             {has(project.gradients) ? (
-              <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
                 {project.gradients!.map((g) => (
                   <button
                     key={g.name}
                     type="button"
                     onClick={() => copy(g.css)}
-                    className="group overflow-hidden rounded-lg border border-border text-left transition-colors hover:border-fg/20"
+                    className="group text-left"
                   >
-                    <span className="block h-20 w-full" style={{ background: g.css }} />
-                    <span className="block px-3 py-2.5">
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-medium text-fg">{g.name}</span>
-                        <span className="text-[10px] uppercase tracking-wide text-fg/50">{g.role}</span>
-                      </span>
-                      <span className="mt-1 block truncate font-mono text-[10px] text-fg/55">
-                        {copied === g.css ? "Copied!" : g.css}
-                      </span>
+                    <span
+                      className="block h-20 w-full rounded-lg ring-1 ring-inset ring-black/10 dark:ring-white/10"
+                      style={{ background: g.css }}
+                    />
+                    <span className="mt-2 flex items-baseline justify-between gap-2">
+                      <span className="truncate text-sm text-fg">{g.name}</span>
+                      <span className="shrink-0 text-xs text-fg/45">{g.role}</span>
+                    </span>
+                    <span className="mt-0.5 block truncate font-mono text-[11px] text-fg/45 group-hover:text-fg/70">
+                      {copied === g.css ? "Copied" : g.css}
                     </span>
                   </button>
                 ))}
@@ -693,14 +675,14 @@ function KitView({ project }: { project: Project }) {
             }
           >
             {has(project.type) ? (
-              <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-panel">
+              <div className="divide-y divide-border">
                 {project.type!.map((t) => (
-                  <div key={t.label} className="p-5">
-                    <p className="text-[11px] uppercase tracking-wide text-fg/50">{t.label}</p>
+                  <div key={t.label} className="py-5 first:pt-0">
+                    <p className="text-xs text-fg/45">{t.label}</p>
                     <p className="mt-2 text-fg" style={{ fontSize: "clamp(1.1rem, 2.6vw, 1.9rem)", ...t.style }}>
                       {t.sample}
                     </p>
-                    <p className="mt-2 font-mono text-[11px] text-fg/55">{t.meta}</p>
+                    <p className="mt-2 text-xs text-fg/50">{t.meta}</p>
                   </div>
                 ))}
               </div>
@@ -756,11 +738,7 @@ function KitView({ project }: { project: Project }) {
           </KitSection>
 
           {/* Logo usage — clear space, min size, do / don't */}
-          <KitSection
-            id="usage"
-            title="Logo usage"
-            desc="Keep the mark legible and consistent. Follow the rules below."
-          >
+          <KitSection id="usage" title="Logo usage" desc="A few things to do — and not do — with the mark.">
             <LogoUsage mark={project.logomark} accent={project.accent} />
           </KitSection>
 
@@ -768,7 +746,7 @@ function KitView({ project }: { project: Project }) {
           <KitSection
             id="favicon"
             title="Favicon & app icons"
-            desc="Every icon a dev actually ships — file, size, and where it's used. Export the mark at each size from a 256px master."
+            desc="The icon files to ship, by platform. Export them all from the 256px master."
           >
             <FaviconSizes mark={project.logomark} accent={project.accent} />
           </KitSection>
@@ -776,10 +754,10 @@ function KitView({ project }: { project: Project }) {
           {/* Layout & radius */}
           <KitSection id="layout" title="Layout & radius" desc="Corner radii, container, and rhythm.">
             {has(project.radius) ? (
-              <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-3">
+              <dl className="grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-3">
                 {project.radius!.map((r) => (
-                  <div key={r.label} className="bg-panel p-4">
-                    <dt className="text-[11px] uppercase tracking-wide text-fg/50">{r.label}</dt>
+                  <div key={r.label}>
+                    <dt className="text-xs text-fg/45">{r.label}</dt>
                     <dd className="mt-1 font-mono text-sm text-fg">{r.value}</dd>
                   </div>
                 ))}
@@ -792,9 +770,9 @@ function KitView({ project }: { project: Project }) {
           {/* Motion */}
           <KitSection id="motion" title="Motion" desc="Signature easing curves and interaction patterns.">
             {has(project.motion) ? (
-              <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-panel">
+              <div className="divide-y divide-border">
                 {project.motion!.map((m) => (
-                  <div key={m.name} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 p-4">
+                  <div key={m.name} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3.5 first:pt-0">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-fg">{m.name}</p>
                       <p className="text-xs text-fg/50">{m.role}</p>
