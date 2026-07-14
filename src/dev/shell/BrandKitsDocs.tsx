@@ -42,7 +42,7 @@ type Project = {
   /* brand hue families — each renders as a generated 50→950 ramp row. */
   colorFamilies?: { name: string; base: string }[];
   gradients?: Gradient[];
-  fonts?: { family: string; source: string; weights: string };
+  fonts?: { family: string; role: string; source: string; weights: string; stack: string; mono?: boolean }[];
   type?: TypeSpec[];
   radius?: { label: string; value: string }[];
   motion?: Motion[];
@@ -81,7 +81,23 @@ const PROJECTS: Project[] = [
       { name: "Amber", base: "#FFB800" },
       { name: "Neutral", base: "#8E8E8E" },
     ],
-    fonts: undefined,
+    fonts: [
+      {
+        family: "DM Sans",
+        role: "Primary — text & headings",
+        source: "Google Fonts",
+        weights: "400 · 500 · 600 · 700 · 800",
+        stack: "'DM Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+      },
+      {
+        family: "DM Mono",
+        role: "Code & data",
+        source: "Google Fonts",
+        weights: "400 · 500",
+        stack: "'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+        mono: true,
+      },
+    ],
     type: [],
     radius: [],
     motion: [],
@@ -237,60 +253,8 @@ function ProjectIndex() {
 
 /* ---- per-project kit -------------------------------------------------- */
 
-const SearchIcon = (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
-  </svg>
-);
-
-/** Left column: a search box over a nav railing of the kit's sections.
-    Typing filters the railing; clicking a section jumps to it. */
-function KitRail({ sections }: { sections: { id: string; label: string }[] }) {
-  const [query, setQuery] = React.useState("");
-  const shown = sections.filter((s) => s.label.toLowerCase().includes(query.toLowerCase().trim()));
-
-  return (
-    <div className="lg:sticky lg:top-24">
-      <div className="relative">
-        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/40">
-          {SearchIcon}
-        </span>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search…"
-          className="w-full rounded-full border border-border bg-panel py-2.5 pl-10 pr-4 text-sm text-fg placeholder:text-fg/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
-      </div>
-      <nav className="mt-5 space-y-0.5">
-        {shown.map((s) => (
-          <a
-            key={s.id}
-            href={`#${s.id}`}
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-            }}
-            className="block rounded-lg px-3 py-2 text-sm text-fg/70 transition-colors hover:bg-overlay/[0.05] hover:text-fg"
-          >
-            {s.label}
-          </a>
-        ))}
-        {!shown.length && <p className="px-3 py-2 text-sm text-fg/40">No matches</p>}
-      </nav>
-    </div>
-  );
-}
-
 function KitView({ project }: { project: Project }) {
   const has = <T,>(v: T[] | undefined): v is T[] => Boolean(v && v.length);
-
-  // railing entries — only sections that actually render
-  const sections = [
-    ...(has(project.colorFamilies) ? [{ id: "colors", label: "Colors" }] : []),
-    { id: "font", label: "Font" },
-  ];
 
   return (
     <article className="animate-fade-up pb-10 pt-16 lg:pt-20">
@@ -312,31 +276,64 @@ function KitView({ project }: { project: Project }) {
         </div>
       </div>
 
-      {/* search + railing | content */}
-      <div className="mt-12 grid gap-8 lg:grid-cols-[16rem_1fr] lg:gap-12">
-        <KitRail sections={sections} />
-
-        <div className="min-w-0 space-y-16">
-          {/* Colors — a generated 50→950 ramp per brand hue (tokens style) */}
-          {has(project.colorFamilies) && (
-            <section id="colors" className="scroll-mt-24">
-              <h2 className="text-2xl font-semibold tracking-tight text-fg">Colors</h2>
-              <p className="mt-1.5 text-sm text-fg/50">
-                Each brand hue as a 50→950 ramp. Click any swatch to copy its hex.
-              </p>
-              <div className="mt-6 space-y-5">
-                {project.colorFamilies!.map((f) => (
-                  <FamilyRow key={f.name} family={f} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Font — heading only for now, awaiting the Figma design */}
-          <section id="font" className="scroll-mt-24">
-            <h2 className="text-2xl font-semibold tracking-tight text-fg">Font</h2>
+      {/* plain stacked sections — no rail, no boxes; dividers do the work */}
+      <div className="mt-14 space-y-14">
+        {/* Colors — a generated 50→950 ramp per brand hue */}
+        {has(project.colorFamilies) && (
+          <section>
+            <h2 className="text-2xl font-semibold tracking-tight text-fg">Colors</h2>
+            <p className="mt-1.5 text-sm text-fg/50">
+              Each brand hue as a 50→950 ramp. Click any swatch to copy its hex.
+            </p>
+            <div className="mt-6 space-y-5">
+              {project.colorFamilies!.map((f) => (
+                <FamilyRow key={f.name} family={f} />
+              ))}
+            </div>
           </section>
-        </div>
+        )}
+
+        {/* Font — real typefaces as live specimens, divided rows (no cards) */}
+        <section className="border-t border-border pt-14">
+          <h2 className="text-2xl font-semibold tracking-tight text-fg">Font</h2>
+          {has(project.fonts) ? (
+            <div className="mt-6 divide-y divide-border">
+              {project.fonts!.map((f) => (
+                <div key={f.family} className="py-8 first:pt-0">
+                  <p className="text-xs text-fg/45">{f.role}</p>
+                  {/* big live specimen */}
+                  <div
+                    className="mt-2 text-fg"
+                    style={{
+                      fontFamily: f.stack,
+                      fontSize: "clamp(2.25rem, 5vw, 3rem)",
+                      fontWeight: 500,
+                      letterSpacing: f.mono ? "0" : "-0.02em",
+                      lineHeight: 1.1,
+                    }}
+                  >
+                    {f.family}
+                  </div>
+                  {/* alphabet / sample run */}
+                  <div
+                    className="mt-3 text-fg/55"
+                    style={{ fontFamily: f.stack, fontSize: "16px", lineHeight: 1.5 }}
+                  >
+                    {f.mono
+                      ? "0123456789 { } < /> $ npm i @asbirtech/asbir-ui"
+                      : "ABCDEFGHIJKLM abcdefghijklm 0123456789"}
+                  </div>
+                  {/* metadata */}
+                  <p className="mt-3 text-xs text-fg/50">
+                    {f.source} · {f.weights}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-1.5 text-sm text-fg/50">Coming soon.</p>
+          )}
+        </section>
       </div>
     </article>
   );
