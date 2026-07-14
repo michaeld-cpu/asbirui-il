@@ -1,11 +1,17 @@
 import { AvatarGroup } from "@/index";
 import type { ComponentEntry } from "./entry";
+import mikey from "@/assets/avatars/mikey.jpg";
+import grace from "@/assets/avatars/grace.jpg";
+import alan from "@/assets/avatars/alan.jpg";
+import kat from "@/assets/avatars/kat.jpg";
 
+// first four carry photos; the last two fall back to initials, so the demo
+// shows the photo ⇄ initials mix the component is built for
 const TEAM = [
-  { name: "Mikey Django" },
-  { name: "Grace Hopper" },
-  { name: "Alan Turing" },
-  { name: "Katherine Johnson" },
+  { name: "Mikey Django", src: mikey },
+  { name: "Grace Hopper", src: grace },
+  { name: "Alan Turing", src: alan },
+  { name: "Katherine Johnson", src: kat },
   { name: "Linus Torvalds" },
   { name: "Margaret Hamilton" },
 ];
