@@ -256,110 +256,37 @@ function LogoTile({
 /* ---- logo anatomy (construction diagram) ------------------------------ */
 
 /** A spec-sheet style construction diagram: the mark on a measured grid with
-    guide lines, an x-unit scale, and clear-space padding — in the vein of the
-    classic NASA / Saturn logo blueprints. Drawn on a dark card so the white
-    construction lines and the mark read like a technical drawing. */
+    a real clear-space frame. No invented dimension rules or construction
+    circles — just the two things that are actually true about the mark: the
+    exclusion zone and the minimum size. */
 function LogoAnatomy({ mark, accent }: { mark?: string; accent: string }) {
-  // the mark sits in a 26×24 viewBox; we frame it in a padded grid and hang
-  // dimension rules off the bounding box. Units are expressed in "x" (one grid
-  // cell) so the proportions are resolution-independent.
-  const stroke = "rgba(255,255,255,0.28)";
-  const faint = "rgba(255,255,255,0.10)";
-  const tick = "rgba(255,255,255,0.6)";
-
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-neutral-950">
-      {/* spec header bar */}
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 text-[11px] font-medium text-white/70">
-        <span className="font-semibold text-white">Mark construction</span>
-        <span className="hidden sm:inline">Grid · x = 1 unit</span>
-        <span className="font-mono">viewBox 26×24</span>
-      </div>
-
-      <div className="relative px-6 py-10 sm:px-10">
-        {/* dotted background grid */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.5]"
-          style={{
-            backgroundImage: `radial-gradient(${faint} 1px, transparent 1px)`,
-            backgroundSize: "22px 22px",
-          }}
-        />
-
-        <div className="relative mx-auto flex max-w-md items-center justify-center">
-          {/* the construction stage: mark + overlaid guides share one square box */}
-          <div className="relative aspect-square w-full max-w-[22rem]">
-            {/* guide overlay */}
-            <svg
-              viewBox="0 0 120 120"
-              className="absolute inset-0 h-full w-full"
-              fill="none"
-              aria-hidden="true"
-            >
-              {/* clear-space frame (1x padding around the mark box) */}
-              <rect x="20" y="20" width="80" height="80" stroke={faint} strokeWidth="0.5" strokeDasharray="3 3" />
-              {/* mark bounding box */}
-              <rect x="34" y="30" width="52" height="60" stroke={stroke} strokeWidth="0.6" />
-              {/* thirds grid inside the box */}
-              <line x1="34" y1="50" x2="86" y2="50" stroke={faint} strokeWidth="0.5" />
-              <line x1="34" y1="70" x2="86" y2="70" stroke={faint} strokeWidth="0.5" />
-              <line x1="51.3" y1="30" x2="51.3" y2="90" stroke={faint} strokeWidth="0.5" />
-              <line x1="68.6" y1="30" x2="68.6" y2="90" stroke={faint} strokeWidth="0.5" />
-              {/* center axis */}
-              <line x1="60" y1="24" x2="60" y2="96" stroke={faint} strokeWidth="0.5" strokeDasharray="2 2" />
-              {/* apex construction circle */}
-              <circle cx="60" cy="42" r="9" stroke={stroke} strokeWidth="0.6" />
-
-              {/* right-side dimension rule: total height = "3x" */}
-              <line x1="95" y1="30" x2="95" y2="90" stroke={tick} strokeWidth="0.5" />
-              <line x1="92" y1="30" x2="98" y2="30" stroke={tick} strokeWidth="0.5" />
-              <line x1="92" y1="90" x2="98" y2="90" stroke={tick} strokeWidth="0.5" />
-              <text x="101" y="62" fill="rgba(255,255,255,0.75)" fontSize="6" fontFamily="ui-monospace, monospace">3x</text>
-
-              {/* bottom dimension rule: width = "2.6x" */}
-              <line x1="34" y1="103" x2="86" y2="103" stroke={tick} strokeWidth="0.5" />
-              <line x1="34" y1="100" x2="34" y2="106" stroke={tick} strokeWidth="0.5" />
-              <line x1="86" y1="100" x2="86" y2="106" stroke={tick} strokeWidth="0.5" />
-              <text x="55" y="113" fill="rgba(255,255,255,0.75)" fontSize="6" fontFamily="ui-monospace, monospace">2.6x</text>
-
-              {/* clear-space callout on the top edge */}
-              <line x1="20" y1="14" x2="34" y2="14" stroke={tick} strokeWidth="0.5" />
-              <line x1="20" y1="11" x2="20" y2="17" stroke={tick} strokeWidth="0.5" />
-              <line x1="34" y1="11" x2="34" y2="17" stroke={tick} strokeWidth="0.5" />
-              <text x="22" y="10" fill="rgba(255,255,255,0.6)" fontSize="5" fontFamily="ui-monospace, monospace">1x clear</text>
-            </svg>
-
-            {/* the mark itself, aligned to the bounding box (34..86 wide of 120) */}
-            <div
-              className="absolute [&_svg]:h-full [&_svg]:w-full"
-              style={{
-                left: `${(34 / 120) * 100}%`,
-                top: `${(30 / 120) * 100}%`,
-                width: `${(52 / 120) * 100}%`,
-                height: `${(60 / 120) * 100}%`,
-                color: accent,
-              }}
-            >
-              {mark ? <Glyph svg={mark} /> : null}
-            </div>
-          </div>
+    <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
+      {/* clear space — a dashed frame at half the mark's width on every side */}
+      <div className="flex items-center justify-center rounded-xl border border-border bg-canvas px-8 py-12">
+        <div className="relative inline-flex p-9">
+          <span className="pointer-events-none absolute inset-0 rounded-lg border border-dashed border-fg/20" />
+          <span className="[&_svg]:h-16 [&_svg]:w-16" style={{ color: accent }}>
+            {mark ? <Glyph svg={mark} /> : null}
+          </span>
         </div>
       </div>
 
-      {/* proportions footnote */}
-      <div className="grid grid-cols-2 gap-px border-t border-white/10 bg-white/10 sm:grid-cols-4">
-        {[
-          { k: "Height", v: "3x" },
-          { k: "Width", v: "2.6x" },
-          { k: "Clear space", v: "1x" },
-          { k: "Min size", v: "16px" },
-        ].map((f) => (
-          <div key={f.k} className="bg-neutral-950 px-3 py-2.5">
-            <p className="text-[10px] uppercase tracking-wide text-white/45">{f.k}</p>
-            <p className="mt-0.5 font-mono text-sm text-white">{f.v}</p>
-          </div>
-        ))}
-      </div>
+      {/* the two real rules, in plain language */}
+      <dl className="space-y-4 text-sm sm:w-56">
+        <div>
+          <dt className="font-medium text-fg">Clear space</dt>
+          <dd className="mt-1 text-fg/60">
+            Keep empty space around the mark equal to at least half its width — the dashed frame.
+          </dd>
+        </div>
+        <div>
+          <dt className="font-medium text-fg">Minimum size</dt>
+          <dd className="mt-1 text-fg/60">
+            Don't place the mark below <span className="font-medium text-fg">16px</span>; the ribbons stop reading.
+          </dd>
+        </div>
+      </dl>
     </div>
   );
 }
@@ -370,98 +297,45 @@ function LogoUsage({ mark, accent }: { mark?: string; accent: string }) {
   const MarkSpan = ({ className = "" }: { className?: string }) =>
     mark ? <Glyph svg={mark} className={className} /> : null;
 
-  const DONTS = [
-    { title: "Don't recolor", desc: "Keep the mark one color — never split or fill the ribbons." },
-    { title: "Don't stretch", desc: "Scale proportionally; never squash or stretch the glyph." },
-    { title: "Don't rotate", desc: "The mark always sits upright — no tilt or flip." },
-    { title: "Don't add effects", desc: "No drop shadows, bevels, or outlines on the mark." },
+  // each don't shows the actual misuse applied to the mark
+  const DONTS: { label: string; style: React.CSSProperties }[] = [
+    { label: "Recolor the ribbons", style: { color: "#22d3ee" } },
+    { label: "Stretch or squash it", style: { color: accent, transform: "scaleX(1.7)" } },
+    { label: "Rotate or flip it", style: { color: accent, transform: "rotate(24deg)" } },
+    { label: "Add shadows or effects", style: { color: accent, filter: "drop-shadow(0 2px 5px rgba(255,255,255,0.55))" } },
   ];
 
   return (
-    <div className="space-y-2.5">
-      {/* clear space + min size */}
-      <div className="grid gap-2.5 sm:grid-cols-2">
-        {/* clear space */}
-        <div className="overflow-hidden rounded-xl border border-border">
-          <div className="flex h-44 items-center justify-center bg-canvas p-4">
-            <div className="relative">
-              {/* 1x clear-space frame around the mark */}
-              <div className="absolute -inset-6 rounded-lg border border-dashed border-fg/25" />
-              <span className="[&_svg]:h-12 [&_svg]:w-12" style={{ color: accent }}>
-                <MarkSpan />
-              </span>
-            </div>
-          </div>
-          <div className="border-t border-border bg-panel px-3 py-2">
-            <p className="text-xs font-medium text-fg">Clear space</p>
-            <p className="mt-0.5 text-[11px] text-fg/55">
-              Leave at least 1x (the mark's own width) of empty space on every side.
-            </p>
-          </div>
+    <div className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+      {/* do */}
+      <div>
+        <p className="text-sm font-medium text-fg">Do</p>
+        <div className="mt-3 flex h-28 items-center justify-center rounded-xl border border-border bg-canvas">
+          <span className="[&_svg]:h-11 [&_svg]:w-11" style={{ color: accent }}>
+            <MarkSpan />
+          </span>
         </div>
-
-        {/* min size */}
-        <div className="overflow-hidden rounded-xl border border-border">
-          <div className="flex h-44 items-end justify-center gap-6 bg-canvas p-4">
-            <span className="[&_svg]:h-12 [&_svg]:w-12" style={{ color: accent }}>
-              <MarkSpan />
-            </span>
-            <span className="[&_svg]:h-4 [&_svg]:w-4" style={{ color: accent }}>
-              <MarkSpan />
-            </span>
-          </div>
-          <div className="border-t border-border bg-panel px-3 py-2">
-            <p className="text-xs font-medium text-fg">Minimum size</p>
-            <p className="mt-0.5 text-[11px] text-fg/55">
-              Never render the mark below 16px — smaller and the ribbons collapse.
-            </p>
-          </div>
-        </div>
+        <p className="mt-3 text-sm text-fg/60">
+          Use the approved marks — one color, upright, with enough contrast against the surface.
+        </p>
       </div>
 
-      {/* do / don't */}
-      <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-        {/* the one "do" */}
-        <div className="overflow-hidden rounded-xl border border-emerald-500/30">
-          <div className="relative flex h-28 items-center justify-center bg-neutral-950">
-            <span className="[&_svg]:h-11 [&_svg]:w-11" style={{ color: accent }}>
-              <MarkSpan />
-            </span>
-            <span className="absolute right-2 top-2 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
-              Do
-            </span>
-          </div>
-          <div className="border-t border-border bg-panel px-3 py-2">
-            <p className="text-xs font-medium text-fg">Use the approved marks</p>
-            <p className="mt-0.5 text-[11px] text-fg/55">One color, upright, on adequate contrast.</p>
-          </div>
-        </div>
-
-        {/* the don'ts */}
-        {DONTS.map((d, i) => (
-          <div key={d.title} className="overflow-hidden rounded-xl border border-rose-500/25">
-            <div className="relative flex h-28 items-center justify-center bg-neutral-950">
-              <span
-                className="[&_svg]:h-11 [&_svg]:w-11"
-                style={{
-                  color: i === 0 ? "#22d3ee" : accent,
-                  transform:
-                    i === 1 ? "scaleX(1.7)" : i === 2 ? "rotate(24deg)" : undefined,
-                  filter: i === 3 ? "drop-shadow(0 3px 5px rgba(255,255,255,0.5))" : undefined,
-                }}
-              >
+      {/* don't */}
+      <div>
+        <p className="text-sm font-medium text-fg">Don't</p>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {DONTS.map((d) => (
+            <div
+              key={d.label}
+              className="flex h-28 flex-col items-center justify-center gap-2.5 rounded-xl border border-border bg-canvas px-2 text-center"
+            >
+              <span className="[&_svg]:h-9 [&_svg]:w-9" style={d.style}>
                 <MarkSpan />
               </span>
-              <span className="absolute right-2 top-2 rounded-full bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-400">
-                Don't
-              </span>
+              <span className="text-[11px] leading-tight text-fg/55">{d.label}</span>
             </div>
-            <div className="border-t border-border bg-panel px-3 py-2">
-              <p className="text-xs font-medium text-fg">{d.title}</p>
-              <p className="mt-0.5 text-[11px] text-fg/55">{d.desc}</p>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -876,7 +750,7 @@ function KitView({ project }: { project: Project }) {
           <KitSection
             id="anatomy"
             title="Logo anatomy"
-            desc="How the mark is built — proportions, grid, and clear space, measured in x units."
+            desc="Give the mark room to breathe and don't let it get too small."
           >
             <LogoAnatomy mark={project.logomark} accent={project.accent} />
           </KitSection>
