@@ -472,10 +472,9 @@ function ComponentsIndex() {
       </div>
 
       {totalPages > 1 && (
-        <div className="mt-8 flex items-center justify-between gap-4">
-          <p className="text-xs text-fg/45">
-            {start + 1}–{Math.min(start + PER_PAGE, sorted.length)} of {sorted.length}
-          </p>
+        // centered pagination, matching the Motion gallery — the numbered
+        // page buttons already convey the total, so no separate count line
+        <div className="mt-8 flex justify-center">
           <Pagination page={page} total={totalPages} onPageChange={gotoPage} />
         </div>
       )}
