@@ -512,9 +512,9 @@ function GalleryCard({ demo }: { demo: MotionDemo }) {
 
 /* ---- page ------------------------------------------------------------- */
 
-// 9 per page = 3 full rows at the gallery's own lg:grid-cols-3, so the last
-// page rarely dangles a single lonely card.
-const PAGE_SIZE = 9;
+// 12 per page = 3 full rows at the gallery's xl:grid-cols-4 (and 4 rows at
+// lg:grid-cols-3), so pages stay full at both breakpoints.
+const PAGE_SIZE = 12;
 
 export function MotionDocs({ slug = "" }: { slug?: string }) {
   const [category, setCategory] = React.useState<string>("All");
@@ -559,7 +559,7 @@ export function MotionDocs({ slug = "" }: { slug?: string }) {
             />
           </div>
 
-          <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {visible.map((demo) => (
               <GalleryCard key={demo.id} demo={demo} />
             ))}

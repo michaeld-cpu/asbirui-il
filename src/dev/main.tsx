@@ -88,8 +88,12 @@ function DocsView({ route }: { route: string }) {
           const wide = isTemplates || isBlocks || isMotion || (isComponents && !componentSlug);
           return (
             <>
-              <main className="min-w-0 flex-1 px-6 lg:px-12">
-                <div className={`mx-auto ${wide ? "max-w-5xl" : "max-w-3xl"}`}>{body}</div>
+              <main className="min-w-0 flex-1 px-6 lg:px-10 xl:px-14">
+                {/* wide pages (galleries, templates, blocks, motion, the
+                    components index) get a roomy column so 3-col grids + live
+                    previews breathe; prose/detail pages stay a comfortable
+                    reading measure */}
+                <div className={`mx-auto ${wide ? "max-w-[88rem]" : "max-w-4xl"}`}>{body}</div>
               </main>
               {/* wide, full-width pages get no right promo aside */}
               {!wide && <DocsAside />}
