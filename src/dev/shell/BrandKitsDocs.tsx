@@ -20,7 +20,6 @@ import * as React from "react";
 
 /* ---- data model ------------------------------------------------------- */
 
-type Swatch = { name: string; hex: string; role: string };
 type Gradient = { name: string; css: string; role: string };
 type TypeSpec = { label: string; sample: string; meta: string; style?: React.CSSProperties };
 type Motion = { name: string; value: string; role: string };
@@ -40,7 +39,8 @@ type Project = {
   summary?: string;
   /* short factual meta rows (Founded, Location, …) */
   facts?: { label: string; value: string }[];
-  colors?: Swatch[];
+  /* brand hue families — each renders as a generated 50→950 ramp row. */
+  colorFamilies?: { name: string; base: string }[];
   gradients?: Gradient[];
   fonts?: { family: string; source: string; weights: string };
   type?: TypeSpec[];
@@ -74,15 +74,12 @@ const PROJECTS: Project[] = [
     // Content intentionally left empty for now — the rail + section pages still
     // render (each section shows a placeholder). Fill these arrays in to
     // populate the kit.
-    colors: [
-      { name: "White", hex: "#FFFFFF", role: "Text primary" },
-      { name: "Grey", hex: "#A0A0A0", role: "Text secondary" },
-      { name: "Card", hex: "#111111", role: "Surface" },
-      { name: "Panel", hex: "#0A0A0A", role: "Surface deep" },
-      { name: "Black", hex: "#000000", role: "Background" },
-      { name: "Orange", hex: "#FF6900", role: "Primary" },
-      { name: "Ember", hex: "#FF4500", role: "Gradient end" },
-      { name: "Amber", hex: "#FFB800", role: "Accent" },
+    // each brand hue renders as a full 50→950 ramp (generated from the base)
+    colorFamilies: [
+      { name: "Orange", base: "#FF6900" },
+      { name: "Ember", base: "#FF4500" },
+      { name: "Amber", base: "#FFB800" },
+      { name: "Neutral", base: "#8E8E8E" },
     ],
     fonts: undefined,
     type: [],
@@ -118,6 +115,89 @@ function inkFor(hex: string): { fg: string; sub: string } {
   return luminance > 0.6
     ? { fg: "rgba(0,0,0,0.85)", sub: "rgba(0,0,0,0.5)" }
     : { fg: "rgba(255,255,255,0.92)", sub: "rgba(255,255,255,0.55)" };
+}
+
+/* ---- ramp generation -------------------------------------------------- */
+
+const RAMP_STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
+
+// how far each step is blended toward white (positive) or black (negative)
+// from the base hue at step 500. Mirrors a typical 50→950 lightness curve.
+const RAMP_MIX = [0.92, 0.82, 0.66, 0.44, 0.2, 0, -0.16, -0.32, -0.46, -0.6, -0.72];
+
+const toHex = (n: number) => Math.round(Math.max(0, Math.min(255, n))).toString(16).padStart(2, "0");
+
+/** Build an 11-step ramp from a base hex: blend toward white for the light
+    steps (50–400), keep the base at 500, blend toward black for 600–950. */
+function buildRamp(baseHex: string): string[] {
+  const { r, g, b } = hexToRgb(baseHex);
+  return RAMP_MIX.map((mix) => {
+    const target = mix >= 0 ? 255 : 0;
+    const t = Math.abs(mix);
+    const nr = r + (target - r) * t;
+    const ng = g + (target - g) * t;
+    const nb = b + (target - b) * t;
+    return `#${toHex(nr)}${toHex(ng)}${toHex(nb)}`.toUpperCase();
+  });
+}
+
+/** One brand-color family: a labeled row over a strip of 11 step chips
+    (step # + hex printed in legible ink), matching the tokens Colors ramp. */
+function FamilyRow({ family }: { family: { name: string; base: string } }) {
+  const [copied, setCopied] = React.useState<string | null>(null);
+  const copy = (hex: string) => {
+    navigator.clipboard?.writeText(hex);
+    setCopied(hex);
+    window.setTimeout(() => setCopied((c) => (c === hex ? null : c)), 1200);
+  };
+  const ramp = React.useMemo(() => buildRamp(family.base), [family.base]);
+
+  return (
+    <div>
+      <p className="mb-2 text-sm font-semibold text-fg">{family.name}</p>
+      <div className="-mx-1 overflow-x-auto px-1">
+        <div className="flex gap-1">
+          {ramp.map((hex, i) => {
+            const ink = inkFor(hex);
+            const step = RAMP_STEPS[i];
+            const isCopied = copied === hex;
+            return (
+              <button
+                key={hex + i}
+                type="button"
+                onClick={() => copy(hex)}
+                title={`${family.name}-${step} — click to copy ${hex}`}
+                aria-label={`${family.name} ${step}, ${hex}`}
+                className="group relative flex h-16 w-[62px] shrink-0 flex-col justify-end rounded-lg p-1.5 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
+                style={{ backgroundColor: hex }}
+              >
+                <span
+                  className={`text-[10px] font-semibold leading-none transition-opacity ${isCopied ? "opacity-0" : ""}`}
+                  style={{ color: ink.fg }}
+                >
+                  {step}
+                </span>
+                <span
+                  className={`mt-0.5 font-mono text-[9px] leading-none transition-opacity ${isCopied ? "opacity-0" : ""}`}
+                  style={{ color: ink.sub }}
+                >
+                  {hex}
+                </span>
+                {isCopied && (
+                  <span
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-semibold tracking-tight motion-safe:animate-copied-pop"
+                    style={{ color: ink.fg }}
+                  >
+                    Copied!
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /* ---- project index ---------------------------------------------------- */
@@ -156,49 +236,6 @@ function ProjectIndex() {
 }
 
 /* ---- per-project kit -------------------------------------------------- */
-
-/** A single color swatch chip in the tokens-Colors style: a fixed-size tile
-    with the name + hex printed in legible ink, and a "Copied!" pop on click. */
-function SwatchChip({ swatch }: { swatch: Swatch }) {
-  const [copied, setCopied] = React.useState(false);
-  const ink = inkFor(swatch.hex);
-  const copy = () => {
-    navigator.clipboard?.writeText(swatch.hex);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1200);
-  };
-  return (
-    <button
-      type="button"
-      onClick={copy}
-      title={`${swatch.name} — click to copy ${swatch.hex}`}
-      aria-label={`${swatch.name}, ${swatch.hex}`}
-      className="group relative flex h-24 w-full flex-col justify-end rounded-xl p-3 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
-      style={{ backgroundColor: swatch.hex }}
-    >
-      <span
-        className={`text-xs font-semibold leading-none transition-opacity ${copied ? "opacity-0" : ""}`}
-        style={{ color: ink.fg }}
-      >
-        {swatch.name}
-      </span>
-      <span
-        className={`mt-1 font-mono text-[10px] leading-none transition-opacity ${copied ? "opacity-0" : ""}`}
-        style={{ color: ink.sub }}
-      >
-        {swatch.hex.toUpperCase()}
-      </span>
-      {copied && (
-        <span
-          className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs font-semibold tracking-tight motion-safe:animate-copied-pop"
-          style={{ color: ink.fg }}
-        >
-          Copied!
-        </span>
-      )}
-    </button>
-  );
-}
 
 const SearchIcon = (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -251,7 +288,7 @@ function KitView({ project }: { project: Project }) {
 
   // railing entries — only sections that actually render
   const sections = [
-    ...(has(project.colors) ? [{ id: "colors", label: "Colors" }] : []),
+    ...(has(project.colorFamilies) ? [{ id: "colors", label: "Colors" }] : []),
     { id: "font", label: "Font" },
   ];
 
@@ -280,14 +317,16 @@ function KitView({ project }: { project: Project }) {
         <KitRail sections={sections} />
 
         <div className="min-w-0 space-y-16">
-          {/* Colors — swatch chips, tokens-style */}
-          {has(project.colors) && (
+          {/* Colors — a generated 50→950 ramp per brand hue (tokens style) */}
+          {has(project.colorFamilies) && (
             <section id="colors" className="scroll-mt-24">
               <h2 className="text-2xl font-semibold tracking-tight text-fg">Colors</h2>
-              <p className="mt-1.5 text-sm text-fg/50">Click any swatch to copy its hex.</p>
-              <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
-                {project.colors!.map((c) => (
-                  <SwatchChip key={c.name} swatch={c} />
+              <p className="mt-1.5 text-sm text-fg/50">
+                Each brand hue as a 50→950 ramp. Click any swatch to copy its hex.
+              </p>
+              <div className="mt-6 space-y-5">
+                {project.colorFamilies!.map((f) => (
+                  <FamilyRow key={f.name} family={f} />
                 ))}
               </div>
             </section>
