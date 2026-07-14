@@ -15,6 +15,7 @@ import { MotionDocs } from "./shell/MotionDocs";
 import { TemplatesPage } from "./shell/TemplatesPage";
 import { Home } from "./shell/Home";
 import { AiTemplate } from "./templates/ai/AiTemplate";
+import { TripketPreview } from "./templates/tripket/TripketPreview";
 import { landingRouteFor } from "./shell/docs-nav";
 import {
   useHashRoute,
@@ -42,11 +43,16 @@ function LandingView() {
 }
 
 /**
- * Bare preview: the AI console with no shell chrome, filling the viewport.
- * Loaded inside the homepage device-frame <iframe>s so each gets its own
+ * Bare preview: a template with no shell chrome, filling the viewport. Loaded
+ * inside the templates/homepage device-frame <iframe>s so each gets its own
  * viewport width and the template's real responsive breakpoints fire.
+ *
+ *   preview / preview/ai  → Lumina AI console
+ *   preview/tripket       → Tripket admin dashboard
  */
-function PreviewView() {
+function PreviewView({ route }: { route: string }) {
+  const sub = route.replace(/^preview\/?/, "");
+  if (sub === "tripket") return <TripketPreview />;
   return <AiTemplate sub="" />;
 }
 
@@ -133,7 +139,7 @@ function App() {
 
   let view;
   if (preview) {
-    view = <PreviewView />;
+    view = <PreviewView route={route} />;
   } else if (isAiRoute(route)) {
     view = <AiTemplate sub={aiSubPath(route)} />;
   } else if (isDocsRoute(route)) {

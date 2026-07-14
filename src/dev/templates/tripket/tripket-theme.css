@@ -1,0 +1,37 @@
+/*
+  Tripket admin — dashboard preview theme.
+
+  The dashboard is wrapped in `.tripket-admin`. It is always light-mode
+  maritime slate (the source app has no dark theme), so we pin light surfaces
+  and text here regardless of the docs shell's current theme. The brand orange
+  (bg-brand-* / text-brand-*) resolves through the AsbirUI preset scale and
+  every slate-* utility is stock Tailwind, so the ported dashboard keeps its
+  original classes verbatim.
+*/
+
+.tripket-admin {
+  color: rgb(15 23 42); /* slate-900 */
+  background: rgb(248 250 252); /* slate-50 */
+  min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tripket-admin ::selection {
+  background: rgb(255 237 213); /* brand-100 */
+  color: rgb(154 52 18);
+}
+
+.tripket-admin *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.tripket-admin *::-webkit-scrollbar-thumb {
+  background: rgb(203 213 225 / 0.8); /* slate-300 */
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.tripket-admin *::-webkit-scrollbar-thumb:hover {
+  background: rgb(148 163 184 / 0.9); /* slate-400 */
+  background-clip: padding-box;
+}

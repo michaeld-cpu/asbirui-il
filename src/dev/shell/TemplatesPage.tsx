@@ -37,16 +37,12 @@ function initialFrameTheme(): string {
     fixed logical `width` so the template shows its real layout at that size. */
 function PreviewThumb({
   route,
-  externalUrl,
   width,
   forceTheme,
   title,
   className = "",
 }: {
   route: string;
-  /** When set, the iframe previews this external URL (a deployed site) instead
-      of an internal preview route. */
-  externalUrl?: string;
   width: number;
   forceTheme?: "light" | "dark";
   title: string;
@@ -59,12 +55,8 @@ function PreviewThumb({
   // freeze src so theme toggles don't remount the iframe
   const srcRef = React.useRef<string | null>(null);
   if (srcRef.current === null) {
-    if (externalUrl) {
-      srcRef.current = externalUrl;
-    } else {
-      const t = forceTheme ?? initialFrameTheme();
-      srcRef.current = `${window.location.pathname}?frame=1&t=${t}#${route}`;
-    }
+    const t = forceTheme ?? initialFrameTheme();
+    srcRef.current = `${window.location.pathname}?frame=1&t=${t}#${route}`;
   }
 
   React.useEffect(() => {
@@ -107,11 +99,12 @@ type Template = {
   kind: string;
   description: string;
   href: string;
-  /** Live preview route (e.g. "preview/ai") for templates that live in-app. */
+  /** Live preview route (e.g. "preview/ai") for templates rendered in-app. */
   previewRoute?: string;
-  /** For a deployed external product: previews this URL and opens it directly. */
-  externalUrl?: string;
-  /** Preview strip theme — external sites keep their own look; default "dark". */
+  /** A deployed product URL — makes the primary CTA "Visit live site" (new tab)
+      and surfaces a Live badge. The preview strip still uses previewRoute. */
+  liveUrl?: string;
+  /** Preview strip theme — default "dark". */
   previewTheme?: "light" | "dark";
   /** Source repo for this template — each template ships from its own repo,
       separate from the main AsbirUI library repo linked in the navbar. */
@@ -125,8 +118,12 @@ const TEMPLATES: Template[] = [
     description:
       "A live, production maritime ferry-booking admin — shipping-line dashboard, voyages, vessels, bookings, tickets and reports across the Philippine inter-island network. Deployed and running.",
     href: "https://tripket-ph.vercel.app/",
-    externalUrl: "https://tripket-ph.vercel.app/",
+    // preview the live-rendered dashboard (its real entrance motion), while
+    // "Visit live site" opens the deployed product
+    previewRoute: "preview/tripket",
+    liveUrl: "https://tripket-ph.vercel.app/",
     previewTheme: "light",
+    repoUrl: "https://github.com/michaeld-cpu/tripket-ph",
   },
   {
     name: "Lumina AI",
@@ -145,21 +142,12 @@ const TEMPLATES: Template[] = [
     true phone-proportioned dark-mode mobile beside it. The mobile frame keeps
     the 390×844 aspect so the preview reads as a real phone, not a stretched
     panel; it's centered in its column and matched to the desktop's height. */
-function LivePreviews({
-  route,
-  externalUrl,
-  theme = "dark",
-}: {
-  route?: string;
-  externalUrl?: string;
-  theme?: "light" | "dark";
-}) {
+function LivePreviews({ route, theme = "dark" }: { route?: string; theme?: "light" | "dark" }) {
   const label = theme === "light" ? "light" : "dark";
   return (
     <div className="grid grid-cols-1 items-center gap-5 sm:grid-cols-[1fr_auto]">
       <PreviewThumb
         route={route ?? ""}
-        externalUrl={externalUrl}
         width={1280}
         forceTheme={theme}
         title={`Desktop preview (${label})`}
@@ -167,7 +155,6 @@ function LivePreviews({
       />
       <PreviewThumb
         route={route ?? ""}
-        externalUrl={externalUrl}
         width={390}
         forceTheme={theme}
         title={`Mobile preview (${label})`}
@@ -184,7 +171,7 @@ const ExternalIcon = (
 );
 
 function TemplateRow({ t }: { t: Template }) {
-  const external = Boolean(t.externalUrl);
+  const external = Boolean(t.liveUrl);
   return (
     <div className="grid grid-cols-1 gap-6 border-t border-border py-10 lg:grid-cols-[minmax(0,18rem)_1fr] lg:gap-10">
       {/* meta column */}
@@ -192,8 +179,7 @@ function TemplateRow({ t }: { t: Template }) {
         <div className="flex items-center gap-2">
           <h3 className="text-xl font-semibold tracking-tight text-fg">{t.name}</h3>
           {external && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
               Live
             </span>
           )}
@@ -209,6 +195,14 @@ function TemplateRow({ t }: { t: Template }) {
             {external ? "Visit live site" : "Open template"}
             <span>{external ? ExternalIcon : ArrowIcon}</span>
           </a>
+          {t.previewRoute && external && (
+            <a
+              href={`#${t.previewRoute}`}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-asbir border border-border px-4 py-2 text-sm font-semibold text-fg/80 transition-colors hover:bg-overlay/[0.05] hover:text-fg"
+            >
+              Preview dashboard
+            </a>
+          )}
           {t.repoUrl && (
             <a
               href={t.repoUrl}
@@ -226,7 +220,7 @@ function TemplateRow({ t }: { t: Template }) {
 
       {/* preview strip */}
       <div>
-        <LivePreviews route={t.previewRoute} externalUrl={t.externalUrl} theme={t.previewTheme} />
+        <LivePreviews route={t.previewRoute} theme={t.previewTheme} />
       </div>
     </div>
   );
