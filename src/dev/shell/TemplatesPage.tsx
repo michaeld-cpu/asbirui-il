@@ -51,6 +51,10 @@ function PreviewThumb({
 }) {
   const boxRef = React.useRef<HTMLDivElement | null>(null);
   const [dims, setDims] = React.useState({ scale: 0.3, logicalH: 800 });
+  // the whole framed preview reveals as one unit once the iframe has loaded,
+  // so you never see the empty bordered container render first — it fades in
+  // when ready. A short fallback timer covers a missed load event.
+  const [ready, setReady] = React.useState(false);
 
   // freeze src so theme toggles don't remount the iframe
   const srcRef = React.useRef<string | null>(null);
@@ -73,10 +77,18 @@ function PreviewThumb({
     return () => ro.disconnect();
   }, [width]);
 
+  // safety net: if onLoad never fires (cache, external site quirks), reveal anyway
+  React.useEffect(() => {
+    const t = window.setTimeout(() => setReady(true), 2500);
+    return () => window.clearTimeout(t);
+  }, []);
+
   return (
     <div
       ref={boxRef}
-      className={`relative overflow-hidden rounded-xl border border-border bg-canvas ${className}`}
+      className={`relative overflow-hidden rounded-xl border border-border bg-canvas transition-opacity duration-500 ease-out ${
+        ready ? "opacity-100" : "opacity-0"
+      } ${className}`}
     >
       <iframe
         title={title}
@@ -85,6 +97,7 @@ function PreviewThumb({
         aria-hidden="true"
         loading="lazy"
         scrolling="no"
+        onLoad={() => setReady(true)}
         className="pointer-events-none absolute left-0 top-0 origin-top-left border-0 bg-canvas"
         style={{ width, height: dims.logicalH, transform: `scale(${dims.scale})` }}
       />
