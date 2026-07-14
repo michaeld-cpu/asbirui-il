@@ -420,9 +420,14 @@ function KitView({ project }: { project: Project }) {
           {/* Logo — primary / secondary / tertiary marks + the wordmark */}
           <KitSection id="logo" title="Logo" desc="Mark variants and the full wordmark.">
             <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-              {/* Primary — white mark on the brand orange */}
+              {/* Primary — the mark in a white chip on the brand orange, so the
+                  glyph reads as one clean solid mark (no orange showing through
+                  the ribbon gaps). */}
               <LogoTile label="Primary" tone="Mark · on brand" bg={project.accent}>
-                <span className="text-white [&_svg]:h-12 [&_svg]:w-12">
+                <span
+                  className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white [&_svg]:h-9 [&_svg]:w-9"
+                  style={{ color: project.accent }}
+                >
                   <Mark />
                 </span>
               </LogoTile>
@@ -447,9 +452,6 @@ function KitView({ project }: { project: Project }) {
                 )}
               </LogoTile>
             </div>
-            <p className="mt-3 text-xs text-fg/50">
-              The marks are single-color and inherit <span className="font-mono">currentColor</span> — tint per surface, never recolor the paths.
-            </p>
           </KitSection>
 
           {/* Layout & radius */}
