@@ -74,10 +74,16 @@ const PROJECTS: Project[] = [
     // Content intentionally left empty for now — the rail + section pages still
     // render (each section shows a placeholder). Fill these arrays in to
     // populate the kit.
-    summary: "",
-    facts: [],
-    colors: [],
-    gradients: [],
+    colors: [
+      { name: "White", hex: "#FFFFFF", role: "Text primary" },
+      { name: "Grey", hex: "#A0A0A0", role: "Text secondary" },
+      { name: "Card", hex: "#111111", role: "Surface" },
+      { name: "Panel", hex: "#0A0A0A", role: "Surface deep" },
+      { name: "Black", hex: "#000000", role: "Background" },
+      { name: "Orange", hex: "#FF6900", role: "Primary" },
+      { name: "Ember", hex: "#FF4500", role: "Gradient end" },
+      { name: "Amber", hex: "#FFB800", role: "Accent" },
+    ],
     fonts: undefined,
     type: [],
     radius: [],
@@ -95,6 +101,32 @@ function Glyph({ svg, className = "" }: { svg: string; className?: string }) {
   return <span className={className} dangerouslySetInnerHTML={{ __html: svg }} />;
 }
 
+/** Parse a #RRGGBB into its r/g/b components. */
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const h = hex.replace("#", "");
+  return {
+    r: parseInt(h.slice(0, 2), 16),
+    g: parseInt(h.slice(2, 4), 16),
+    b: parseInt(h.slice(4, 6), 16),
+  };
+}
+
+/** Pick readable ink for a swatch: dark text on light fills, light on dark. */
+function inkFor(hex: string): { fg: string; sub: string } {
+  const { r, g, b } = hexToRgb(hex);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6
+    ? { fg: "rgba(0,0,0,0.85)", sub: "rgba(0,0,0,0.5)" }
+    : { fg: "rgba(255,255,255,0.92)", sub: "rgba(255,255,255,0.55)" };
+}
+
+/** "R 255 G 255 B 255" for a hex. */
+function rgbLabel(hex: string): string {
+  const { r, g, b } = hexToRgb(hex);
+  const p = (n: number) => String(n).padStart(3, "0");
+  return `R ${p(r)} G ${p(g)} B ${p(b)}`;
+}
+
 /* ---- project index ---------------------------------------------------- */
 
 function ProjectIndex() {
@@ -102,30 +134,26 @@ function ProjectIndex() {
     <article className="animate-fade-up py-10">
       <h1 className="text-3xl font-semibold tracking-tight text-fg">Brand kits</h1>
       <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-fg/70">
-        The brand book for every project we run — colors, gradients, typography,
-        logo, motion, and voice, in one place. Open a project for its full
-        identity; each kit is the source of truth product and marketing build
-        from.
+        The brand book for every project we run — colors, typography, logo, and
+        voice, in one place. Open a project for its full identity.
       </p>
 
-      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="mt-10 space-y-6">
         {PROJECTS.map((p) => (
           <a
             key={p.slug}
             href={`#brand-kits/${p.slug}`}
-            className="group flex items-center gap-4 rounded-xl border border-border bg-panel p-4 transition-colors hover:border-fg/20"
+            className="group flex items-center gap-6"
           >
             <span
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-semibold text-white [&_svg]:h-6 [&_svg]:w-6"
+              className="flex h-20 w-20 shrink-0 items-center justify-center rounded-3xl text-white transition-transform group-hover:scale-[1.03] [&_svg]:h-10 [&_svg]:w-10"
               style={{ backgroundColor: p.accent }}
             >
-              {p.logomark ? <Glyph svg={p.logomark} /> : p.name.slice(0, 1)}
+              {p.logomark ? <Glyph svg={p.logomark} /> : <span className="text-2xl font-semibold">{p.name.slice(0, 1)}</span>}
             </span>
-            <span className="min-w-0 flex-1">
-              <span className="truncate text-sm font-semibold text-fg">{p.name}</span>
-              <span className="mt-0.5 block truncate text-xs text-fg/60 dark:text-fg/45">
-                {p.tagline}
-              </span>
+            <span className="min-w-0">
+              <span className="block text-2xl font-semibold tracking-tight text-fg">{p.name}</span>
+              <span className="mt-1 block text-[15px] text-fg/50">{p.tagline}</span>
             </span>
           </a>
         ))}
@@ -136,22 +164,41 @@ function ProjectIndex() {
 
 /* ---- per-project kit -------------------------------------------------- */
 
+function ColorBand({ swatch }: { swatch: Swatch }) {
+  const [copied, setCopied] = React.useState(false);
+  const ink = inkFor(swatch.hex);
+  const copy = () => {
+    navigator.clipboard?.writeText(swatch.hex);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1200);
+  };
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      title={`Copy ${swatch.hex}`}
+      className="grid w-full grid-cols-3 items-center px-6 py-5 text-left transition-opacity hover:opacity-95 sm:px-8"
+      style={{ backgroundColor: swatch.hex }}
+    >
+      <span className="truncate text-sm font-medium" style={{ color: ink.fg }}>
+        {swatch.name}
+      </span>
+      <span className="justify-self-center font-mono text-xs" style={{ color: ink.sub }}>
+        {copied ? "Copied" : `# ${swatch.hex.replace("#", "").toUpperCase()}`}
+      </span>
+      <span className="justify-self-end font-mono text-xs" style={{ color: ink.sub }}>
+        {rgbLabel(swatch.hex)}
+      </span>
+    </button>
+  );
+}
+
 function KitView({ project }: { project: Project }) {
-  // NOTE: the detail-page design was stripped intentionally — it's being
-  // rebuilt from a Figma reference. The section components below (SectionRail,
-  // KitSection, LogoTile, LogoAnatomy, LogoUsage, FaviconSizes, …) are kept in
-  // this file, unused, ready to be rewired into the new layout. For now the
-  // page is a blank slate with just the back link + project header.
+  const has = <T,>(v: T[] | undefined): v is T[] => Boolean(v && v.length);
   return (
     <article className="animate-fade-up py-10">
-      <a
-        href="#brand-kits"
-        className="text-xs font-medium text-fg/60 transition-colors hover:text-fg"
-      >
-        ← All projects
-      </a>
-
-      <div className="mt-3 flex flex-wrap items-center gap-4">
+      {/* header — top-left, no eyebrow */}
+      <div className="flex items-center gap-4">
         <span
           className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-semibold text-white [&_svg]:h-7 [&_svg]:w-7"
           style={{ backgroundColor: project.accent }}
@@ -163,10 +210,27 @@ function KitView({ project }: { project: Project }) {
           )}
         </span>
         <div className="min-w-0">
-          <h1 className="text-3xl font-semibold tracking-tight text-fg">{project.name}</h1>
-          <p className="mt-1 text-[15px] text-fg/70">{project.tagline}</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-fg">{project.name}</h1>
+          <p className="mt-0.5 text-[15px] text-fg/50">{project.tagline}</p>
         </div>
       </div>
+
+      {/* Colors — full-width stacked bands */}
+      {has(project.colors) && (
+        <section className="mt-16">
+          <h2 className="text-2xl font-semibold tracking-tight text-fg">Colors</h2>
+          <div className="mt-6 overflow-hidden rounded-xl">
+            {project.colors!.map((c) => (
+              <ColorBand key={c.name} swatch={c} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Font — heading only for now, awaiting the Figma design */}
+      <section className="mt-16">
+        <h2 className="text-2xl font-semibold tracking-tight text-fg">Font</h2>
+      </section>
     </article>
   );
 }
