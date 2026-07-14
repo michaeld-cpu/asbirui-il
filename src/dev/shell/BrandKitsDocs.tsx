@@ -211,7 +211,7 @@ function ProjectIndex() {
         voice, in one place. Open a project for its full identity.
       </p>
 
-      <div className="mt-8 space-y-4">
+      <div className="mt-16 space-y-6">
         {PROJECTS.map((p) => (
           <a
             key={p.slug}
