@@ -117,7 +117,14 @@ const PROJECTS: Project[] = [
       { label: "Text 3", size: 14, lineHeight: "150%", tracking: "-0.5%", weight: 400 },
       { label: "Button text", size: 18, lineHeight: "100%", tracking: "-2.5%", weight: 600, upper: true },
     ],
-    radius: [],
+    radius: [
+      { label: "Pill", value: "100px / 50px" },
+      { label: "Card", value: "24px" },
+      { label: "Panel", value: "12px" },
+      { label: "Icon box", value: "8px" },
+      { label: "Container", value: "max 1500px" },
+      { label: "Section rhythm", value: "8rem 0" },
+    ],
     motion: [],
     voice: "",
     voiceTraits: [],
@@ -285,6 +292,108 @@ function ProjectIndex() {
 
 /* ---- per-project kit -------------------------------------------------- */
 
+/** A labeled logo swatch: a surface tile with the mark, plain caption below. */
+function LogoTile({
+  label,
+  bg,
+  className = "",
+  children,
+}: {
+  label: string;
+  bg?: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div
+        className={`flex h-28 items-center justify-center rounded-xl border border-border px-4 ${className}`}
+        style={bg ? { backgroundColor: bg } : undefined}
+      >
+        {children}
+      </div>
+      <p className="mt-2 text-xs text-fg/50">{label}</p>
+    </div>
+  );
+}
+
+/** Favicon deliverables — a size ladder plus a plain divided file list per
+    platform (no boxy cards; matches the calm section language). */
+function FaviconList({ mark, accent }: { mark: string; accent: string }) {
+  const Tile = ({ px, fill }: { px: number; fill: "bare" | "brand" }) =>
+    fill === "brand" ? (
+      <span
+        className="flex shrink-0 items-center justify-center rounded-[22%]"
+        style={{ width: px, height: px, backgroundColor: accent }}
+      >
+        <span className="text-white" style={{ width: px * 0.62, height: px * 0.62 }}>
+          <Glyph svg={mark} className="[&_svg]:h-full [&_svg]:w-full" />
+        </span>
+      </span>
+    ) : (
+      <span className="shrink-0" style={{ width: px, height: px, color: accent }}>
+        <Glyph svg={mark} className="[&_svg]:h-full [&_svg]:w-full" />
+      </span>
+    );
+
+  const GROUPS: { platform: string; files: { file: string; size: string; use: string; fill: "bare" | "brand" }[] }[] = [
+    {
+      platform: "Browser",
+      files: [
+        { file: "favicon.svg", size: "any", use: "Modern browsers", fill: "bare" },
+        { file: "favicon.ico", size: "16 · 32 · 48", use: "Legacy fallback", fill: "bare" },
+        { file: "favicon-32x32.png", size: "32×32", use: "Tab / retina", fill: "bare" },
+      ],
+    },
+    {
+      platform: "Apple · Android · PWA",
+      files: [
+        { file: "apple-touch-icon.png", size: "180×180", use: "iOS home screen", fill: "brand" },
+        { file: "icon-192.png", size: "192×192", use: "Android / manifest", fill: "brand" },
+        { file: "icon-512.png", size: "512×512", use: "Splash / install", fill: "brand" },
+        { file: "icon-maskable-512.png", size: "512×512", use: "Maskable adaptive", fill: "brand" },
+      ],
+    },
+  ];
+
+  return (
+    <div className="mt-6 space-y-8">
+      {/* size ladder */}
+      <div className="flex items-end gap-6 overflow-x-auto pb-1">
+        {[16, 32, 48, 64, 96].map((px) => (
+          <div key={px} className="flex shrink-0 flex-col items-center gap-2">
+            <Tile px={px} fill="bare" />
+            <span className="text-[11px] text-fg/45">{px}px</span>
+          </div>
+        ))}
+      </div>
+
+      {/* per-platform file lists */}
+      <div className="grid gap-x-12 gap-y-8 sm:grid-cols-2">
+        {GROUPS.map((g) => (
+          <div key={g.platform}>
+            <p className="text-sm font-medium text-fg">{g.platform}</p>
+            <ul className="mt-3 divide-y divide-border border-t border-border">
+              {g.files.map((f) => (
+                <li key={f.file} className="flex items-center gap-3 py-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+                    <Tile px={f.fill === "brand" ? 36 : 26} fill={f.fill} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-mono text-xs text-fg/85">{f.file}</span>
+                    <span className="mt-0.5 block truncate text-[11px] text-fg/50">{f.use}</span>
+                  </span>
+                  <span className="shrink-0 font-mono text-[11px] text-fg/45">{f.size}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const SearchIcon = (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
@@ -368,6 +477,11 @@ function KitView({ project }: { project: Project }) {
   const sections = [
     ...(has(project.colorFamilies) ? [{ id: "colors", label: "Colors" }] : []),
     { id: "font", label: "Font" },
+    ...(project.logomark ? [{ id: "logo", label: "Logo" }] : []),
+    ...(project.logomark ? [{ id: "anatomy", label: "Logo anatomy" }] : []),
+    ...(project.logomark ? [{ id: "usage", label: "Logo usage" }] : []),
+    ...(project.logomark ? [{ id: "favicon", label: "Favicon" }] : []),
+    ...(has(project.radius) ? [{ id: "layout", label: "Layout & radius" }] : []),
   ];
 
   return (
@@ -515,6 +629,131 @@ function KitView({ project }: { project: Project }) {
               </div>
             )}
           </section>
+
+          {/* Logo — mark variants + the wordmark */}
+          {project.logomark && (
+            <section id="logo" className="scroll-mt-24 border-t border-border pt-14">
+              <h2 className="text-2xl font-semibold tracking-tight text-fg">Logo</h2>
+              <p className="mt-1.5 text-sm text-fg/50">Mark variants and the full wordmark.</p>
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <LogoTile label="Primary" bg={project.accent}>
+                  <span
+                    className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white [&_svg]:h-8 [&_svg]:w-8"
+                    style={{ color: project.accent }}
+                  >
+                    <Glyph svg={project.logomark} />
+                  </span>
+                </LogoTile>
+                <LogoTile label="Secondary" className="bg-neutral-950">
+                  <span className="[&_svg]:h-11 [&_svg]:w-11" style={{ color: project.accent }}>
+                    <Glyph svg={project.logomark} />
+                  </span>
+                </LogoTile>
+                <LogoTile label="Tertiary" className="bg-neutral-100">
+                  <span className="text-neutral-900 [&_svg]:h-11 [&_svg]:w-11">
+                    <Glyph svg={project.logomark} />
+                  </span>
+                </LogoTile>
+                <LogoTile label="Wordmark" className="bg-canvas">
+                  {project.logoWordmark ? (
+                    <Glyph svg={project.logoWordmark} className="text-fg [&_svg]:h-5 [&_svg]:w-auto" />
+                  ) : (
+                    <span className="text-base font-semibold text-fg">{project.name}</span>
+                  )}
+                </LogoTile>
+              </div>
+            </section>
+          )}
+
+          {/* Logo anatomy — clear space + min size, honest & minimal */}
+          {project.logomark && (
+            <section id="anatomy" className="scroll-mt-24 border-t border-border pt-14">
+              <h2 className="text-2xl font-semibold tracking-tight text-fg">Logo anatomy</h2>
+              <p className="mt-1.5 text-sm text-fg/50">Give the mark room to breathe; don't shrink it too far.</p>
+              <div className="mt-6 grid gap-8 sm:grid-cols-[auto_1fr] sm:items-center">
+                <div className="flex items-center justify-center rounded-xl border border-border bg-canvas px-10 py-12">
+                  <div className="relative inline-flex p-9">
+                    <span className="pointer-events-none absolute inset-0 rounded-lg border border-dashed border-fg/20" />
+                    <span className="[&_svg]:h-16 [&_svg]:w-16" style={{ color: project.accent }}>
+                      <Glyph svg={project.logomark} />
+                    </span>
+                  </div>
+                </div>
+                <dl className="space-y-5 text-sm">
+                  <div>
+                    <dt className="font-medium text-fg">Clear space</dt>
+                    <dd className="mt-1 text-fg/55">Keep empty space around the mark equal to at least half its width — the dashed frame.</dd>
+                  </div>
+                  <div>
+                    <dt className="font-medium text-fg">Minimum size</dt>
+                    <dd className="mt-1 text-fg/55">Don't place the mark below <span className="font-medium text-fg">16px</span>; the ribbons stop reading.</dd>
+                  </div>
+                </dl>
+              </div>
+            </section>
+          )}
+
+          {/* Logo usage — plain do / don't */}
+          {project.logomark && (
+            <section id="usage" className="scroll-mt-24 border-t border-border pt-14">
+              <h2 className="text-2xl font-semibold tracking-tight text-fg">Logo usage</h2>
+              <p className="mt-1.5 text-sm text-fg/50">A few things to do — and not do — with the mark.</p>
+              <div className="mt-6 grid gap-x-10 gap-y-6 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm font-medium text-fg">Do</p>
+                  <div className="mt-3 flex h-28 items-center justify-center rounded-xl border border-border bg-canvas">
+                    <span className="[&_svg]:h-11 [&_svg]:w-11" style={{ color: project.accent }}>
+                      <Glyph svg={project.logomark} />
+                    </span>
+                  </div>
+                  <p className="mt-3 text-sm text-fg/55">Use the approved marks — one color, upright, with enough contrast.</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-fg">Don't</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {[
+                      { label: "Recolor the ribbons", style: { color: "#22d3ee" } },
+                      { label: "Stretch or squash", style: { color: project.accent, transform: "scaleX(1.7)" } },
+                      { label: "Rotate or flip", style: { color: project.accent, transform: "rotate(24deg)" } },
+                      { label: "Add shadows / effects", style: { color: project.accent, filter: "drop-shadow(0 2px 5px rgba(255,255,255,0.55))" } },
+                    ].map((d) => (
+                      <div key={d.label} className="flex h-28 flex-col items-center justify-center gap-2.5 rounded-xl border border-border bg-canvas px-2 text-center">
+                        <span className="[&_svg]:h-9 [&_svg]:w-9" style={d.style as React.CSSProperties}>
+                          <Glyph svg={project.logomark!} />
+                        </span>
+                        <span className="text-[11px] leading-tight text-fg/55">{d.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Favicon — dev deliverables, plain divided list per platform */}
+          {project.logomark && (
+            <section id="favicon" className="scroll-mt-24 border-t border-border pt-14">
+              <h2 className="text-2xl font-semibold tracking-tight text-fg">Favicon</h2>
+              <p className="mt-1.5 text-sm text-fg/50">The icon files to ship, by platform. Export them all from a 256px master.</p>
+              <FaviconList mark={project.logomark} accent={project.accent} />
+            </section>
+          )}
+
+          {/* Layout & radius — plain label/value columns */}
+          {has(project.radius) && (
+            <section id="layout" className="scroll-mt-24 border-t border-border pt-14">
+              <h2 className="text-2xl font-semibold tracking-tight text-fg">Layout &amp; radius</h2>
+              <p className="mt-1.5 text-sm text-fg/50">Corner radii, container, and rhythm.</p>
+              <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-5 sm:grid-cols-3">
+                {project.radius!.map((r) => (
+                  <div key={r.label}>
+                    <dt className="text-xs text-fg/45">{r.label}</dt>
+                    <dd className="mt-1 font-mono text-sm text-fg">{r.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )}
         </div>
       </div>
     </article>
