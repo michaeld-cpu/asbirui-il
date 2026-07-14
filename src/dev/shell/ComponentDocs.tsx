@@ -378,16 +378,29 @@ const PER_PAGE = 12;
     handled for keyboard. */
 function ComponentGalleryCard({ entry }: { entry: ComponentEntry }) {
   const boxRef = React.useRef<HTMLDivElement | null>(null);
-  const [scale, setScale] = React.useState(0.75);
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = React.useState(1);
   const DESIGN_W = 360; // width the demo renders at before scaling to fit
+  const STAGE_PAD = 24; // breathing room so nothing kisses the stage edges
 
+  // Fit the (fixed design-width) demo into the stage on BOTH axes, so a tall
+  // demo (Accordion, Timeline) scales down to fit instead of being cropped by
+  // the stage's overflow-hidden. Never scale up past 1.
   React.useEffect(() => {
     const box = boxRef.current;
-    if (!box) return;
-    const update = () => setScale(Math.min(1, box.clientWidth / DESIGN_W));
+    const content = contentRef.current;
+    if (!box || !content) return;
+    const update = () => {
+      const availW = box.clientWidth - STAGE_PAD * 2;
+      const availH = box.clientHeight - STAGE_PAD * 2;
+      const rawH = content.scrollHeight || 1;
+      const next = Math.min(1, availW / DESIGN_W, availH / rawH);
+      setScale(next > 0 ? next : 1);
+    };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(box);
+    ro.observe(content);
     return () => ro.disconnect();
   }, []);
 
@@ -409,9 +422,10 @@ function ComponentGalleryCard({ entry }: { entry: ComponentEntry }) {
       }}
       className="flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-canvas outline-none transition-colors hover:border-fg/20 focus-visible:ring-2 focus-visible:ring-ring"
     >
-      {/* thumbnail stage — clips a scaled, non-interactive default render */}
-      <div ref={boxRef} className="relative flex h-40 items-center justify-center overflow-hidden border-b border-border">
+      {/* thumbnail stage — scales a non-interactive default render to fit both axes */}
+      <div ref={boxRef} className="relative flex h-52 items-center justify-center overflow-hidden border-b border-border">
         <div
+          ref={contentRef}
           aria-hidden="true"
           className="pointer-events-none absolute left-1/2 top-1/2 origin-center"
           style={{ width: DESIGN_W, transform: `translate(-50%, -50%) scale(${scale})` }}
