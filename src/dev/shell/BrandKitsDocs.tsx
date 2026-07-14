@@ -253,8 +253,84 @@ function ProjectIndex() {
 
 /* ---- per-project kit -------------------------------------------------- */
 
+const SearchIcon = (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" />
+  </svg>
+);
+
+/** Left column: a search box over a section nav rail with scrollspy. Typing
+    filters the rail; clicking a section jumps to it; the rail highlights the
+    section currently in view. Built to scale as more sections are added. */
+function KitRail({ sections }: { sections: { id: string; label: string }[] }) {
+  const [query, setQuery] = React.useState("");
+  const [active, setActive] = React.useState(sections[0]?.id);
+
+  // scrollspy: the last section whose top has passed ~30% down the viewport wins
+  React.useEffect(() => {
+    const els = sections
+      .map((s) => document.getElementById(s.id))
+      .filter((el): el is HTMLElement => Boolean(el));
+    if (!els.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setActive(visible[0].target.id);
+      },
+      { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [sections]);
+
+  const shown = sections.filter((s) => s.label.toLowerCase().includes(query.toLowerCase().trim()));
+
+  return (
+    <div className="lg:sticky lg:top-24">
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-fg/40">
+          {SearchIcon}
+        </span>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search…"
+          className="w-full rounded-full border border-border bg-panel py-2.5 pl-10 pr-4 text-sm text-fg placeholder:text-fg/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      </div>
+      <nav className="mt-5 space-y-0.5">
+        {shown.map((s) => (
+          <a
+            key={s.id}
+            href={`#${s.id}`}
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+            className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
+              active === s.id ? "bg-overlay/[0.06] font-medium text-fg" : "text-fg/60 hover:text-fg"
+            }`}
+          >
+            {s.label}
+          </a>
+        ))}
+        {!shown.length && <p className="px-3 py-2 text-sm text-fg/40">No matches</p>}
+      </nav>
+    </div>
+  );
+}
+
 function KitView({ project }: { project: Project }) {
   const has = <T,>(v: T[] | undefined): v is T[] => Boolean(v && v.length);
+
+  // rail entries — only sections that actually render (grows as we add more)
+  const sections = [
+    ...(has(project.colorFamilies) ? [{ id: "colors", label: "Colors" }] : []),
+    { id: "font", label: "Font" },
+  ];
 
   return (
     <article className="animate-fade-up pb-10 pt-16 lg:pt-20">
@@ -276,64 +352,68 @@ function KitView({ project }: { project: Project }) {
         </div>
       </div>
 
-      {/* plain stacked sections — no rail, no boxes; dividers do the work */}
-      <div className="mt-14 space-y-14">
-        {/* Colors — a generated 50→950 ramp per brand hue */}
-        {has(project.colorFamilies) && (
-          <section>
-            <h2 className="text-2xl font-semibold tracking-tight text-fg">Colors</h2>
-            <p className="mt-1.5 text-sm text-fg/50">
-              Each brand hue as a 50→950 ramp. Click any swatch to copy its hex.
-            </p>
-            <div className="mt-6 space-y-5">
-              {project.colorFamilies!.map((f) => (
-                <FamilyRow key={f.name} family={f} />
-              ))}
-            </div>
-          </section>
-        )}
+      {/* search + scrollspy rail | plain stacked content (no boxes) */}
+      <div className="mt-12 grid gap-8 lg:grid-cols-[15rem_1fr] lg:gap-12">
+        <KitRail sections={sections} />
 
-        {/* Font — real typefaces as live specimens, divided rows (no cards) */}
-        <section className="border-t border-border pt-14">
-          <h2 className="text-2xl font-semibold tracking-tight text-fg">Font</h2>
-          {has(project.fonts) ? (
-            <div className="mt-6 divide-y divide-border">
-              {project.fonts!.map((f) => (
-                <div key={f.family} className="py-8 first:pt-0">
-                  <p className="text-xs text-fg/45">{f.role}</p>
-                  {/* big live specimen */}
-                  <div
-                    className="mt-2 text-fg"
-                    style={{
-                      fontFamily: f.stack,
-                      fontSize: "clamp(2.25rem, 5vw, 3rem)",
-                      fontWeight: 500,
-                      letterSpacing: f.mono ? "0" : "-0.02em",
-                      lineHeight: 1.1,
-                    }}
-                  >
-                    {f.family}
-                  </div>
-                  {/* alphabet / sample run */}
-                  <div
-                    className="mt-3 text-fg/55"
-                    style={{ fontFamily: f.stack, fontSize: "16px", lineHeight: 1.5 }}
-                  >
-                    {f.mono
-                      ? "0123456789 { } < /> $ npm i @asbirtech/asbir-ui"
-                      : "ABCDEFGHIJKLM abcdefghijklm 0123456789"}
-                  </div>
-                  {/* metadata */}
-                  <p className="mt-3 text-xs text-fg/50">
-                    {f.source} · {f.weights}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-1.5 text-sm text-fg/50">Coming soon.</p>
+        <div className="min-w-0 space-y-14">
+          {/* Colors — a generated 50→950 ramp per brand hue */}
+          {has(project.colorFamilies) && (
+            <section id="colors" className="scroll-mt-24">
+              <h2 className="text-2xl font-semibold tracking-tight text-fg">Colors</h2>
+              <p className="mt-1.5 text-sm text-fg/50">
+                Each brand hue as a 50→950 ramp. Click any swatch to copy its hex.
+              </p>
+              <div className="mt-6 space-y-5">
+                {project.colorFamilies!.map((f) => (
+                  <FamilyRow key={f.name} family={f} />
+                ))}
+              </div>
+            </section>
           )}
-        </section>
+
+          {/* Font — real typefaces as live specimens, divided rows (no cards) */}
+          <section id="font" className="scroll-mt-24 border-t border-border pt-14">
+            <h2 className="text-2xl font-semibold tracking-tight text-fg">Font</h2>
+            {has(project.fonts) ? (
+              <div className="mt-6 divide-y divide-border">
+                {project.fonts!.map((f) => (
+                  <div key={f.family} className="py-8 first:pt-0">
+                    <p className="text-xs text-fg/45">{f.role}</p>
+                    {/* big live specimen */}
+                    <div
+                      className="mt-2 text-fg"
+                      style={{
+                        fontFamily: f.stack,
+                        fontSize: "clamp(2.25rem, 5vw, 3rem)",
+                        fontWeight: 500,
+                        letterSpacing: f.mono ? "0" : "-0.02em",
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      {f.family}
+                    </div>
+                    {/* alphabet / sample run */}
+                    <div
+                      className="mt-3 text-fg/55"
+                      style={{ fontFamily: f.stack, fontSize: "16px", lineHeight: 1.5 }}
+                    >
+                      {f.mono
+                        ? "0123456789 { } < /> $ npm i @asbirtech/asbir-ui"
+                        : "ABCDEFGHIJKLM abcdefghijklm 0123456789"}
+                    </div>
+                    {/* metadata */}
+                    <p className="mt-3 text-xs text-fg/50">
+                      {f.source} · {f.weights}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-1.5 text-sm text-fg/50">Coming soon.</p>
+            )}
+          </section>
+        </div>
       </div>
     </article>
   );
