@@ -482,11 +482,6 @@ function MotionDetail({ demo }: { demo: MotionDemo }) {
 
       <h2 className="mt-10 text-lg font-semibold tracking-tight text-fg">Usage</h2>
       <CodeBlock code={demo.code} />
-
-      <div className="mt-4 flex flex-wrap gap-2 text-xs">
-        <code className="rounded-md border border-border bg-panel px-2 py-1 text-fg/70">import &#123; {demo.name.replace(/\s|&/g, "")} &#125; from "@asbirtech/asbir-ui/motion"</code>
-        <code className="rounded-md border border-border bg-panel px-2 py-1 text-fg/70">import "@asbirtech/asbir-ui/motion.css"</code>
-      </div>
     </>
   );
 }
