@@ -171,8 +171,10 @@ function FamilyRow({ family }: { family: { name: string; base: string } }) {
   return (
     <div>
       <p className="mb-2 text-sm font-semibold text-fg">{family.name}</p>
-      <div>
-        <div className="grid grid-cols-[repeat(11,minmax(0,1fr))] gap-1.5">
+      {/* fixed-size square chips that WRAP — the full hex always fits (never
+          truncated); on narrow screens the row wraps to fewer per line rather
+          than shrinking the cubes. */}
+      <div className="flex flex-wrap gap-1.5">
           {ramp.map((hex, i) => {
             const ink = inkFor(hex);
             const step = RAMP_STEPS[i];
@@ -184,17 +186,17 @@ function FamilyRow({ family }: { family: { name: string; base: string } }) {
                 onClick={() => copy(hex)}
                 title={`${family.name}-${step} — click to copy ${hex}`}
                 aria-label={`${family.name} ${step}, ${hex}`}
-                className="group relative flex aspect-square min-w-0 flex-col justify-end overflow-hidden rounded-lg p-1 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
+                className="group relative flex h-[72px] w-[72px] shrink-0 flex-col justify-end overflow-hidden rounded-lg p-2 text-left outline-none ring-1 ring-inset ring-black/[0.06] transition-[box-shadow] hover:ring-2 hover:ring-fg/40 focus-visible:ring-2 focus-visible:ring-fg/60 dark:ring-white/[0.08]"
                 style={{ backgroundColor: hex }}
               >
                 <span
-                  className={`text-[10px] font-semibold leading-none transition-opacity ${isCopied ? "opacity-0" : ""}`}
+                  className={`text-[11px] font-semibold leading-none transition-opacity ${isCopied ? "opacity-0" : ""}`}
                   style={{ color: ink.fg }}
                 >
                   {step}
                 </span>
                 <span
-                  className={`mt-0.5 font-mono text-[8px] leading-none transition-opacity ${isCopied ? "opacity-0" : ""}`}
+                  className={`mt-1 font-mono text-[10px] leading-none transition-opacity ${isCopied ? "opacity-0" : ""}`}
                   style={{ color: ink.sub }}
                 >
                   {hex}
@@ -210,7 +212,6 @@ function FamilyRow({ family }: { family: { name: string; base: string } }) {
               </button>
             );
           })}
-        </div>
       </div>
     </div>
   );
@@ -265,25 +266,31 @@ const SearchIcon = (
 function KitRail({ sections }: { sections: { id: string; label: string }[] }) {
   const [query, setQuery] = React.useState("");
   const [active, setActive] = React.useState(sections[0]?.id);
+  // depend on the id list (stable string) rather than the array identity, which
+  // is recreated every parent render and would thrash the effect.
+  const ids = sections.map((s) => s.id).join(",");
 
-  // scrollspy: the last section whose top has passed ~30% down the viewport wins
+  // scrollspy: on every scroll pick the last section whose top has crossed a
+  // line ~28% down the viewport — reliable and highlights on first paint.
   React.useEffect(() => {
-    const els = sections
-      .map((s) => document.getElementById(s.id))
-      .filter((el): el is HTMLElement => Boolean(el));
-    if (!els.length) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, [sections]);
+    const idList = ids ? ids.split(",") : [];
+    const compute = () => {
+      const line = window.innerHeight * 0.28;
+      let current = idList[0];
+      for (const id of idList) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= line) current = id;
+      }
+      if (current) setActive(current);
+    };
+    compute();
+    window.addEventListener("scroll", compute, { passive: true });
+    window.addEventListener("resize", compute);
+    return () => {
+      window.removeEventListener("scroll", compute);
+      window.removeEventListener("resize", compute);
+    };
+  }, [ids]);
 
   const shown = sections.filter((s) => s.label.toLowerCase().includes(query.toLowerCase().trim()));
 
