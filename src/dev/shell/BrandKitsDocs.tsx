@@ -824,18 +824,31 @@ function KitView({ project }: { project: Project }) {
               <h2 className="text-2xl font-semibold tracking-tight text-fg">Layout &amp; radius</h2>
               <p className="mt-1.5 text-sm text-fg/50">Corner radii, container, and rhythm.</p>
 
-              {/* corner radii — dashed ghost rounded-rect per step */}
-              <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                {project.radius!.filter((r) => r.px != null).map((r) => (
-                  <div key={r.label}>
-                    <div
-                      className="flex h-24 w-full items-center justify-center border border-dashed border-fg/25 bg-fg/[0.04]"
-                      style={{ borderRadius: Math.min(r.px!, 48) }}
-                    />
-                    <p className="mt-2 text-xs text-fg/45">{r.label}</p>
-                    <p className="font-mono text-sm text-fg">{r.value}</p>
-                  </div>
-                ))}
+              {/* corner radii — small dashed ghost rounded-rect per step */}
+              <div className="mt-6 flex flex-wrap gap-x-10 gap-y-6">
+                {project.radius!.filter((r) => r.px != null).map((r) => {
+                  const box = 64; // swatch px
+                  const rad = Math.min(r.px!, box / 2);
+                  return (
+                    <div key={r.label}>
+                      <svg width={box} height={box} viewBox={`0 0 ${box} ${box}`} className="block">
+                        <rect
+                          x="1"
+                          y="1"
+                          width={box - 2}
+                          height={box - 2}
+                          rx={rad}
+                          fill="rgb(var(--fg-rgb) / 0.05)"
+                          stroke="rgb(var(--fg-rgb) / 0.3)"
+                          strokeWidth="1"
+                          strokeDasharray="5 4"
+                        />
+                      </svg>
+                      <p className="mt-2 text-xs text-fg/45">{r.label}</p>
+                      <p className="font-mono text-sm text-fg">{r.value}</p>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* container / rhythm — plain label/value */}
