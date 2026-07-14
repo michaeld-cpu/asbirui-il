@@ -225,16 +225,14 @@ function KitSection({
 }
 
 /** A labeled logo swatch: a fixed-height stage that shows the mark/lockup on a
-    given surface, with a caption row (variant name + tone note) beneath. */
+    given surface, with a caption row (variant name) beneath. */
 function LogoTile({
   label,
-  tone,
   bg,
   className = "",
   children,
 }: {
   label: string;
-  tone: string;
   /** explicit background color (overrides className bg) */
   bg?: string;
   className?: string;
@@ -250,7 +248,220 @@ function LogoTile({
       </div>
       <div className="border-t border-border bg-panel px-3 py-2">
         <p className="text-xs font-medium text-fg">{label}</p>
-        <p className="mt-0.5 text-[10px] uppercase tracking-wide text-fg/50">{tone}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ---- logo anatomy (construction diagram) ------------------------------ */
+
+/** A spec-sheet style construction diagram: the mark on a measured grid with
+    guide lines, an x-unit scale, and clear-space padding — in the vein of the
+    classic NASA / Saturn logo blueprints. Drawn on a dark card so the white
+    construction lines and the mark read like a technical drawing. */
+function LogoAnatomy({ mark, accent }: { mark?: string; accent: string }) {
+  // the mark sits in a 26×24 viewBox; we frame it in a padded grid and hang
+  // dimension rules off the bounding box. Units are expressed in "x" (one grid
+  // cell) so the proportions are resolution-independent.
+  const stroke = "rgba(255,255,255,0.28)";
+  const faint = "rgba(255,255,255,0.10)";
+  const tick = "rgba(255,255,255,0.6)";
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-neutral-950">
+      {/* spec header bar */}
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5 text-[11px] font-medium text-white/70">
+        <span className="font-semibold text-white">Mark construction</span>
+        <span className="hidden sm:inline">Grid · x = 1 unit</span>
+        <span className="font-mono">viewBox 26×24</span>
+      </div>
+
+      <div className="relative px-6 py-10 sm:px-10">
+        {/* dotted background grid */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.5]"
+          style={{
+            backgroundImage: `radial-gradient(${faint} 1px, transparent 1px)`,
+            backgroundSize: "22px 22px",
+          }}
+        />
+
+        <div className="relative mx-auto flex max-w-md items-center justify-center">
+          {/* the construction stage: mark + overlaid guides share one square box */}
+          <div className="relative aspect-square w-full max-w-[22rem]">
+            {/* guide overlay */}
+            <svg
+              viewBox="0 0 120 120"
+              className="absolute inset-0 h-full w-full"
+              fill="none"
+              aria-hidden="true"
+            >
+              {/* clear-space frame (1x padding around the mark box) */}
+              <rect x="20" y="20" width="80" height="80" stroke={faint} strokeWidth="0.5" strokeDasharray="3 3" />
+              {/* mark bounding box */}
+              <rect x="34" y="30" width="52" height="60" stroke={stroke} strokeWidth="0.6" />
+              {/* thirds grid inside the box */}
+              <line x1="34" y1="50" x2="86" y2="50" stroke={faint} strokeWidth="0.5" />
+              <line x1="34" y1="70" x2="86" y2="70" stroke={faint} strokeWidth="0.5" />
+              <line x1="51.3" y1="30" x2="51.3" y2="90" stroke={faint} strokeWidth="0.5" />
+              <line x1="68.6" y1="30" x2="68.6" y2="90" stroke={faint} strokeWidth="0.5" />
+              {/* center axis */}
+              <line x1="60" y1="24" x2="60" y2="96" stroke={faint} strokeWidth="0.5" strokeDasharray="2 2" />
+              {/* apex construction circle */}
+              <circle cx="60" cy="42" r="9" stroke={stroke} strokeWidth="0.6" />
+
+              {/* right-side dimension rule: total height = "3x" */}
+              <line x1="95" y1="30" x2="95" y2="90" stroke={tick} strokeWidth="0.5" />
+              <line x1="92" y1="30" x2="98" y2="30" stroke={tick} strokeWidth="0.5" />
+              <line x1="92" y1="90" x2="98" y2="90" stroke={tick} strokeWidth="0.5" />
+              <text x="101" y="62" fill="rgba(255,255,255,0.75)" fontSize="6" fontFamily="ui-monospace, monospace">3x</text>
+
+              {/* bottom dimension rule: width = "2.6x" */}
+              <line x1="34" y1="103" x2="86" y2="103" stroke={tick} strokeWidth="0.5" />
+              <line x1="34" y1="100" x2="34" y2="106" stroke={tick} strokeWidth="0.5" />
+              <line x1="86" y1="100" x2="86" y2="106" stroke={tick} strokeWidth="0.5" />
+              <text x="55" y="113" fill="rgba(255,255,255,0.75)" fontSize="6" fontFamily="ui-monospace, monospace">2.6x</text>
+
+              {/* clear-space callout on the top edge */}
+              <line x1="20" y1="14" x2="34" y2="14" stroke={tick} strokeWidth="0.5" />
+              <line x1="20" y1="11" x2="20" y2="17" stroke={tick} strokeWidth="0.5" />
+              <line x1="34" y1="11" x2="34" y2="17" stroke={tick} strokeWidth="0.5" />
+              <text x="22" y="10" fill="rgba(255,255,255,0.6)" fontSize="5" fontFamily="ui-monospace, monospace">1x clear</text>
+            </svg>
+
+            {/* the mark itself, aligned to the bounding box (34..86 wide of 120) */}
+            <div
+              className="absolute [&_svg]:h-full [&_svg]:w-full"
+              style={{
+                left: `${(34 / 120) * 100}%`,
+                top: `${(30 / 120) * 100}%`,
+                width: `${(52 / 120) * 100}%`,
+                height: `${(60 / 120) * 100}%`,
+                color: accent,
+              }}
+            >
+              {mark ? <Glyph svg={mark} /> : null}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* proportions footnote */}
+      <div className="grid grid-cols-2 gap-px border-t border-white/10 bg-white/10 sm:grid-cols-4">
+        {[
+          { k: "Height", v: "3x" },
+          { k: "Width", v: "2.6x" },
+          { k: "Clear space", v: "1x" },
+          { k: "Min size", v: "16px" },
+        ].map((f) => (
+          <div key={f.k} className="bg-neutral-950 px-3 py-2.5">
+            <p className="text-[10px] uppercase tracking-wide text-white/45">{f.k}</p>
+            <p className="mt-0.5 font-mono text-sm text-white">{f.v}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---- logo usage (clear space, min size, do / don't) ------------------- */
+
+function LogoUsage({ mark, accent }: { mark?: string; accent: string }) {
+  const MarkSpan = ({ className = "" }: { className?: string }) =>
+    mark ? <Glyph svg={mark} className={className} /> : null;
+
+  const DONTS = [
+    { title: "Don't recolor", desc: "Keep the mark one color — never split or fill the ribbons." },
+    { title: "Don't stretch", desc: "Scale proportionally; never squash or stretch the glyph." },
+    { title: "Don't rotate", desc: "The mark always sits upright — no tilt or flip." },
+    { title: "Don't add effects", desc: "No drop shadows, bevels, or outlines on the mark." },
+  ];
+
+  return (
+    <div className="space-y-2.5">
+      {/* clear space + min size */}
+      <div className="grid gap-2.5 sm:grid-cols-2">
+        {/* clear space */}
+        <div className="overflow-hidden rounded-xl border border-border">
+          <div className="flex h-44 items-center justify-center bg-canvas p-4">
+            <div className="relative">
+              {/* 1x clear-space frame around the mark */}
+              <div className="absolute -inset-6 rounded-lg border border-dashed border-fg/25" />
+              <span className="[&_svg]:h-12 [&_svg]:w-12" style={{ color: accent }}>
+                <MarkSpan />
+              </span>
+            </div>
+          </div>
+          <div className="border-t border-border bg-panel px-3 py-2">
+            <p className="text-xs font-medium text-fg">Clear space</p>
+            <p className="mt-0.5 text-[11px] text-fg/55">
+              Leave at least 1x (the mark's own width) of empty space on every side.
+            </p>
+          </div>
+        </div>
+
+        {/* min size */}
+        <div className="overflow-hidden rounded-xl border border-border">
+          <div className="flex h-44 items-end justify-center gap-6 bg-canvas p-4">
+            <span className="[&_svg]:h-12 [&_svg]:w-12" style={{ color: accent }}>
+              <MarkSpan />
+            </span>
+            <span className="[&_svg]:h-4 [&_svg]:w-4" style={{ color: accent }}>
+              <MarkSpan />
+            </span>
+          </div>
+          <div className="border-t border-border bg-panel px-3 py-2">
+            <p className="text-xs font-medium text-fg">Minimum size</p>
+            <p className="mt-0.5 text-[11px] text-fg/55">
+              Never render the mark below 16px — smaller and the ribbons collapse.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* do / don't */}
+      <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
+        {/* the one "do" */}
+        <div className="overflow-hidden rounded-xl border border-emerald-500/30">
+          <div className="relative flex h-28 items-center justify-center bg-neutral-950">
+            <span className="[&_svg]:h-11 [&_svg]:w-11" style={{ color: accent }}>
+              <MarkSpan />
+            </span>
+            <span className="absolute right-2 top-2 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-400">
+              Do
+            </span>
+          </div>
+          <div className="border-t border-border bg-panel px-3 py-2">
+            <p className="text-xs font-medium text-fg">Use the approved marks</p>
+            <p className="mt-0.5 text-[11px] text-fg/55">One color, upright, on adequate contrast.</p>
+          </div>
+        </div>
+
+        {/* the don'ts */}
+        {DONTS.map((d, i) => (
+          <div key={d.title} className="overflow-hidden rounded-xl border border-rose-500/25">
+            <div className="relative flex h-28 items-center justify-center bg-neutral-950">
+              <span
+                className="[&_svg]:h-11 [&_svg]:w-11"
+                style={{
+                  color: i === 0 ? "#22d3ee" : accent,
+                  transform:
+                    i === 1 ? "scaleX(1.7)" : i === 2 ? "rotate(24deg)" : undefined,
+                  filter: i === 3 ? "drop-shadow(0 3px 5px rgba(255,255,255,0.5))" : undefined,
+                }}
+              >
+                <MarkSpan />
+              </span>
+              <span className="absolute right-2 top-2 rounded-full bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-400">
+                Don't
+              </span>
+            </div>
+            <div className="border-t border-border bg-panel px-3 py-2">
+              <p className="text-xs font-medium text-fg">{d.title}</p>
+              <p className="mt-0.5 text-[11px] text-fg/55">{d.desc}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -269,6 +480,8 @@ function KitView({ project }: { project: Project }) {
     { id: "gradients", label: "Gradients" },
     { id: "typography", label: "Typography" },
     { id: "logo", label: "Logo" },
+    { id: "anatomy", label: "Logo anatomy" },
+    { id: "usage", label: "Logo usage" },
     { id: "layout", label: "Layout & radius" },
     { id: "motion", label: "Motion" },
     { id: "voice", label: "Brand voice" },
@@ -423,7 +636,7 @@ function KitView({ project }: { project: Project }) {
               {/* Primary — the mark in a white chip on the brand orange, so the
                   glyph reads as one clean solid mark (no orange showing through
                   the ribbon gaps). */}
-              <LogoTile label="Primary" tone="Mark · on brand" bg={project.accent}>
+              <LogoTile label="Primary" bg={project.accent}>
                 <span
                   className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white [&_svg]:h-9 [&_svg]:w-9"
                   style={{ color: project.accent }}
@@ -432,19 +645,19 @@ function KitView({ project }: { project: Project }) {
                 </span>
               </LogoTile>
               {/* Secondary — orange mark on a dark surface */}
-              <LogoTile label="Secondary" tone="Mark · on dark" className="bg-neutral-950">
+              <LogoTile label="Secondary" className="bg-neutral-950">
                 <span className="[&_svg]:h-12 [&_svg]:w-12" style={{ color: project.accent }}>
                   <Mark />
                 </span>
               </LogoTile>
               {/* Tertiary — monochrome mark on a light neutral */}
-              <LogoTile label="Tertiary" tone="Mark · monochrome" className="bg-neutral-100">
+              <LogoTile label="Tertiary" className="bg-neutral-100">
                 <span className="text-neutral-900 [&_svg]:h-12 [&_svg]:w-12">
                   <Mark />
                 </span>
               </LogoTile>
               {/* Wordmark — full lockup on the canvas surface */}
-              <LogoTile label="Wordmark" tone="Full lockup" className="bg-canvas">
+              <LogoTile label="Wordmark" className="bg-canvas">
                 {project.logoWordmark ? (
                   <Glyph svg={project.logoWordmark} className="text-fg [&_svg]:h-6 [&_svg]:w-auto" />
                 ) : (
@@ -452,6 +665,24 @@ function KitView({ project }: { project: Project }) {
                 )}
               </LogoTile>
             </div>
+          </KitSection>
+
+          {/* Logo anatomy — construction diagram of the mark */}
+          <KitSection
+            id="anatomy"
+            title="Logo anatomy"
+            desc="How the mark is built — proportions, grid, and clear space, measured in x units."
+          >
+            <LogoAnatomy mark={project.logomark} accent={project.accent} />
+          </KitSection>
+
+          {/* Logo usage — clear space, min size, do / don't */}
+          <KitSection
+            id="usage"
+            title="Logo usage"
+            desc="Keep the mark legible and consistent. Follow the rules below."
+          >
+            <LogoUsage mark={project.logomark} accent={project.accent} />
           </KitSection>
 
           {/* Layout & radius */}
