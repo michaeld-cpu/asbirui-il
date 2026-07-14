@@ -179,7 +179,7 @@ function KpiStrip() {
   ];
 
   return (
-    <div className="grid grid-cols-4 overflow-hidden rounded-2xl bg-white shadow-[0_20px_40px_-24px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/70 divide-x divide-slate-100">
+    <div className="grid grid-cols-2 divide-x divide-y divide-slate-100 overflow-hidden rounded-2xl bg-white shadow-[0_20px_40px_-24px_rgba(15,23,42,0.06)] ring-1 ring-slate-200/70 lg:grid-cols-4 lg:divide-y-0">
       {cards.map((c) => {
         const up = c.trend >= 0;
         const trendTone = up
@@ -875,7 +875,7 @@ export function TripketDashboard() {
       {/* KPI strip — anti-card grouping with divide-x hairlines; flat surface, no shadow */}
       <KpiStrip />
 
-      <div className="mt-6 grid grid-cols-2 gap-4">
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <WeeklyRevenueChart data={WEEKLY_REVENUE} />
         <TicketBookingsChart data={BOOKINGS_6M} />
       </div>
