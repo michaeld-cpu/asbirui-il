@@ -156,25 +156,29 @@ function LivePreviews({
   device?: "mobile" | "tablet";
 }) {
   const label = theme === "light" ? "light" : "dark";
+  // frames are taller now (26rem); the second frame's width follows its device
+  // aspect against that height so it stays a true phone/tablet shape
   const second =
     device === "tablet"
-      ? { width: 834, name: "Tablet", widthClass: "w-[calc(22rem*834/1112)]" }
-      : { width: 390, name: "Mobile", widthClass: "w-[calc(22rem*390/844)]" };
+      ? { width: 834, name: "Tablet", widthClass: "w-[calc(26rem*834/1112)]" }
+      : { width: 390, name: "Mobile", widthClass: "w-[calc(26rem*390/844)]" };
   return (
-    <div className="grid grid-cols-1 items-center gap-5 sm:grid-cols-[1fr_auto]">
+    // desktop column is capped (minmax) rather than a raw 1fr so it doesn't
+    // sprawl to the full content width; the second frame sits beside it
+    <div className="grid grid-cols-1 items-center gap-5 sm:grid-cols-[minmax(0,44rem)_auto]">
       <PreviewThumb
         route={route ?? ""}
         width={1280}
         forceTheme={theme}
         title={`Desktop preview (${label})`}
-        className="h-[22rem]"
+        className="h-[26rem]"
       />
       <PreviewThumb
         route={route ?? ""}
         width={second.width}
         forceTheme={theme}
         title={`${second.name} preview (${label})`}
-        className={`h-[22rem] justify-self-center ${second.widthClass}`}
+        className={`h-[26rem] justify-self-center ${second.widthClass}`}
       />
     </div>
   );
