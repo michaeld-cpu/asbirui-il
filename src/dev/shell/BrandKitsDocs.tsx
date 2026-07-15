@@ -322,7 +322,7 @@ function LogoTile({
     a tight box, center crosshair, and a circle sized to the mark's true extent,
     all in the mark's own coordinate space so everything lines up exactly. The
     mark itself is a ghost (soft fill + stroked outline). */
-function LogoAnatomy({ mark, accent }: { mark: string; accent: string }) {
+function LogoAnatomy({ mark }: { mark: string }) {
   const groupRef = React.useRef<SVGGElement | null>(null);
   // measured bbox of the actual painted paths (mark's own units)
   const [bb, setBb] = React.useState<{ x: number; y: number; w: number; h: number } | null>(null);
@@ -378,8 +378,8 @@ function LogoAnatomy({ mark, accent }: { mark: string; accent: string }) {
           </>
         )}
 
-        {/* visible ghost mark, in the SAME coordinate space as the guides */}
-        <g style={{ color: accent }}>
+        {/* visible ghost mark (white, in the SAME coordinate space as guides) */}
+        <g style={{ color: "#ffffff" }}>
           {/* soft fill silhouette (paths keep their own fill="currentColor") */}
           <g opacity="0.2" dangerouslySetInnerHTML={{ __html: markInner(mark) }} />
           {/* crisp outline: strip per-path fills, stroke instead */}
@@ -757,7 +757,7 @@ function KitView({ project }: { project: Project }) {
               <h2 className="text-2xl font-semibold tracking-tight text-fg">Logo anatomy</h2>
               <p className="mt-1.5 text-sm text-fg/50">Give the mark room to breathe; don't shrink it too far.</p>
               <div className="mt-6 grid gap-8 sm:grid-cols-[auto_1fr] sm:items-center">
-                <LogoAnatomy mark={project.logomark} accent={project.accent} />
+                <LogoAnatomy mark={project.logomark} />
                 <dl className="space-y-5 text-sm">
                   <div>
                     <dt className="font-medium text-fg">Clear space</dt>
