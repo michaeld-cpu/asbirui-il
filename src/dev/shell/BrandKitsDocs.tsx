@@ -777,18 +777,34 @@ function KitView({ project }: { project: Project }) {
             <section id="usage" className="scroll-mt-24 border-t border-border pt-14">
               <h2 className="text-2xl font-semibold tracking-tight text-fg">Logo usage</h2>
               <p className="mt-1.5 text-sm text-fg/50">A few things to do — and not do — with the mark.</p>
-              <div className="mt-6 grid gap-x-10 gap-y-6 sm:grid-cols-2">
+              <div className="mt-6 grid gap-x-10 gap-y-8 sm:grid-cols-2">
+                {/* Do — a matching 2×2 grid so both sides balance: one approved
+                    tile + three "also fine" surface treatments. */}
                 <div>
-                  <p className="text-sm font-medium text-fg">Do</p>
-                  <div className="mt-3 flex h-28 items-center justify-center rounded-xl border border-border bg-canvas">
-                    <span className="[&_svg]:h-11 [&_svg]:w-11" style={{ color: project.accent }}>
-                      <Glyph svg={project.logomark} />
-                    </span>
+                  <p className="text-sm font-medium text-emerald-500/90">Do</p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {[
+                      { label: "One-color mark", bg: "bg-canvas", style: { color: project.accent } },
+                      { label: "White on brand", bg: "", brand: true, style: { color: "#ffffff" } },
+                      { label: "On a dark surface", bg: "bg-neutral-950", style: { color: project.accent } },
+                      { label: "Mono on light", bg: "bg-neutral-100", style: { color: "#171717" } },
+                    ].map((d) => (
+                      <div
+                        key={d.label}
+                        className={`flex h-28 flex-col items-center justify-center gap-2.5 rounded-xl border border-border px-2 text-center ${d.bg}`}
+                        style={d.brand ? { backgroundColor: project.accent } : undefined}
+                      >
+                        <span className="[&_svg]:h-9 [&_svg]:w-9" style={d.style as React.CSSProperties}>
+                          <Glyph svg={project.logomark!} />
+                        </span>
+                        <span className="text-[11px] leading-tight text-fg/55">{d.label}</span>
+                      </div>
+                    ))}
                   </div>
-                  <p className="mt-3 text-sm text-fg/55">Use the approved marks — one color, upright, with enough contrast.</p>
                 </div>
+                {/* Don't — matching 2×2 grid */}
                 <div>
-                  <p className="text-sm font-medium text-fg">Don't</p>
+                  <p className="text-sm font-medium text-rose-500/90">Don't</p>
                   <div className="mt-3 grid grid-cols-2 gap-2">
                     {[
                       { label: "Recolor the ribbons", style: { color: "#22d3ee" } },
