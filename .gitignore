@@ -9,3 +9,7 @@ dist-app
 coverage
 .vite
 *.tsbuildinfo
+
+# emitted vite config artifacts (never commit)
+vite.config*.js
+vite.config*.d.ts

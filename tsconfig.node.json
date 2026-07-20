@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
     "composite": true,
+    // isolate any emit (composite requires it) into a throwaway dir so tsc
+    // --build never writes .js/.d.ts next to the vite config sources
+    "outDir": "./node_modules/.cache/tsnode",
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
