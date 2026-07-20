@@ -17,6 +17,7 @@ const ComponentDocs = React.lazy(() => import("./shell/ComponentDocs").then((m) 
 const BlocksDocs = React.lazy(() => import("./shell/BlocksDocs").then((m) => ({ default: m.BlocksDocs })));
 const BrandKitsDocs = React.lazy(() => import("./shell/BrandKitsDocs").then((m) => ({ default: m.BrandKitsDocs })));
 const ColorsDocs = React.lazy(() => import("./shell/ColorsDocs").then((m) => ({ default: m.ColorsDocs })));
+const TypographyDocs = React.lazy(() => import("./shell/TypographyDocs").then((m) => ({ default: m.TypographyDocs })));
 const MotionDocs = React.lazy(() => import("./shell/MotionDocs").then((m) => ({ default: m.MotionDocs })));
 const TemplatesPage = React.lazy(() => import("./shell/TemplatesPage").then((m) => ({ default: m.TemplatesPage })));
 const AiTemplate = React.lazy(() => import("./templates/ai/AiTemplate").then((m) => ({ default: m.AiTemplate })));
@@ -84,6 +85,7 @@ function DocsView({ route }: { route: string }) {
   else if (isBlocks) body = <BlocksDocs slug={blocksSubPath(route)} />;
   else if (isBrandKits) body = <BrandKitsDocs slug={brandKitsSubPath(route)} />;
   else if (tokensSub === "colors") body = <ColorsDocs />;
+  else if (tokensSub === "typography") body = <TypographyDocs />;
   else if (isTemplates) body = <TemplatesPage />;
   else if (isMotion) body = <MotionDocs slug={motionSubPath(route)} />;
   else body = <DocsContent route={route} />;
