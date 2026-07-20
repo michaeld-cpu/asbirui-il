@@ -6,17 +6,21 @@ import { ThemeProvider } from "./shell/theme-context";
 import { SidebarProvider } from "./shell/sidebar-context";
 import { Navbar } from "./shell/Navbar";
 import { DocsSidebar } from "./shell/DocsSidebar";
-import { DocsContent } from "./shell/DocsContent";
-import { ComponentDocs } from "./shell/ComponentDocs";
-import { BlocksDocs } from "./shell/BlocksDocs";
-import { BrandKitsDocs } from "./shell/BrandKitsDocs";
-import { ColorsDocs } from "./shell/ColorsDocs";
-import { MotionDocs } from "./shell/MotionDocs";
-import { TemplatesPage } from "./shell/TemplatesPage";
 import { Home } from "./shell/Home";
-import { AiTemplate } from "./templates/ai/AiTemplate";
-import { TripketPreview } from "./templates/tripket/TripketPreview";
+import { PageSkeleton, PreviewSkeleton } from "./shell/PageSkeleton";
 import { landingRouteFor } from "./shell/docs-nav";
+
+// Docs pages are code-split and loaded on demand; while a chunk is fetching we
+// show a <PageSkeleton>. Each is a named export, hence the `.then` remap.
+const DocsContent = React.lazy(() => import("./shell/DocsContent").then((m) => ({ default: m.DocsContent })));
+const ComponentDocs = React.lazy(() => import("./shell/ComponentDocs").then((m) => ({ default: m.ComponentDocs })));
+const BlocksDocs = React.lazy(() => import("./shell/BlocksDocs").then((m) => ({ default: m.BlocksDocs })));
+const BrandKitsDocs = React.lazy(() => import("./shell/BrandKitsDocs").then((m) => ({ default: m.BrandKitsDocs })));
+const ColorsDocs = React.lazy(() => import("./shell/ColorsDocs").then((m) => ({ default: m.ColorsDocs })));
+const MotionDocs = React.lazy(() => import("./shell/MotionDocs").then((m) => ({ default: m.MotionDocs })));
+const TemplatesPage = React.lazy(() => import("./shell/TemplatesPage").then((m) => ({ default: m.TemplatesPage })));
+const AiTemplate = React.lazy(() => import("./templates/ai/AiTemplate").then((m) => ({ default: m.AiTemplate })));
+const TripketPreview = React.lazy(() => import("./templates/tripket/TripketPreview").then((m) => ({ default: m.TripketPreview })));
 import {
   useHashRoute,
   isDocsRoute,
@@ -53,8 +57,11 @@ function LandingView() {
  */
 function PreviewView({ route }: { route: string }) {
   const sub = route.replace(/^preview\/?/, "");
-  if (sub === "tripket") return <TripketPreview />;
-  return <AiTemplate sub="" />;
+  return (
+    <React.Suspense fallback={<PreviewSkeleton />}>
+      {sub === "tripket" ? <TripketPreview /> : <AiTemplate sub="" />}
+    </React.Suspense>
+  );
 }
 
 /** Docs view: full-width navbar + grouped sidebar, content column, right aside.
@@ -90,7 +97,13 @@ function DocsView({ route }: { route: string }) {
             galleries, previews, grids, playgrounds, and prose all share the
             same generous width */}
         <main className="min-w-0 flex-1 px-6 lg:px-10 xl:px-14">
-          <div className="mx-auto max-w-7xl">{body}</div>
+          <div className="mx-auto max-w-7xl">
+            {/* keyed by route so switching pages re-triggers the skeleton
+                fallback while the next chunk loads */}
+            <React.Suspense key={route} fallback={<PageSkeleton />}>
+              {body}
+            </React.Suspense>
+          </div>
         </main>
       </div>
     </div>
@@ -137,7 +150,11 @@ function App() {
   if (preview) {
     view = <PreviewView route={route} />;
   } else if (isAiRoute(route)) {
-    view = <AiTemplate sub={aiSubPath(route)} />;
+    view = (
+      <React.Suspense fallback={<PreviewSkeleton />}>
+        <AiTemplate sub={aiSubPath(route)} />
+      </React.Suspense>
+    );
   } else if (isDocsRoute(route)) {
     view = <DocsView route={route} />;
   } else {
