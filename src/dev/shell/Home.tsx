@@ -4,6 +4,7 @@ import heroBackdrop from "@/assets/backdrops/herobackdrop.jpeg";
 import { TemplatePreview } from "./TemplatePreview";
 import { MotionPromoFloating } from "./MotionPromoCard";
 import { DetailsSkeleton } from "./DetailsSkeleton";
+import { SkeletonImg } from "./PageSkeleton";
 import { IntegrationsGrid } from "./IntegrationsGrid";
 import { Reveal } from "@/motion";
 
@@ -28,12 +29,14 @@ const ArrowIcon = (
 function IntroPanel() {
   return (
     <section className="relative flex min-h-[380px] items-center justify-center overflow-hidden rounded-2xl border border-border px-6 py-16 sm:px-12">
-      {/* photo backdrop — shown at full strength, no darkening scrim */}
-      <img
+      {/* photo backdrop — shown at full strength, no darkening scrim; shimmers
+          in while the large hero image loads */}
+      <SkeletonImg
         src={heroBackdrop}
         alt=""
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        wrapperClassName="pointer-events-none absolute inset-0"
+        className="object-cover"
       />
 
       {/* one soft shadow behind the whole content block, instead of per-line
@@ -206,9 +209,6 @@ function FeaturesSection() {
 const SPECTRUM_GRADIENT =
   "linear-gradient(90deg, #3E8AFF, #00B8CE, #976CFF, #E14D9F, #F83E3A, #FF751A, #3E8AFF)";
 
-/* Scroll-triggered CTA entrance. When the section scrolls into view, the
-   spectrum band grows from a center block out to the full-bleed strip, then the
-   headline + buttons fade up. Reduced motion jumps straight to the final state. */
 function CtaSection() {
   const ref = React.useRef<HTMLElement>(null);
   const [phase, setPhase] = React.useState<"idle" | "band" | "content">("idle");
@@ -225,8 +225,8 @@ function CtaSection() {
       ([e]) => {
         if (!e.isIntersecting) return;
         io.disconnect();
-        setPhase("band"); // band morphs in immediately
-        timers.push(window.setTimeout(() => setPhase("content"), 650)); // then content
+        setPhase("band"); 
+        timers.push(window.setTimeout(() => setPhase("content"), 650)); 
       },
       { threshold: 0.4 },
     );
@@ -246,7 +246,6 @@ function CtaSection() {
       id="get-started"
       className="relative mt-24 flex min-h-[340px] items-center justify-center overflow-hidden rounded-2xl border border-border bg-panel px-6 pb-40 pt-16 text-center sm:px-12"
     >
-      {/* faint dot-grid floor */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.5]"
         style={{
@@ -259,7 +258,6 @@ function CtaSection() {
         }}
       />
 
-      {/* content — fades up once the band has grown in */}
       <div
         className={`relative z-10 max-w-2xl transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           showContent ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"

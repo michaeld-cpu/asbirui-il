@@ -86,10 +86,10 @@ function PreviewThumb({
   return (
     <div
       ref={boxRef}
-      className={`relative overflow-hidden rounded-xl border border-border bg-canvas transition-opacity duration-500 ease-out ${
-        ready ? "opacity-100" : "opacity-0"
-      } ${className}`}
+      className={`relative overflow-hidden rounded-xl border border-border bg-canvas ${className}`}
     >
+      {/* shimmer skeleton behind the frame until the iframe finishes loading */}
+      {!ready && <div className="absolute inset-0 animate-pulse bg-overlay/[0.08]" aria-hidden="true" />}
       <iframe
         title={title}
         src={srcRef.current}
@@ -98,7 +98,9 @@ function PreviewThumb({
         loading="lazy"
         scrolling="no"
         onLoad={() => setReady(true)}
-        className="pointer-events-none absolute left-0 top-0 origin-top-left border-0 bg-canvas"
+        className={`pointer-events-none absolute left-0 top-0 origin-top-left border-0 bg-canvas transition-opacity duration-500 ease-out ${
+          ready ? "opacity-100" : "opacity-0"
+        }`}
         style={{ width, height: dims.logicalH, transform: `scale(${dims.scale})` }}
       />
     </div>

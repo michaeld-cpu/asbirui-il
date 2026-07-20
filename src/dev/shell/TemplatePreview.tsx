@@ -172,6 +172,7 @@ function ScaledFrame({
   iframeRef?: (el: HTMLIFrameElement | null) => void;
 }) {
   const boxRef = React.useRef<HTMLDivElement | null>(null);
+  const [ready, setReady] = React.useState(false);
   const [dims, setDims] = React.useState({
     scale: width < 500 ? 0.5 : 0.3,
     logicalH: height,
@@ -195,7 +196,9 @@ function ScaledFrame({
   }, [width, height]);
 
   return (
-    <div ref={boxRef} className={`overflow-hidden ${className ?? ""}`}>
+    <div ref={boxRef} className={`relative overflow-hidden ${className ?? ""}`}>
+      {/* shimmer skeleton until the iframe loads */}
+      {!ready && <div className="absolute inset-0 animate-pulse bg-overlay/[0.08]" aria-hidden="true" />}
       <iframe
         ref={iframeRef}
         title={title}
@@ -204,7 +207,10 @@ function ScaledFrame({
         aria-hidden="true"
         loading="lazy"
         scrolling="no"
-        className="pointer-events-none absolute left-0 top-0 origin-top-left border-0 bg-canvas"
+        onLoad={() => setReady(true)}
+        className={`pointer-events-none absolute left-0 top-0 origin-top-left border-0 bg-canvas transition-opacity duration-500 ease-out ${
+          ready ? "opacity-100" : "opacity-0"
+        }`}
         style={{
           width,
           height: dims.logicalH,

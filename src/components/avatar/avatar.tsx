@@ -59,6 +59,7 @@ function tintFor(name: string): string {
 
 export function Avatar({ src, name, size = "md", status, className, ...props }: AvatarProps) {
   const [errored, setErrored] = React.useState(false);
+  const [loaded, setLoaded] = React.useState(false);
   const showImage = src && !errored;
   return (
     <span
@@ -70,12 +71,25 @@ export function Avatar({ src, name, size = "md", status, className, ...props }: 
           intrinsic baselines) can't shift the avatar in the line box */}
       <span className="block h-full w-full overflow-hidden rounded-full">
         {showImage ? (
-          <img
-            src={src}
-            alt={name}
-            onError={() => setErrored(true)}
-            className="h-full w-full object-cover"
-          />
+          <span className="relative block h-full w-full">
+            {/* shimmer until the photo loads */}
+            {!loaded && (
+              <span
+                className="absolute inset-0 animate-pulse rounded-full bg-overlay/[0.12]"
+                aria-hidden="true"
+              />
+            )}
+            <img
+              src={src}
+              alt={name}
+              onLoad={() => setLoaded(true)}
+              onError={() => setErrored(true)}
+              className={cn(
+                "h-full w-full object-cover transition-opacity duration-300",
+                loaded ? "opacity-100" : "opacity-0"
+              )}
+            />
+          </span>
         ) : (
           <span
             role="img"
