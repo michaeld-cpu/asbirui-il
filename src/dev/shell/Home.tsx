@@ -4,7 +4,6 @@ import heroBackdrop from "@/assets/backdrops/herobackdrop.jpeg";
 import { TemplatePreview } from "./TemplatePreview";
 import { MotionPromoFloating } from "./MotionPromoCard";
 import { DetailsSkeleton } from "./DetailsSkeleton";
-import { SkeletonImg } from "./PageSkeleton";
 import { IntegrationsGrid } from "./IntegrationsGrid";
 import { Reveal } from "@/motion";
 
@@ -29,14 +28,12 @@ const ArrowIcon = (
 function IntroPanel() {
   return (
     <section className="relative flex min-h-[380px] items-center justify-center overflow-hidden rounded-2xl border border-border px-6 py-16 sm:px-12">
-      {/* photo backdrop — shown at full strength, no darkening scrim; shimmers
-          in while the large hero image loads */}
-      <SkeletonImg
+      {/* photo backdrop — shown at full strength, no darkening scrim */}
+      <img
         src={heroBackdrop}
         alt=""
         aria-hidden="true"
-        wrapperClassName="pointer-events-none absolute inset-0"
-        className="object-cover"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
       />
 
       {/* one soft shadow behind the whole content block, instead of per-line

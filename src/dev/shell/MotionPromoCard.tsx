@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import asbirMotionBanner from "@/assets/backdrops/asbirmotion.png";
 import asbirWebSlats from "@/assets/backdrops/asbirweb-slats.png";
 import asbirTechLogo from "@/assets/logo/asbirtech-logo.png";
-import { SkeletonImg } from "./PageSkeleton";
 
 /* SINGLE SOURCE OF TRUTH for the promo-card banner size. Keyed to the Asbir
    Motion banner (asbirmotion.png, 272×153) as the reference — every card's
@@ -18,7 +17,7 @@ const BANNER_ASPECT = "272 / 153";
    shared banner box; no bespoke scaling. */
 const AsbirWebBanner = () => (
   <div className="relative h-full w-full overflow-hidden bg-black">
-    <SkeletonImg src={asbirWebSlats} alt="" aria-hidden="true" wrapperClassName="absolute inset-0" className="object-cover" />
+    <img src={asbirWebSlats} alt="" aria-hidden="true" className="h-full w-full object-cover" />
     <div className="absolute inset-0 flex items-center justify-center drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]">
       <img src={asbirTechLogo} alt="AsbirTech" className="h-auto w-[52%] max-w-[150px]" />
     </div>
@@ -111,7 +110,7 @@ function CardBody({
         style={{ aspectRatio: BANNER_ASPECT }}
       >
         {typeof content.banner === "string" ? (
-          <SkeletonImg src={content.banner} alt={content.bannerAlt} wrapperClassName="absolute inset-0" className="object-cover" />
+          <img src={content.banner} alt={content.bannerAlt} className="h-full w-full object-cover" />
         ) : (
           content.banner
         )}

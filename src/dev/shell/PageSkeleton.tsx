@@ -7,41 +7,8 @@
   themes. Purely presentational; no props needed for the common case.
 */
 
-import * as React from "react";
-
 function Bar({ className = "" }: { className?: string }) {
   return <div className={`rounded-md bg-overlay/[0.08] ${className}`} />;
-}
-
-/** An <img> that shows a shimmer placeholder until it loads, then fades in.
-    Wrap-and-forward: pass the usual img props; `wrapperClassName` styles the
-    positioned container (give it the size/rounding you'd put on the img). */
-export function SkeletonImg({
-  wrapperClassName = "",
-  className = "",
-  onLoad,
-  onError,
-  ...img
-}: React.ImgHTMLAttributes<HTMLImageElement> & { wrapperClassName?: string }) {
-  const [loaded, setLoaded] = React.useState(false);
-  return (
-    <span className={`relative block overflow-hidden ${wrapperClassName}`}>
-      {!loaded && <span className="absolute inset-0 animate-pulse bg-overlay/[0.08]" aria-hidden="true" />}
-      {/* eslint-disable-next-line jsx-a11y/alt-text */}
-      <img
-        {...img}
-        className={`h-full w-full transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"} ${className}`}
-        onLoad={(e) => {
-          setLoaded(true);
-          onLoad?.(e);
-        }}
-        onError={(e) => {
-          setLoaded(true); // drop the shimmer even on error so it doesn't pulse forever
-          onError?.(e);
-        }}
-      />
-    </span>
-  );
 }
 
 export function PageSkeleton() {
