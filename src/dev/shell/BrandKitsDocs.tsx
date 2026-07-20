@@ -591,7 +591,9 @@ function KitView({ project }: { project: Project }) {
       </div>
 
       {/* search + scrollspy rail | plain stacked content (no boxes) */}
-      <div className="mt-12 grid gap-8 lg:grid-cols-[15rem_1fr] lg:gap-12">
+      {/* items-start so the rail cell takes its natural height — a stretched
+          cell would give the sticky rail no room to travel within */}
+      <div className="mt-12 grid items-start gap-8 lg:grid-cols-[15rem_1fr] lg:gap-12">
         <KitRail sections={sections} />
 
         <div className="min-w-0 space-y-14">
