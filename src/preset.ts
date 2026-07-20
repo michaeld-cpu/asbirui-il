@@ -95,7 +95,10 @@ export const asbirPreset = {
         asbir: "var(--as-radius)",
       },
       fontFamily: {
+        // "Asbir Sans" is our own variable typeface (self-hosted woff2, see
+        // the @font-face in tokens.css); Inter/system fonts are fallbacks.
         sans: [
+          "Asbir Sans",
           "Inter",
           "ui-sans-serif",
           "system-ui",
@@ -104,6 +107,7 @@ export const asbirPreset = {
           "Roboto",
           "sans-serif",
         ],
+        asbir: ["Asbir Sans", "Inter", "sans-serif"],
         mono: [
           "ui-monospace",
           "SFMono-Regular",

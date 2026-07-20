@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Asbir Sans — our own variable typeface (wght 100–900, opsz 14–32), bundled
+   as a single woff2 so it's self-hosted and offline-capable. Callable via the
+   `font-sans` stack (it leads the stack) or `font-family: "Asbir Sans"`. */
+@font-face {
+  font-family: "Asbir Sans";
+  src: url("../assets/fonts/AsbirSans-VF.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-stretch: 100%;
+  font-style: normal;
+  font-display: swap;
+}
+
 /*
   Two token systems live here on purpose:
 

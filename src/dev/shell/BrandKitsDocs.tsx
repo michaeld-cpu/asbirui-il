@@ -92,11 +92,11 @@ const PROJECTS: Project[] = [
     ],
     fonts: [
       {
-        family: "DM Sans",
+        family: "Asbir Sans",
         role: "Primary — text & headings",
-        source: "Google Fonts",
-        weights: "400 · 500 · 600 · 700 · 800",
-        stack: "'DM Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+        source: "Our own variable typeface · self-hosted",
+        weights: "100 · 200 · 300 · 400 · 500 · 600 · 700 · 800 · 900",
+        stack: "'Asbir Sans', Inter, sans-serif",
       },
       {
         family: "DM Mono",
