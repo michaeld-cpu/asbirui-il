@@ -8,3 +8,4 @@ dist-app
 .env.*
 coverage
 .vite
+*.tsbuildinfo
